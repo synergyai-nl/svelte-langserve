@@ -1,4 +1,4 @@
-# Docker Compose configuration for LangServe + Socket.IO Frontend
+# Docker Compose configuration for LangServe + SvelteKit Frontend
 version: '3.8'
 
 services:
@@ -23,8 +23,8 @@ services:
       timeout: 10s
       retries: 3
 
-  # Socket.IO Frontend Server
-  socketio-frontend:
+  # SvelteKit Frontend
+  svelte-frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
@@ -32,43 +32,17 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=production
-      - LANGSERVE_CHATBOT_URL=http://langserve-backend:8000/chatbot
-      - LANGSERVE_CODE_URL=http://langserve-backend:8000/code-assistant
-      - LANGSERVE_DATA_URL=http://langserve-backend:8000/data-analyst
-      - LANGSERVE_CREATIVE_URL=http://langserve-backend:8000/creative-writer
-      - LANGSERVE_RESEARCH_URL=http://langserve-backend:8000/research-assistant
-      - REDIS_URL=redis://redis:6379
-      - JWT_SECRET=${JWT_SECRET}
+      - PUBLIC_LANGSERVE_CHATBOT_URL=http://langserve-backend:8000/chatbot
+      - PUBLIC_LANGSERVE_CODE_URL=http://langserve-backend:8000/code-assistant
+      - PUBLIC_LANGSERVE_DATA_URL=http://langserve-backend:8000/data-analyst
+      - PUBLIC_LANGSERVE_CREATIVE_URL=http://langserve-backend:8000/creative-writer
+      - PUBLIC_LANGSERVE_RESEARCH_URL=http://langserve-backend:8000/research-assistant
+      - PUBLIC_SOCKET_IO_URL=http://localhost:3000
     depends_on:
       - langserve-backend
-      - redis
     volumes:
       - ./frontend:/app
       - /app/node_modules
-    restart: unless-stopped
-
-  # Redis for Socket.IO scaling and session management
-  redis:
-    image: redis:7-alpine
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
-    restart: unless-stopped
-    command: redis-server --appendonly yes
-
-  # PostgreSQL for conversation persistence
-  postgres:
-    image: postgres:15-alpine
-    ports:
-      - "5432:5432"
-    environment:
-      - POSTGRES_DB=langserve_chat
-      - POSTGRES_USER=langserve
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
     restart: unless-stopped
 
   # Nginx reverse proxy
@@ -81,13 +55,9 @@ services:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
       - ./nginx/ssl:/etc/nginx/ssl
     depends_on:
-      - socketio-frontend
+      - svelte-frontend
       - langserve-backend
     restart: unless-stopped
-
-volumes:
-  redis_data:
-  postgres_data:
 
 ---
 # Backend Dockerfile
@@ -126,24 +96,24 @@ FROM node:18-alpine
 WORKDIR /app
 
 # Copy package files
-COPY package*.json ./
-RUN npm ci --only=production
+COPY package.json pnpm-lock.yaml ./
+RUN npm install -g pnpm && pnpm install
 
 # Copy application code
 COPY . .
 
 # Build the application
-RUN npm run build
+RUN pnpm build
 
 # Expose port
 EXPOSE 3000
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:3000/health || exit 1
+    CMD curl -f http://localhost:3000/api/langserve || exit 1
 
 # Run the application
-CMD ["npm", "start"]
+CMD ["node", "build"]
 
 ---
 # Nginx Configuration
@@ -153,8 +123,8 @@ events {
 }
 
 http {
-    upstream socketio {
-        server socketio-frontend:3000;
+    upstream frontend {
+        server svelte-frontend:3000;
     }
 
     upstream langserve {
@@ -169,9 +139,25 @@ http {
         listen 80;
         server_name localhost;
 
-        # Socket.IO Frontend
+        # SvelteKit Frontend
         location / {
-            proxy_pass http://socketio;
+            proxy_pass http://frontend;
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection "upgrade";
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+
+            # WebSocket timeouts
+            proxy_read_timeout 86400;
+            proxy_send_timeout 86400;
+        }
+
+        # WebSocket
+        location /api/socket.io/ {
+            proxy_pass http://frontend/api/socket.io/;
             proxy_http_version 1.1;
             proxy_set_header Upgrade $http_upgrade;
             proxy_set_header Connection "upgrade";
@@ -189,7 +175,7 @@ http {
         }
 
         # LangServe Backend API
-        location /api/ {
+        location /langserve/ {
             proxy_pass http://langserve/;
             proxy_set_header Host $host;
             proxy_set_header X-Real-IP $remote_addr;
@@ -207,10 +193,10 @@ http {
         # Health checks
         location /health {
             access_log off;
-            proxy_pass http://socketio/health;
+            proxy_pass http://frontend/api/langserve;
         }
 
-        location /api/health {
+        location /langserve/health {
             access_log off;
             proxy_pass http://langserve/health;
         }
@@ -227,78 +213,13 @@ OPENAI_API_KEY=your-openai-api-key-here
 ANTHROPIC_API_KEY=your-anthropic-api-key-here
 TAVILY_API_KEY=your-tavily-api-key-here
 
-# Database
-POSTGRES_PASSWORD=your-secure-postgres-password
-
 # Security
-JWT_SECRET=your-jwt-secret-key-for-authentication
+PUBLIC_SOCKET_IO_URL=http://localhost:3000
 
 # Optional: Custom LangServe URLs if not using Docker Compose
-# LANGSERVE_CHATBOT_URL=http://localhost:8000/chatbot
-# LANGSERVE_CODE_URL=http://localhost:8000/code-assistant
-# LANGSERVE_DATA_URL=http://localhost:8000/data-analyst
-
----
-# Database initialization
-# database/init.sql
-CREATE TABLE IF NOT EXISTS conversations (
-    id VARCHAR(255) PRIMARY KEY,
-    participants JSONB NOT NULL,
-    status VARCHAR(50) DEFAULT 'active',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    metadata JSONB
-);
-
-CREATE TABLE IF NOT EXISTS messages (
-    id VARCHAR(255) PRIMARY KEY,
-    conversation_id VARCHAR(255) REFERENCES conversations(id) ON DELETE CASCADE,
-    type VARCHAR(50) NOT NULL,
-    content TEXT NOT NULL,
-    sender_id VARCHAR(255) NOT NULL,
-    sender_type VARCHAR(50) NOT NULL,
-    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    additional_kwargs JSONB
-);
-
-CREATE INDEX idx_conversations_participants ON conversations USING GIN (participants);
-CREATE INDEX idx_messages_conversation_id ON messages (conversation_id);
-CREATE INDEX idx_messages_timestamp ON messages (timestamp);
-
----
-# Package.json for frontend
-# frontend/package.json
-{
-  "name": "langserve-socketio-frontend",
-  "version": "1.0.0",
-  "description": "Socket.IO frontend for LangServe",
-  "main": "dist/server.js",
-  "scripts": {
-    "build": "tsc",
-    "start": "node dist/server.js",
-    "dev": "ts-node-dev --respawn src/server.ts",
-    "test": "jest"
-  },
-  "dependencies": {
-    "socket.io": "^4.7.0",
-    "express": "^4.18.0",
-    "@langchain/core": "^0.2.0",
-    "ioredis": "^5.3.0",
-    "pg": "^8.11.0",
-    "jsonwebtoken": "^9.0.0",
-    "cors": "^2.8.5",
-    "helmet": "^7.0.0",
-    "rate-limiter-flexible": "^3.0.0"
-  },
-  "devDependencies": {
-    "@types/node": "^20.0.0",
-    "@types/express": "^4.17.0",
-    "@types/pg": "^8.10.0",
-    "typescript": "^5.0.0",
-    "ts-node-dev": "^2.0.0",
-    "jest": "^29.0.0"
-  }
-}
+# PUBLIC_LANGSERVE_CHATBOT_URL=http://localhost:8000/chatbot
+# PUBLIC_LANGSERVE_CODE_URL=http://localhost:8000/code-assistant
+# PUBLIC_LANGSERVE_DATA_URL=http://localhost:8000/data-analyst
 
 ---
 # Requirements.txt for backend
@@ -312,16 +233,12 @@ langchain-community==0.0.10
 uvicorn[standard]==0.24.0
 pydantic==2.5.0
 python-multipart==0.0.6
-asyncpg==0.29.0
-redis==5.0.1
-python-jose[cryptography]==3.3.0
-passlib[bcrypt]==1.7.4
 
 ---
 # Deployment instructions
 # DEPLOYMENT.md
 
-## LangServe Socket.IO Frontend Deployment Guide
+## LangServe SvelteKit Frontend Deployment Guide
 
 ### Prerequisites
 - Docker and Docker Compose
@@ -333,14 +250,21 @@ passlib[bcrypt]==1.7.4
 1. **Clone and setup:**
    ```bash
    git clone <repository>
-   cd langserve-socketio-frontend
+   cd claude-rocks-the-dashboard
    cp .env.example .env
    # Edit .env with your API keys
    ```
 
 2. **Development:**
    ```bash
-   docker-compose -f docker-compose.dev.yml up
+   # Start LangServe backend
+   cd backend
+   python -m uvicorn main:app --reload
+
+   # In another terminal, start SvelteKit frontend
+   cd frontend
+   pnpm install
+   pnpm dev
    ```
 
 3. **Production:**
@@ -354,15 +278,19 @@ passlib[bcrypt]==1.7.4
 - `OPENAI_API_KEY`: Required for OpenAI models
 - `ANTHROPIC_API_KEY`: Required for Anthropic models
 - `TAVILY_API_KEY`: Optional, for enhanced search capabilities
-- `POSTGRES_PASSWORD`: Secure password for PostgreSQL
-- `JWT_SECRET`: Secret key for JWT authentication
+
+#### Frontend Configuration
+- `PUBLIC_SOCKET_IO_URL`: URL for the Socket.IO server
+- `PUBLIC_LANGSERVE_CHATBOT_URL`: URL for the chatbot endpoint
+- `PUBLIC_LANGSERVE_CODE_URL`: URL for the code assistant endpoint
+- `PUBLIC_LANGSERVE_DATA_URL`: URL for the data analyst endpoint
 
 #### Scaling
 For high-traffic deployments:
 
-1. **Multiple Socket.IO instances:**
+1. **Multiple frontend instances:**
    ```bash
-   docker-compose up --scale socketio-frontend=3
+   docker-compose up --scale svelte-frontend=3
    ```
 
 2. **Multiple LangServe instances:**
@@ -377,25 +305,15 @@ For high-traffic deployments:
 #### Monitoring
 Add monitoring services:
 - Prometheus + Grafana for metrics
-- ELK stack for logging
-- Health check endpoints at `/health`
+- Health check endpoints at `/health` and `/langserve/health`
 
 #### Security
 - Configure CORS origins appropriately
 - Use SSL certificates in production
 - Implement rate limiting
-- Add authentication middleware
 - Regular security updates
 
-### API Endpoints
-
-#### Socket.IO Events
-- `authenticate`: User authentication
-- `create_conversation`: Start new conversation
-- `send_message`: Send message to conversation
-- `join_conversation`: Join existing conversation
-
-#### LangServe Endpoints
+### LangServe Endpoints
 - `/chatbot`: General conversational AI
 - `/code-assistant`: Coding specialist
 - `/data-analyst`: Data analysis with tools
@@ -407,8 +325,8 @@ Add monitoring services:
 # Test LangServe backend
 curl http://localhost:8000/health
 
-# Test Socket.IO frontend
-curl http://localhost:3000/health
+# Test SvelteKit frontend
+curl http://localhost:3000/api/langserve
 
 # Interactive testing
 # Visit http://localhost:3000 for web interface

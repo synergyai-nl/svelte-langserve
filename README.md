@@ -1,41 +1,39 @@
-# LangServe Socket.IO Frontend
+# Claude Rocks the Dashboard
 
-> Real-time, multi-user frontend for LangServe AI agents with streaming support
+A SvelteKit-based dashboard for interacting with LangServe endpoints via Socket.IO, providing a responsive and real-time chat interface for AI assistants.
 
-Transform your LangServe AI agents into real-time, collaborative chat applications. This project provides a Socket.IO-based frontend that connects to LangServe backends, enabling live conversations with multiple AI agents simultaneously.
-
-## 🚀 Features
+## Features
 
 - **Real-time Communication**: WebSocket-based chat with instant message delivery
 - **Multi-Agent Conversations**: Connect multiple LangServe agents in a single conversation
 - **Streaming Support**: Progressive message rendering as AI agents respond
-- **Mobile Optimized**: Efficient connection management for mobile applications
+- **Mobile Optimized**: Responsive UI that works on all devices
 - **Auto-Discovery**: Automatically detects and connects to available LangServe endpoints
 - **Health Monitoring**: Real-time endpoint status and connectivity testing
-- **Schema Introspection**: Fetches and validates input/output schemas from LangServe
-- **Scalable Architecture**: Redis-backed Socket.IO with multi-server support
+- **Internationalization**: Support for multiple languages with Inlang/Paraglide
+- **Modern UI**: Clean, responsive interface built with TailwindCSS and Svelte
 
 ## 🏗️ Architecture
 
 ```
 ┌─────────────────┐    WebSocket    ┌─────────────────┐    HTTP/Streaming    ┌─────────────────┐
-│   Mobile/Web    │ ◄──────────────► │   Socket.IO     │ ◄───────────────────► │   LangServe     │
+│   Browser/Web    │ ◄─────────────► │   SvelteKit     │ ◄───────────────────► │   LangServe     │
 │     Client      │                 │    Frontend     │                      │    Backends     │
 └─────────────────┘                 └─────────────────┘                      └─────────────────┘
                                             │                                         │
                                             ▼                                         ▼
                                     ┌─────────────────┐                      ┌─────────────────┐
-                                    │     Redis       │                      │   ChatGPT-4     │
-                                    │   (Scaling)     │                      │   Claude-3      │
+                                    │    Socket.IO    │                      │   ChatGPT-4     │
+                                    │     Server      │                      │   Claude-3      │
                                     └─────────────────┘                      │   Custom LLMs   │
                                                                              └─────────────────┘
 ```
 
 ### Components
 
-- **Socket.IO Frontend Server**: Real-time communication hub
+- **SvelteKit Frontend**: Modern, reactive UI with WebSocket integration
+- **Socket.IO Server**: Integrated directly in SvelteKit hooks.server.ts
 - **LangServe Client Manager**: Connects to and manages multiple LangServe backends
-- **Mobile/Web Clients**: React/React Native applications with real-time chat
 - **LangServe Backends**: AI agents built with LangChain and served via LangServe
 
 ## 📦 Quick Start
@@ -43,15 +41,16 @@ Transform your LangServe AI agents into real-time, collaborative chat applicatio
 ### Prerequisites
 
 - Node.js 18+
-- Python 3.11+
+- pnpm (recommended) or npm
+- Python 3.11+ (for LangServe backend)
 - Docker & Docker Compose (optional)
 - API keys for OpenAI, Anthropic, etc.
 
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/your-org/langserve-socketio-frontend.git
-cd langserve-socketio-frontend
+git clone https://github.com/your-org/claude-rocks-the-dashboard.git
+cd claude-rocks-the-dashboard
 ```
 
 ### 2. Environment Setup
@@ -63,7 +62,6 @@ cp .env.example .env
 # Add your API keys to .env
 OPENAI_API_KEY=your-openai-key-here
 ANTHROPIC_API_KEY=your-anthropic-key-here
-TAVILY_API_KEY=your-tavily-key-here
 ```
 
 ### 3. Docker Deployment (Recommended)
@@ -83,59 +81,36 @@ docker-compose logs -f
 ```bash
 cd backend
 pip install -r requirements.txt
-python langserve_backend.py
+python -m uvicorn main:app --reload --port 8000
 ```
 
-#### Start Socket.IO Frontend
+#### Start SvelteKit Frontend
 
 ```bash
 cd frontend
-npm install
-npm run build
-npm start
+pnpm install
+pnpm dev
 ```
 
 ### 5. Access the Application
 
-- **Web Interface**: http://localhost:3000
+- **Web Interface**: http://localhost:5173 (dev) or http://localhost:3000 (prod)
 - **LangServe API Docs**: http://localhost:8000/docs
-- **Health Check**: http://localhost:3000/health
+- **Health Check**: http://localhost:3000/api/langserve
 
 ## 🎯 Usage Examples
 
 ### Creating a Multi-Agent Conversation
 
-```typescript
-import { useLangServeFrontend } from './useLangServeFrontend';
+```svelte
+<script>
+  import { LangServeFrontend } from '$lib/langserve';
+</script>
 
-function ChatApp() {
-  const langserve = useLangServeFrontend('ws://localhost:3000', 'user123');
-
-  // Create conversation with multiple agents
-  const startConversation = () => {
-    langserve.createConversation(
-      ['chatbot', 'code-assistant', 'data-analyst'], // Multiple agents
-      'Help me build a data dashboard',
-      { temperature: 0.7, streaming: true }
-    );
-  };
-
-  // Send message to all agents
-  const sendMessage = (message: string) => {
-    langserve.sendMessage(conversationId, message, {
-      streaming: true,
-      temperature: 0.7
-    });
-  };
-
-  return (
-    <ChatInterface
-      messages={langserve.getDisplayMessages(conversationId)}
-      onSendMessage={sendMessage}
-      streamingMessages={langserve.streamingMessages}
-    />
-  );
-}
+<LangServeFrontend 
+  userId="user123" 
+  serverUrl="http://localhost:3000"
+/>
 ```
 
 ### Socket.IO Events
@@ -215,69 +190,35 @@ const langserveConfig = {
 ### Environment Variables
 
 ```bash
-# Backend URLs (auto-configured in Docker)
-LANGSERVE_CHATBOT_URL=http://localhost:8000/chatbot
-LANGSERVE_CODE_URL=http://localhost:8000/code-assistant
-LANGSERVE_DATA_URL=http://localhost:8000/data-analyst
+# Frontend environment variables
+PUBLIC_SOCKET_IO_URL=http://localhost:3000
+PUBLIC_LANGSERVE_CHATBOT_URL=http://localhost:8000/chatbot
+PUBLIC_LANGSERVE_CODE_URL=http://localhost:8000/code-assistant
+PUBLIC_LANGSERVE_DATA_URL=http://localhost:8000/data-analyst
+```
 
-# Scaling & Persistence
-REDIS_URL=redis://localhost:6379
-POSTGRES_URL=postgres://user:pass@localhost:5432/langserve_chat
+## Project Structure
 
-# Security
-JWT_SECRET=your-jwt-secret-key
-CORS_ORIGINS=https://yourdomain.com,https://app.yourdomain.com
+```
+claude-rocks-the-dashboard/
+├── backend/               # LangServe backend Python implementation
+├── frontend/              # SvelteKit frontend implementation
+│   ├── src/
+│   │   ├── lib/
+│   │   │   ├── langserve/ # LangServe frontend library
+│   │   │   │   ├── components/ # Svelte components
+│   │   │   │   ├── stores/     # Svelte stores
+│   │   │   │   └── types/      # TypeScript type definitions
+│   │   ├── routes/       # SvelteKit routes
+│   │   └── hooks.server.ts # Server-side Socket.IO setup
+│   ├── static/           # Static assets
+│   └── messages/         # i18n message files
+└── deployment_implementation.txt # Deployment configuration
 ```
 
 ## 🚀 Deployment
 
-### Production with Docker Compose
-
-```bash
-# Production deployment
-docker-compose -f docker-compose.prod.yml up -d
-
-# Scale Socket.IO servers
-docker-compose up --scale socketio-frontend=3
-
-# Scale LangServe backends
-docker-compose up --scale langserve-backend=3
-```
-
-### Kubernetes
-
-```yaml
-# Example Kubernetes deployment
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: socketio-frontend
-spec:
-  replicas: 3
-  selector:
-    matchLabels:
-      app: socketio-frontend
-  template:
-    metadata:
-      labels:
-        app: socketio-frontend
-    spec:
-      containers:
-      - name: socketio-frontend
-        image: your-registry/socketio-frontend:latest
-        ports:
-        - containerPort: 3000
-        env:
-        - name: REDIS_URL
-          value: "redis://redis-service:6379"
-```
-
-### Cloud Platforms
-
-- **Heroku**: Use the included `Procfile`
-- **AWS ECS**: Use the Docker images
-- **Google Cloud Run**: Serverless deployment
-- **Railway/Render**: One-click deployment
+See [deployment_implementation.txt](./deployment_implementation.txt) for detailed deployment instructions.
 
 ## 📚 API Documentation
 
@@ -292,17 +233,6 @@ spec:
 | `message_chunk` | Server → Client | Streaming message chunk |
 | `agent_response_complete` | Server → Client | Agent finished responding |
 | `test_endpoint` | Client → Server | Test LangServe endpoint health |
-
-### LangServe Endpoints
-
-Each LangServe backend exposes:
-
-- `POST /invoke` - Single message processing
-- `POST /stream` - Streaming response
-- `POST /batch` - Batch processing
-- `GET /input_schema` - Input validation schema
-- `GET /output_schema` - Output schema
-- `GET /playground` - Interactive testing interface
 
 ### Message Format
 
@@ -331,78 +261,17 @@ python -m uvicorn main:app --reload --port 8000
 
 # Start frontend in development mode
 cd frontend
-npm install
-npm run dev
-
-# Start Redis (for scaling features)
-docker run -p 6379:6379 redis:alpine
-```
-
-### Adding New LangServe Agents
-
-1. **Create LangChain chain** in `backend/`
-2. **Add route** in `langserve_backend.py`
-3. **Configure endpoint** in Socket.IO frontend
-4. **Test integration** via health checks
-
-```python
-# Example: Add new agent
-def create_translator_chain():
-    prompt = ChatPromptTemplate.from_messages([
-        ("system", "You are an expert translator..."),
-        MessagesPlaceholder(variable_name="messages"),
-    ])
-    return prompt | ChatOpenAI() | StrOutputParser()
-
-# Add to FastAPI
-add_routes(app, create_translator_chain(), path="/translator")
+pnpm install
+pnpm dev
 ```
 
 ### Testing
 
 ```bash
-# Backend tests
-cd backend
-python -m pytest
-
 # Frontend tests
 cd frontend
-npm test
-
-# Integration tests
-npm run test:integration
-
-# Load testing
-npm run test:load
+pnpm run test
 ```
-
-## 📱 Mobile Integration
-
-### React Native
-
-```typescript
-import { useLangServeFrontend } from '@langserve/react-native-client';
-
-export function MobileChatScreen() {
-  const chat = useLangServeFrontend('wss://your-domain.com', userId);
-
-  return (
-    <ChatInterface
-      messages={chat.getDisplayMessages(conversationId)}
-      onSendMessage={chat.sendMessage}
-      onTypingStart={() => chat.startTyping(conversationId)}
-      onTypingStop={() => chat.stopTyping(conversationId)}
-    />
-  );
-}
-```
-
-### Flutter/iOS/Android
-
-Use Socket.IO client libraries:
-- **Flutter**: `socket_io_client`
-- **iOS**: `Socket.IO-Client-Swift`
-- **Android**: `Socket.IO Java Client`
 
 ## 🤝 Contributing
 
@@ -412,32 +281,19 @@ Use Socket.IO client libraries:
 4. Push to branch: `git push origin feature/amazing-feature`
 5. Open a Pull Request
 
-### Development Guidelines
-
-- Follow TypeScript/Python type hints
-- Add tests for new features
-- Update documentation
-- Use conventional commits
-- Ensure Docker builds pass
-
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License.
 
 ## 🙏 Acknowledgments
 
 - **LangChain Team** for the amazing LangChain framework
 - **LangServe** for the standardized AI agent deployment
 - **Socket.IO** for real-time communication infrastructure
-- **FastAPI** for the high-performance API framework
-
-## 📞 Support
-
-- **Documentation**: [docs.your-domain.com](https://docs.your-domain.com)
-- **Issues**: [GitHub Issues](https://github.com/your-org/langserve-socketio-frontend/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/your-org/langserve-socketio-frontend/discussions)
-- **Discord**: [Join our community](https://discord.gg/your-invite)
+- **SvelteKit** for the powerful frontend framework
+- **TailwindCSS** for the utility-first CSS framework
+- **Inlang/Paraglide** for the internationalization support
 
 ---
 
-**Made with ❤️ by the LangServe Socket.IO Frontend team**
+**Made with ❤️ by Claude**
