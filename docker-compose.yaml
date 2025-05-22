@@ -1,0 +1,416 @@
+# Docker Compose configuration for LangServe + Socket.IO Frontend
+version: '3.8'
+
+services:
+  # LangServe Backend
+  langserve-backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - TAVILY_API_KEY=${TAVILY_API_KEY}
+      - ENVIRONMENT=production
+    volumes:
+      - ./backend:/app
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Socket.IO Frontend Server
+  socketio-frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - LANGSERVE_CHATBOT_URL=http://langserve-backend:8000/chatbot
+      - LANGSERVE_CODE_URL=http://langserve-backend:8000/code-assistant
+      - LANGSERVE_DATA_URL=http://langserve-backend:8000/data-analyst
+      - LANGSERVE_CREATIVE_URL=http://langserve-backend:8000/creative-writer
+      - LANGSERVE_RESEARCH_URL=http://langserve-backend:8000/research-assistant
+      - REDIS_URL=redis://redis:6379
+      - JWT_SECRET=${JWT_SECRET}
+    depends_on:
+      - langserve-backend
+      - redis
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    restart: unless-stopped
+
+  # Redis for Socket.IO scaling and session management
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+
+  # PostgreSQL for conversation persistence
+  postgres:
+    image: postgres:15-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=langserve_chat
+      - POSTGRES_USER=langserve
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    restart: unless-stopped
+
+  # Nginx reverse proxy
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/ssl:/etc/nginx/ssl
+    depends_on:
+      - socketio-frontend
+      - langserve-backend
+    restart: unless-stopped
+
+volumes:
+  redis_data:
+  postgres_data:
+
+---
+# Backend Dockerfile
+# backend/Dockerfile
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements first for better caching
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy application code
+COPY . .
+
+# Expose port
+EXPOSE 8000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:8000/health || exit 1
+
+# Run the application
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "4"]
+
+---
+# Frontend Dockerfile
+# frontend/Dockerfile
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+RUN npm ci --only=production
+
+# Copy application code
+COPY . .
+
+# Build the application
+RUN npm run build
+
+# Expose port
+EXPOSE 3000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:3000/health || exit 1
+
+# Run the application
+CMD ["npm", "start"]
+
+---
+# Nginx Configuration
+# nginx/nginx.conf
+events {
+    worker_connections 1024;
+}
+
+http {
+    upstream socketio {
+        server socketio-frontend:3000;
+    }
+
+    upstream langserve {
+        server langserve-backend:8000;
+    }
+
+    # Rate limiting
+    limit_req_zone $binary_remote_addr zone=api:10m rate=100r/m;
+    limit_req_zone $binary_remote_addr zone=ws:10m rate=50r/m;
+
+    server {
+        listen 80;
+        server_name localhost;
+
+        # Socket.IO Frontend
+        location / {
+            proxy_pass http://socketio;
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection "upgrade";
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+
+            # WebSocket timeouts
+            proxy_read_timeout 86400;
+            proxy_send_timeout 86400;
+
+            # Rate limiting for WebSocket connections
+            limit_req zone=ws burst=10 nodelay;
+        }
+
+        # LangServe Backend API
+        location /api/ {
+            proxy_pass http://langserve/;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+
+            # Rate limiting for API calls
+            limit_req zone=api burst=20 nodelay;
+
+            # Timeouts for streaming responses
+            proxy_read_timeout 300;
+            proxy_send_timeout 300;
+        }
+
+        # Health checks
+        location /health {
+            access_log off;
+            proxy_pass http://socketio/health;
+        }
+
+        location /api/health {
+            access_log off;
+            proxy_pass http://langserve/health;
+        }
+    }
+}
+
+---
+# Environment file template
+# .env.example
+# Copy to .env and fill in your values
+
+# API Keys
+OPENAI_API_KEY=your-openai-api-key-here
+ANTHROPIC_API_KEY=your-anthropic-api-key-here
+TAVILY_API_KEY=your-tavily-api-key-here
+
+# Database
+POSTGRES_PASSWORD=your-secure-postgres-password
+
+# Security
+JWT_SECRET=your-jwt-secret-key-for-authentication
+
+# Optional: Custom LangServe URLs if not using Docker Compose
+# LANGSERVE_CHATBOT_URL=http://localhost:8000/chatbot
+# LANGSERVE_CODE_URL=http://localhost:8000/code-assistant
+# LANGSERVE_DATA_URL=http://localhost:8000/data-analyst
+
+---
+# Database initialization
+# database/init.sql
+CREATE TABLE IF NOT EXISTS conversations (
+    id VARCHAR(255) PRIMARY KEY,
+    participants JSONB NOT NULL,
+    status VARCHAR(50) DEFAULT 'active',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    metadata JSONB
+);
+
+CREATE TABLE IF NOT EXISTS messages (
+    id VARCHAR(255) PRIMARY KEY,
+    conversation_id VARCHAR(255) REFERENCES conversations(id) ON DELETE CASCADE,
+    type VARCHAR(50) NOT NULL,
+    content TEXT NOT NULL,
+    sender_id VARCHAR(255) NOT NULL,
+    sender_type VARCHAR(50) NOT NULL,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    additional_kwargs JSONB
+);
+
+CREATE INDEX idx_conversations_participants ON conversations USING GIN (participants);
+CREATE INDEX idx_messages_conversation_id ON messages (conversation_id);
+CREATE INDEX idx_messages_timestamp ON messages (timestamp);
+
+---
+# Package.json for frontend
+# frontend/package.json
+{
+  "name": "langserve-socketio-frontend",
+  "version": "1.0.0",
+  "description": "Socket.IO frontend for LangServe",
+  "main": "dist/server.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "dev": "ts-node-dev --respawn src/server.ts",
+    "test": "jest"
+  },
+  "dependencies": {
+    "socket.io": "^4.7.0",
+    "express": "^4.18.0",
+    "@langchain/core": "^0.2.0",
+    "ioredis": "^5.3.0",
+    "pg": "^8.11.0",
+    "jsonwebtoken": "^9.0.0",
+    "cors": "^2.8.5",
+    "helmet": "^7.0.0",
+    "rate-limiter-flexible": "^3.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/express": "^4.17.0",
+    "@types/pg": "^8.10.0",
+    "typescript": "^5.0.0",
+    "ts-node-dev": "^2.0.0",
+    "jest": "^29.0.0"
+  }
+}
+
+---
+# Requirements.txt for backend
+# backend/requirements.txt
+fastapi==0.104.1
+langserve[all]==0.0.38
+langchain==0.1.0
+langchain-openai==0.0.2
+langchain-anthropic==0.1.0
+langchain-community==0.0.10
+uvicorn[standard]==0.24.0
+pydantic==2.5.0
+python-multipart==0.0.6
+asyncpg==0.29.0
+redis==5.0.1
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+
+---
+# Deployment instructions
+# DEPLOYMENT.md
+
+## LangServe Socket.IO Frontend Deployment Guide
+
+### Prerequisites
+- Docker and Docker Compose
+- API keys for OpenAI, Anthropic, and Tavily (optional)
+- Domain name and SSL certificates (for production)
+
+### Quick Start
+
+1. **Clone and setup:**
+   ```bash
+   git clone <repository>
+   cd langserve-socketio-frontend
+   cp .env.example .env
+   # Edit .env with your API keys
+   ```
+
+2. **Development:**
+   ```bash
+   docker-compose -f docker-compose.dev.yml up
+   ```
+
+3. **Production:**
+   ```bash
+   docker-compose up -d
+   ```
+
+### Configuration
+
+#### Environment Variables
+- `OPENAI_API_KEY`: Required for OpenAI models
+- `ANTHROPIC_API_KEY`: Required for Anthropic models
+- `TAVILY_API_KEY`: Optional, for enhanced search capabilities
+- `POSTGRES_PASSWORD`: Secure password for PostgreSQL
+- `JWT_SECRET`: Secret key for JWT authentication
+
+#### Scaling
+For high-traffic deployments:
+
+1. **Multiple Socket.IO instances:**
+   ```bash
+   docker-compose up --scale socketio-frontend=3
+   ```
+
+2. **Multiple LangServe instances:**
+   ```bash
+   docker-compose up --scale langserve-backend=3
+   ```
+
+3. **Load balancing:**
+   - Update nginx.conf with additional upstream servers
+   - Consider using external load balancers
+
+#### Monitoring
+Add monitoring services:
+- Prometheus + Grafana for metrics
+- ELK stack for logging
+- Health check endpoints at `/health`
+
+#### Security
+- Configure CORS origins appropriately
+- Use SSL certificates in production
+- Implement rate limiting
+- Add authentication middleware
+- Regular security updates
+
+### API Endpoints
+
+#### Socket.IO Events
+- `authenticate`: User authentication
+- `create_conversation`: Start new conversation
+- `send_message`: Send message to conversation
+- `join_conversation`: Join existing conversation
+
+#### LangServe Endpoints
+- `/chatbot`: General conversational AI
+- `/code-assistant`: Coding specialist
+- `/data-analyst`: Data analysis with tools
+- `/creative-writer`: Creative writing assistant
+- `/research-assistant`: Research with search
+
+### Testing
+```bash
+# Test LangServe backend
+curl http://localhost:8000/health
+
+# Test Socket.IO frontend
+curl http://localhost:3000/health
+
+# Interactive testing
+# Visit http://localhost:3000 for web interface
+# Visit http://localhost:8000/docs for API documentation
+```
