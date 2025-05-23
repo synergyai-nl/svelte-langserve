@@ -18,7 +18,8 @@
     "test": "nx run-many -t test",
     "changeset": "changeset",
     "version-packages": "changeset version",
-    "release": "pnpm build && changeset publish"
+    "release": "pnpm build && changeset publish",
+    "prepare": "husky"
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.1",
@@ -29,6 +30,8 @@
     "@nx/vite": "^21.1.1",
     "@nx/workspace": "^21.1.1",
     "eslint": "^9.18.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.0.0",
     "nx": "^21.1.1",
     "typescript": "^5.0.0",
     "typescript-eslint": "^8.20.0"
@@ -38,6 +41,12 @@
     "pnpm": ">=8"
   },
   "packageManager": "pnpm@8.15.0",
+  "lint-staged": {
+    "examples/dashboard/**/*.{js,ts,svelte}": [
+      "cd examples/dashboard && pnpm format",
+      "cd examples/dashboard && pnpm lint"
+    ]
+  },
   "keywords": [
     "svelte",
     "langserve",
