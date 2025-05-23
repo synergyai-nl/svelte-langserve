@@ -1,0 +1,51 @@
+{
+  "name": "svelte-langserve",
+  "version": "0.1.0",
+  "description": "Svelte integration packages for LangServe backends",
+  "type": "module",
+  "private": true,
+  "workspaces": [
+    "packages/@svelte-langserve/*",
+    "examples/*"
+  ],
+  "scripts": {
+    "build": "pnpm -r --filter='@svelte-langserve/*' build",
+    "dev": "pnpm -r --filter='@svelte-langserve/*' dev",
+    "clean": "pnpm -r --filter='@svelte-langserve/*' clean",
+    "typecheck": "pnpm -r --filter='@svelte-langserve/*' typecheck",
+    "lint": "pnpm -r --filter='@svelte-langserve/*' lint",
+    "test": "pnpm -r --filter='@svelte-langserve/*' test",
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "release": "pnpm build && changeset publish"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.27.1",
+    "typescript": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=18",
+    "pnpm": ">=8"
+  },
+  "packageManager": "pnpm@8.15.0",
+  "keywords": [
+    "svelte",
+    "langserve",
+    "langchain",
+    "ai",
+    "chat",
+    "socket.io",
+    "frontend",
+    "ui"
+  ],
+  "author": "svelte-langserve contributors",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-org/svelte-langserve.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-org/svelte-langserve/issues"
+  },
+  "homepage": "https://github.com/your-org/svelte-langserve#readme"
+}
