@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  # LangServe Backend
+  langserve-backend:
+    build:
+      context: ./examples/langserve-backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - TAVILY_API_KEY=${TAVILY_API_KEY}
+      - ENVIRONMENT=production
+    volumes:
+      - ./examples/langserve-backend:/app
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # SvelteKit Frontend
+  svelte-frontend:
+    build:
+      context: ./examples/dashboard
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PUBLIC_LANGSERVE_CHATBOT_URL=http://langserve-backend:8000/chatbot
+      - PUBLIC_LANGSERVE_CODE_URL=http://langserve-backend:8000/code-assistant
+      - PUBLIC_LANGSERVE_DATA_URL=http://langserve-backend:8000/data-analyst
+      - PUBLIC_LANGSERVE_CREATIVE_URL=http://langserve-backend:8000/creative-writer
+      - PUBLIC_LANGSERVE_RESEARCH_URL=http://langserve-backend:8000/research-assistant
+      - PUBLIC_SOCKET_IO_URL=http://localhost:3000
+    depends_on:
+      - langserve-backend
+    volumes:
+      - ./examples/dashboard:/app
+      - /app/node_modules
+    restart: unless-stopped
+
+  # Nginx reverse proxy
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/ssl:/etc/nginx/ssl
+    depends_on:
+      - svelte-frontend
+      - langserve-backend
+    restart: unless-stopped

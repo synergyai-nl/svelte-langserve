@@ -586,6 +586,18 @@ const langserveConfig = {
 			name: 'Data Analyst',
 			url: process.env.LANGSERVE_DATA_URL || 'http://localhost:8000/data-analyst',
 			description: 'Data analysis and visualization expert'
+		},
+		{
+			id: 'creative-writer',
+			name: 'Creative Writer',
+			url: process.env.LANGSERVE_CREATIVE_URL || 'http://localhost:8000/creative-writer',
+			description: 'Creative writing and storytelling assistant'
+		},
+		{
+			id: 'research-assistant',
+			name: 'Research Assistant',
+			url: process.env.LANGSERVE_RESEARCH_URL || 'http://localhost:8000/research-assistant',
+			description: 'Research and information gathering specialist'
 		}
 	],
 	default_config: {
