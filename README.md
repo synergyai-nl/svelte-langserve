@@ -1,6 +1,16 @@
-# Claude Rocks the Dashboard
+# svelte-langserve
 
-A SvelteKit-based dashboard for interacting with LangServe endpoints via Socket.IO, providing a responsive and real-time chat interface for AI assistants.
+A high-performance SvelteKit toolkit for building custom AI frontends on top of LangServe APIs. Purpose-built for developers who need to create fast, maintainable interfaces for advanced agentic reasoning systems.
+
+## 🎯 Problem & Solution
+
+Building production-ready frontends for LangServe applications requires handling real-time streaming, multi-agent coordination, WebSocket management, and performance optimization. Most existing solutions are either React-specific, full frameworks, or lack the performance characteristics needed for complex AI interactions.
+
+**svelte-langserve** solves this by providing:
+- **Focused toolkit** - Does one thing well: connecting SvelteKit to LangServe
+- **Performance-first** - Leverages SvelteKit's speed for responsive AI interfaces  
+- **Customizable** - Components and hooks, not rigid templates
+- **Production-ready** - Built-in streaming, error handling, and real-time features
 
 ## Features
 
@@ -12,6 +22,25 @@ A SvelteKit-based dashboard for interacting with LangServe endpoints via Socket.
 - **Health Monitoring**: Real-time endpoint status and connectivity testing
 - **Internationalization**: Support for multiple languages with Inlang/Paraglide
 - **Modern UI**: Clean, responsive interface built with TailwindCSS and Svelte
+
+## 📊 Comparison with Similar Projects
+
+| Project | Framework | Focus | Scope | LangServe Integration |
+|---------|-----------|-------|-------|-----------------------|
+| **svelte-langserve** *(this project)* | SvelteKit | LangServe toolkit | Focused tool for custom AI frontends | ✅ Native, optimized |
+| [assistant-ui](https://github.com/assistant-ui/assistant-ui) | React | AI chat components | Comprehensive React component library | ✅ Via Vercel AI SDK |
+| [langserve-assistant-ui](https://github.com/hminle/langserve-assistant-ui) | Next.js | LangServe + assistant-ui | Full-stack template with specific UI | ✅ Direct integration |
+| [Vercel AI SDK](https://github.com/vercel/ai) | Multi-framework | General AI integration | Broad AI SDK with multiple providers | ✅ Via adapters |
+| [sveltekit-ai-chatbot](https://github.com/jianyuan/sveltekit-ai-chatbot) | SvelteKit | OpenAI/general AI | Full chatbot application | ❌ OpenAI-focused |
+| LangServe Playground | Built-in | LangServe testing | Basic development UI | ✅ Built-in |
+
+### Why svelte-langserve?
+
+- **Only SvelteKit-native LangServe toolkit** - Purpose-built for the framework
+- **Performance-optimized** - Faster than React alternatives for real-time AI interactions
+- **Toolkit approach** - Build exactly what you need, not what someone else designed
+- **Production-grade** - Handles streaming, error recovery, and WebSocket management
+- **Extensible** - Hooks for auth, persistence, and custom integrations
 
 ## 🏗️ Architecture
 
@@ -49,8 +78,8 @@ A SvelteKit-based dashboard for interacting with LangServe endpoints via Socket.
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/your-org/claude-rocks-the-dashboard.git
-cd claude-rocks-the-dashboard
+git clone https://github.com/your-org/svelte-langserve.git
+cd svelte-langserve
 ```
 
 ### 2. Environment Setup
@@ -200,7 +229,7 @@ PUBLIC_LANGSERVE_DATA_URL=http://localhost:8000/data-analyst
 ## Project Structure
 
 ```
-claude-rocks-the-dashboard/
+svelte-langserve/
 ├── backend/               # LangServe backend Python implementation
 ├── frontend/              # SvelteKit frontend implementation
 │   ├── src/
