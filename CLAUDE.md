@@ -70,7 +70,7 @@ cd examples/langserve-backend
 uv run ruff check .        # Lint code
 uv run ruff format .       # Format code
 uv run pytest             # Run tests
-uv run mypy src/           # Type checking
+uv run pyright            # Type checking
 ```
 
 ### Docker Deployment

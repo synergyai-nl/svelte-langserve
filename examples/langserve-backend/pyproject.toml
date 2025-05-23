@@ -25,7 +25,7 @@ dev = [
     "ruff",
     "pytest",
     "pytest-asyncio",
-    "mypy",
+    "pyright",
     "httpx"
 ]
 
@@ -59,8 +59,3 @@ filterwarnings = [
 [tool.hatch.build.targets.wheel]
 packages = ["src/svelte_langserve"]
 
-[tool.mypy]
-python_version = "3.11"
-warn_return_any = true
-warn_unused_configs = true
-disallow_untyped_defs = true
