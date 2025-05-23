@@ -2,18 +2,18 @@
 # This shows how to create the LangServe backends that the Socket.IO frontend connects to
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from langserve import add_routes
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.output_parsers import StrOutputParser
-from langchain_core.runnables import RunnableLambda, RunnablePassthrough
+from langchain_core.runnables import RunnableLambda
 from langchain_openai import ChatOpenAI
 from langchain_anthropic import ChatAnthropic
 from langchain_community.tools import DuckDuckGoSearchRun
 from langchain.agents import create_openai_functions_agent, AgentExecutor
 from langchain_community.tools.tavily_search import TavilySearchResults
-from typing import List, Dict, Any
+from typing import Dict, Any
 import os
-from langchain_core.messages import BaseMessage
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -210,31 +210,6 @@ def create_research_assistant_chain():
 
     search_tool = DuckDuckGoSearchRun()
 
-    prompt = ChatPromptTemplate.from_messages(
-        [
-            (
-                "system",
-                """You are a meticulous research assistant. You specialize in:
-        - Academic and professional research
-        - Fact-checking and verification
-        - Literature reviews
-        - Comparative analysis
-        - Source evaluation
-        - Research methodology
-
-        When conducting research:
-        1. Use multiple reliable sources
-        2. Cross-reference information
-        3. Cite your sources
-        4. Present balanced perspectives
-        5. Identify potential biases
-        6. Suggest areas for further investigation
-        """,
-            ),
-            MessagesPlaceholder(variable_name="messages"),
-        ]
-    )
-
     def research_chain(inputs: Dict[str, Any]) -> str:
         messages = inputs.get("messages", [])
         if not messages:
@@ -397,8 +372,6 @@ async def root():
 
 
 # CORS middleware for frontend integration
-from fastapi.middleware.cors import CORSMiddleware
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # Configure appropriately for production

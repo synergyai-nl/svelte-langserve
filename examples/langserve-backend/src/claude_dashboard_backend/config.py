@@ -1,7 +1,6 @@
 """Configuration settings for the Claude Dashboard Backend."""
 
 import os
-from typing import Literal
 
 
 class Settings:
