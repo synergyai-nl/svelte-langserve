@@ -1,6 +1,7 @@
 import { io, Socket } from 'socket.io-client';
 import type { LangServeEndpoint, Conversation, ChatMessage, MessageChunk } from '../types';
 import { writable, derived, get } from 'svelte/store';
+import { logger, socketLogger, streamingLogger, performanceLogger } from '../../utils/logger';
 
 // Store types
 interface LangServeState {
@@ -13,6 +14,12 @@ interface LangServeState {
 	streamingMessages: Map<string, string>;
 	connectionError: string | null;
 	endpointHealth: Map<string, boolean>;
+	messagePagination: Map<string, {
+		currentPage: number;
+		messagesPerPage: number;
+		totalMessages: number;
+		hasMore: boolean;
+	}>;
 }
 
 // Create the initial state
@@ -25,7 +32,8 @@ const initialState: LangServeState = {
 	activeConversationId: null,
 	streamingMessages: new Map(),
 	connectionError: null,
-	endpointHealth: new Map()
+	endpointHealth: new Map(),
+	messagePagination: new Map()
 };
 
 // Create the writable store
@@ -33,19 +41,85 @@ const createLangServeStore = () => {
 	// Create the store with initial state
 	const { subscribe, update } = writable<LangServeState>(initialState);
 
-	// Map to store streaming message timeouts
+	// Map to store streaming message timeouts and cleanup functions
 	const streamingTimeouts = new Map<string, NodeJS.Timeout>();
+	const streamingCleanup = new Map<string, () => void>();
+	
+	// Constants for memory management
+	const STREAMING_TIMEOUT = 30000; // 30 seconds
+	const MAX_STREAMING_MESSAGES = 10; // Maximum concurrent streaming messages
+	const CLEANUP_INTERVAL = 60000; // 1 minute
+
+	// Periodic cleanup function
+	let cleanupInterval: NodeJS.Timeout | null = null;
+	
+	const startCleanupInterval = () => {
+		if (cleanupInterval) clearInterval(cleanupInterval);
+		cleanupInterval = setInterval(() => {
+			// Clean up stale streaming messages
+			const now = Date.now();
+			streamingTimeouts.forEach((timeout, messageId) => {
+				// Force cleanup of very old streaming messages
+				const elapsed = now - parseInt(messageId.split('-')[1] || '0', 10);
+				if (elapsed > STREAMING_TIMEOUT * 2) {
+					cleanupStreamingMessage(messageId);
+				}
+			});
+		}, CLEANUP_INTERVAL);
+	};
+
+	const stopCleanupInterval = () => {
+		if (cleanupInterval) {
+			clearInterval(cleanupInterval);
+			cleanupInterval = null;
+		}
+	};
+
+	const cleanupStreamingMessage = (messageId: string) => {
+		streamingLogger.debug('Cleaning up streaming message', {
+			messageId: messageId.substring(0, 8) + '...'
+		});
+
+		// Clear timeout
+		const timeout = streamingTimeouts.get(messageId);
+		if (timeout) {
+			clearTimeout(timeout);
+			streamingTimeouts.delete(messageId);
+		}
+
+		// Run custom cleanup
+		const cleanup = streamingCleanup.get(messageId);
+		if (cleanup) {
+			cleanup();
+			streamingCleanup.delete(messageId);
+		}
+
+		// Remove from store
+		update((state) => {
+			state.streamingMessages.delete(messageId);
+			return state;
+		});
+	};
 
 	// Connect to the Socket.IO server
 	const connect = (serverUrl: string, userId: string, authToken?: string) => {
+		socketLogger.info('Initiating connection', { serverUrl, userId: userId.substring(0, 8) + '...' });
+		performanceLogger.time('connection-establish');
+		
 		update((state) => {
 			// Clean up existing socket if there is one
 			if (state.socket) {
+				socketLogger.info('Cleaning up existing socket connection');
 				state.socket.disconnect();
 
-				// Clear all timeouts
+				// Clear all timeouts and cleanup functions
 				streamingTimeouts.forEach((timeout) => clearTimeout(timeout));
 				streamingTimeouts.clear();
+				streamingCleanup.forEach((cleanup) => cleanup());
+				streamingCleanup.clear();
+				
+				// Stop cleanup interval
+				stopCleanupInterval();
 			}
 
 			// Create new socket
@@ -58,15 +132,22 @@ const createLangServeStore = () => {
 
 			// Connection events
 			newSocket.on('connect', () => {
+				socketLogger.info('Socket connected successfully');
+				performanceLogger.timeEnd('connection-establish');
+				
 				update((s) => {
 					s.connected = true;
 					s.connectionError = null;
 					return s;
 				});
+				// Start cleanup interval when connected
+				startCleanupInterval();
+				socketLogger.debug('Sending authentication request', { userId: userId.substring(0, 8) + '...' });
 				newSocket.emit('authenticate', { user_id: userId, token: authToken });
 			});
 
-			newSocket.on('disconnect', () => {
+			newSocket.on('disconnect', (reason) => {
+				socketLogger.warn('Socket disconnected', { reason });
 				update((s) => {
 					s.connected = false;
 					s.authenticated = false;
@@ -75,6 +156,7 @@ const createLangServeStore = () => {
 			});
 
 			newSocket.on('connect_error', (error) => {
+				socketLogger.error('Connection error', { error: error.message }, error);
 				update((s) => {
 					s.connectionError = error.message;
 					return s;
@@ -85,12 +167,18 @@ const createLangServeStore = () => {
 			newSocket.on(
 				'authenticated',
 				(data: { user_id: string; available_endpoints: LangServeEndpoint[] }) => {
+					socketLogger.info('Authentication successful', { 
+						userId: data.user_id.substring(0, 8) + '...', 
+						endpointCount: data.available_endpoints.length 
+					});
+					
 					update((s) => {
 						s.authenticated = true;
 						s.availableEndpoints = data.available_endpoints;
 						return s;
 					});
-					console.log('Authenticated with', data.available_endpoints.length, 'endpoints available');
+					
+					logger.setUserContext(data.user_id);
 				}
 			);
 
@@ -139,6 +227,26 @@ const createLangServeStore = () => {
 			newSocket.on(
 				'agent_response_start',
 				(data: { message_id: string; endpoint_id: string; endpoint_name: string }) => {
+					streamingLogger.info('Agent response started', {
+						messageId: data.message_id.substring(0, 8) + '...',
+						endpointId: data.endpoint_id,
+						endpointName: data.endpoint_name
+					});
+
+					// Check for too many concurrent streaming messages
+					if (streamingTimeouts.size >= MAX_STREAMING_MESSAGES) {
+						streamingLogger.warn('Maximum concurrent streaming messages reached, cleaning up oldest', {
+							currentCount: streamingTimeouts.size,
+							maxAllowed: MAX_STREAMING_MESSAGES
+						});
+						
+						// Clean up oldest streaming messages
+						const oldestMessageId = Array.from(streamingTimeouts.keys())[0];
+						if (oldestMessageId) {
+							cleanupStreamingMessage(oldestMessageId);
+						}
+					}
+
 					update((s) => {
 						s.streamingMessages.set(data.message_id, '');
 						return s;
@@ -147,6 +255,11 @@ const createLangServeStore = () => {
 			);
 
 			newSocket.on('message_chunk', (chunk: MessageChunk) => {
+				streamingLogger.debug('Received message chunk', {
+					messageId: chunk.message_id.substring(0, 8) + '...',
+					chunkLength: chunk.content.length
+				});
+
 				update((s) => {
 					const current = s.streamingMessages.get(chunk.message_id) || '';
 					s.streamingMessages.set(chunk.message_id, current + chunk.content);
@@ -161,22 +274,28 @@ const createLangServeStore = () => {
 
 				// Set a timeout to clean up if streaming stops unexpectedly
 				const timeout = setTimeout(() => {
-					update((s) => {
-						s.streamingMessages.delete(chunk.message_id);
-						return s;
+					streamingLogger.warn('Streaming timeout reached, cleaning up message', {
+						messageId: chunk.message_id.substring(0, 8) + '...',
+						timeoutMs: STREAMING_TIMEOUT
 					});
-					streamingTimeouts.delete(chunk.message_id);
-				}, 10000);
+					cleanupStreamingMessage(chunk.message_id);
+				}, STREAMING_TIMEOUT);
 
 				streamingTimeouts.set(chunk.message_id, timeout);
 			});
 
 			newSocket.on('agent_response_complete', (message: ChatMessage) => {
-				// Clear streaming state
-				update((s) => {
-					s.streamingMessages.delete(message.id);
+				streamingLogger.info('Agent response completed', {
+					messageId: message.id.substring(0, 8) + '...',
+					conversationId: message.conversation_id.substring(0, 8) + '...',
+					contentLength: message.content.length
+				});
 
-					// Add final message
+				// Clear streaming state using our cleanup function
+				cleanupStreamingMessage(message.id);
+
+				// Add final message
+				update((s) => {
 					s.conversations = s.conversations.map((conv) =>
 						conv.id === message.conversation_id
 							? {
@@ -185,15 +304,8 @@ const createLangServeStore = () => {
 								}
 							: conv
 					);
-
 					return s;
 				});
-
-				const timeout = streamingTimeouts.get(message.id);
-				if (timeout) {
-					clearTimeout(timeout);
-					streamingTimeouts.delete(message.id);
-				}
 			});
 
 			// Endpoint management
@@ -240,11 +352,8 @@ const createLangServeStore = () => {
 			newSocket.on(
 				'agent_response_error',
 				(error: { message_id: string; endpoint_id: string; error: string }) => {
-					// Clean up streaming state on error
-					update((s) => {
-						s.streamingMessages.delete(error.message_id);
-						return s;
-					});
+					// Clean up streaming state on error using our cleanup function
+					cleanupStreamingMessage(error.message_id);
 				}
 			);
 
@@ -264,9 +373,14 @@ const createLangServeStore = () => {
 				state.socket.disconnect();
 			}
 
-			// Clear all timeouts
+			// Clear all timeouts and cleanup functions
 			streamingTimeouts.forEach((timeout) => clearTimeout(timeout));
 			streamingTimeouts.clear();
+			streamingCleanup.forEach((cleanup) => cleanup());
+			streamingCleanup.clear();
+
+			// Stop cleanup interval
+			stopCleanupInterval();
 
 			return {
 				...initialState,
@@ -368,6 +482,49 @@ const createLangServeStore = () => {
 	const setActiveConversationId = (conversationId: string | null) => {
 		update((state) => {
 			state.activeConversationId = conversationId;
+			// Initialize pagination for new conversation
+			if (conversationId && !state.messagePagination.has(conversationId)) {
+				state.messagePagination.set(conversationId, {
+					currentPage: 1,
+					messagesPerPage: 50,
+					totalMessages: 0,
+					hasMore: false
+				});
+			}
+			return state;
+		});
+	};
+
+	const updateMessagePagination = (conversationId: string, updates: Partial<{
+		currentPage: number;
+		messagesPerPage: number;
+		totalMessages: number;
+		hasMore: boolean;
+	}>) => {
+		update((state) => {
+			const existing = state.messagePagination.get(conversationId) || {
+				currentPage: 1,
+				messagesPerPage: 50,
+				totalMessages: 0,
+				hasMore: false
+			};
+			state.messagePagination.set(conversationId, { ...existing, ...updates });
+			return state;
+		});
+	};
+
+	const loadMoreMessages = (conversationId: string) => {
+		update((state) => {
+			const pagination = state.messagePagination.get(conversationId);
+			if (pagination && pagination.hasMore && state.socket && state.authenticated) {
+				const nextPage = pagination.currentPage + 1;
+				state.socket.emit('load_conversation_messages', {
+					conversation_id: conversationId,
+					page: nextPage,
+					limit: pagination.messagesPerPage
+				});
+				pagination.currentPage = nextPage;
+			}
 			return state;
 		});
 	};
@@ -391,7 +548,11 @@ const createLangServeStore = () => {
 		sendMessage,
 		loadConversations,
 		getConversationHistory,
-		setActiveConversationId
+		setActiveConversationId,
+
+		// Message pagination
+		updateMessagePagination,
+		loadMoreMessages
 	};
 };
 
@@ -410,7 +571,9 @@ export const {
 	sendMessage, 
 	loadConversations, 
 	getConversationHistory, 
-	setActiveConversationId 
+	setActiveConversationId,
+	updateMessagePagination,
+	loadMoreMessages
 } = langserveStore;
 
 // Derived stores for convenience
@@ -437,8 +600,8 @@ export const activeConversation = derived([langserveStore], ([$store]) =>
 	$store.conversations.find((c) => c.id === $store.activeConversationId)
 );
 
-// Helper to get display messages (with streaming content)
-export function getDisplayMessages(conversationId: string) {
+// Helper to get display messages (with streaming content and pagination)
+export function getDisplayMessages(conversationId: string, limit?: number) {
 	const state = get(langserveStore);
 	const conversation = state.conversations.find((c) => c.id === conversationId);
 	if (!conversation) return [];
@@ -462,5 +625,29 @@ export function getDisplayMessages(conversationId: string) {
 		}
 	});
 
-	return messages.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+	const sortedMessages = messages.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+	
+	// Apply pagination if specified
+	if (limit && limit > 0) {
+		const pagination = state.messagePagination.get(conversationId);
+		if (pagination) {
+			const startIndex = Math.max(0, sortedMessages.length - (pagination.currentPage * pagination.messagesPerPage));
+			return sortedMessages.slice(startIndex);
+		}
+		// Fallback: return last N messages
+		return sortedMessages.slice(-limit);
+	}
+
+	return sortedMessages;
+}
+
+// Helper to get pagination info for a conversation
+export function getMessagePagination(conversationId: string) {
+	const state = get(langserveStore);
+	return state.messagePagination.get(conversationId) || {
+		currentPage: 1,
+		messagesPerPage: 50,
+		totalMessages: 0,
+		hasMore: false
+	};
 }

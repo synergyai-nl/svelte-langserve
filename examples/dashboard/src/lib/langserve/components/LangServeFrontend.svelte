@@ -15,6 +15,7 @@
 	import ConversationList from './ConversationList.svelte';
 	import ChatInterface from './ChatInterface.svelte';
 	import LoginForm from './LoginForm.svelte';
+	import ErrorBoundary from './ErrorBoundary.svelte';
 
 	export let userId: string = 'user123';
 	export let authToken: string | undefined = undefined;
@@ -84,88 +85,106 @@
 	}
 </script>
 
-<div class="flex h-screen bg-white">
-	<!-- Show login form if not authenticated -->
-	{#if !$isAuthenticated}
-		<LoginForm serverUrl={backendUrl} on:loginSuccess={handleLoginSuccess} />
-	<!-- If authenticated but not connected to langserve, show loading state -->
-	{:else if !$connected}
-		<div class="flex h-full w-full items-center justify-center">
-			<div class="p-6 text-center">
-				<h2 class="mb-4 text-xl">Connecting to LangServe Frontend...</h2>
-				{#if $connectionError}
-					<div class="mb-4 text-red-500">
-						Error: {$connectionError}
+<ErrorBoundary 
+	fallback="The LangServe Frontend encountered an error. Please try refreshing the page."
+	showDetails={true}
+	onError={(error) => console.error('LangServe Frontend Error:', error)}
+>
+	<div class="flex h-screen bg-white">
+		<!-- Show login form if not authenticated -->
+		{#if !$isAuthenticated}
+			<ErrorBoundary fallback="Login form encountered an error.">
+				<LoginForm serverUrl={backendUrl} on:loginSuccess={handleLoginSuccess} />
+			</ErrorBoundary>
+		<!-- If authenticated but not connected to langserve, show loading state -->
+		{:else if !$connected}
+			<div class="flex h-full w-full items-center justify-center">
+				<div class="p-6 text-center">
+					<h2 class="mb-4 text-xl">Connecting to LangServe Frontend...</h2>
+					{#if $connectionError}
+						<div class="mb-4 text-red-500">
+							Error: {$connectionError}
+						</div>
+					{/if}
+					<div class="space-y-2">
+						<button
+							on:click={() => {
+								const token = $accessToken;
+								const user = $currentUser?.username || userId;
+								langserveStore.connect(serverUrl, user, token);
+							}}
+							class="rounded-md bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
+						>
+							Retry Connection
+						</button>
+						<button
+							on:click={handleLogout}
+							class="rounded-md bg-gray-500 px-4 py-2 text-white hover:bg-gray-600"
+						>
+							Logout
+						</button>
 					</div>
-				{/if}
-				<div class="space-y-2">
-					<button
-						on:click={() => {
-							const token = $accessToken;
-							const user = $currentUser?.username || userId;
-							langserveStore.connect(serverUrl, user, token);
-						}}
-						class="rounded-md bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
-					>
-						Retry Connection
-					</button>
+				</div>
+			</div>
+		{:else if !$authenticated}
+			<div class="flex h-full w-full items-center justify-center">
+				<div class="text-center">
+					<h2 class="text-xl">Authenticating with LangServe...</h2>
 					<button
 						on:click={handleLogout}
-						class="rounded-md bg-gray-500 px-4 py-2 text-white hover:bg-gray-600"
+						class="mt-4 rounded-md bg-gray-500 px-4 py-2 text-white hover:bg-gray-600"
 					>
 						Logout
 					</button>
 				</div>
 			</div>
-		</div>
-	{:else if !$authenticated}
-		<div class="flex h-full w-full items-center justify-center">
-			<div class="text-center">
-				<h2 class="text-xl">Authenticating with LangServe...</h2>
-				<button
-					on:click={handleLogout}
-					class="mt-4 rounded-md bg-gray-500 px-4 py-2 text-white hover:bg-gray-600"
-				>
-					Logout
-				</button>
-			</div>
-		</div>
-	{:else}
-		<!-- Main interface when connected and authenticated -->
-		<div class="flex w-80 flex-col overflow-y-auto border-r p-4">
-			<div class="mb-4 flex items-center justify-between">
-				<h2 class="text-xl font-bold">LangServe Frontend</h2>
-				<button
-					on:click={handleLogout}
-					class="rounded-md bg-red-500 px-3 py-1 text-sm text-white hover:bg-red-600"
-				>
-					Logout
-				</button>
-			</div>
+		{:else}
+			<!-- Main interface when connected and authenticated -->
+			<ErrorBoundary fallback="Sidebar components encountered an error.">
+				<div class="flex w-80 flex-col overflow-y-auto border-r p-4">
+					<div class="mb-4 flex items-center justify-between">
+						<h2 class="text-xl font-bold">LangServe Frontend</h2>
+						<button
+							on:click={handleLogout}
+							class="rounded-md bg-red-500 px-3 py-1 text-sm text-white hover:bg-red-600"
+						>
+							Logout
+						</button>
+					</div>
 
-			<EndpointSelector bind:selectedEndpoints />
+					<ErrorBoundary fallback="Endpoint selector error.">
+						<EndpointSelector bind:selectedEndpoints />
+					</ErrorBoundary>
 
-			<ConfigPanel
-				temperature={config.temperature}
-				streaming={config.streaming}
-				on:change={handleConfigChange}
-			/>
+					<ErrorBoundary fallback="Config panel error.">
+						<ConfigPanel
+							temperature={config.temperature}
+							streaming={config.streaming}
+							on:change={handleConfigChange}
+						/>
+					</ErrorBoundary>
 
-			<button
-				on:click={handleCreateConversation}
-				disabled={selectedEndpoints.length === 0}
-				class="mb-4 w-full py-2 {selectedEndpoints.length > 0
-					? 'bg-blue-500 hover:bg-blue-600'
-					: 'cursor-not-allowed bg-gray-300'} rounded-md text-white"
-			>
-				Create Conversation ({selectedEndpoints.length} endpoints)
-			</button>
+					<button
+						on:click={handleCreateConversation}
+						disabled={selectedEndpoints.length === 0}
+						class="mb-4 w-full py-2 {selectedEndpoints.length > 0
+							? 'bg-blue-500 hover:bg-blue-600'
+							: 'cursor-not-allowed bg-gray-300'} rounded-md text-white"
+					>
+						Create Conversation ({selectedEndpoints.length} endpoints)
+					</button>
 
-			<ConversationList />
-		</div>
+					<ErrorBoundary fallback="Conversation list error.">
+						<ConversationList />
+					</ErrorBoundary>
+				</div>
+			</ErrorBoundary>
 
-		<div class="flex flex-1 flex-col">
-			<ChatInterface sendMessage={handleSendChatMessage} on:create={handleCreateConversation} />
-		</div>
-	{/if}
-</div>
+			<ErrorBoundary fallback="Chat interface encountered an error.">
+				<div class="flex flex-1 flex-col">
+					<ChatInterface sendMessage={handleSendChatMessage} on:create={handleCreateConversation} />
+				</div>
+			</ErrorBoundary>
+		{/if}
+	</div>
+</ErrorBoundary>

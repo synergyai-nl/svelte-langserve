@@ -6,7 +6,7 @@
 		getEndpointSchemas
 	} from '../stores/langserve';
 
-	let selectedEndpoints: string[] = [];
+	export let selectedEndpoints: string[] = [];
 	let showEndpointDetails = false;
 
 	function getEndpointStatus(endpointId: string) {

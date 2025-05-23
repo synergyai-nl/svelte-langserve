@@ -1,0 +1,127 @@
+<script lang="ts">
+	import { onMount } from 'svelte';
+
+	export let fallback: string = 'An error occurred. Please try again.';
+	export let showDetails: boolean = false;
+	export let onError: ((error: Error) => void) | undefined = undefined;
+
+	let hasError = $state(false);
+	let errorMessage = $state('');
+	let errorStack = $state('');
+
+	// Global error handler for unhandled errors
+	onMount(() => {
+		const handleError = (event: ErrorEvent) => {
+			captureError(new Error(event.message), event.filename, event.lineno);
+		};
+
+		const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
+			captureError(
+				new Error(`Unhandled Promise Rejection: ${event.reason}`),
+				'Promise',
+				0
+			);
+		};
+
+		window.addEventListener('error', handleError);
+		window.addEventListener('unhandledrejection', handleUnhandledRejection);
+
+		return () => {
+			window.removeEventListener('error', handleError);
+			window.removeEventListener('unhandledrejection', handleUnhandledRejection);
+		};
+	});
+
+	function captureError(error: Error, source?: string, line?: number) {
+		hasError = true;
+		errorMessage = error.message || 'Unknown error occurred';
+		errorStack = error.stack || '';
+		
+		// Log error for debugging
+		console.error('ErrorBoundary caught error:', {
+			message: errorMessage,
+			source,
+			line,
+			stack: errorStack
+		});
+
+		// Call custom error handler if provided
+		if (onError) {
+			onError(error);
+		}
+	}
+
+	function handleRetry() {
+		hasError = false;
+		errorMessage = '';
+		errorStack = '';
+	}
+
+	// Wrap component execution to catch synchronous errors
+	function safeExecute<T>(fn: () => T, defaultValue: T): T {
+		try {
+			return fn();
+		} catch (error) {
+			captureError(error instanceof Error ? error : new Error(String(error)));
+			return defaultValue;
+		}
+	}
+
+	// Export the safeExecute function for use by child components
+	export { safeExecute };
+</script>
+
+{#if hasError}
+	<div class="error-boundary flex flex-col items-center justify-center p-8 text-center">
+		<div class="mb-4 rounded-lg border border-red-300 bg-red-50 p-6 max-w-md">
+			<div class="flex items-center mb-4">
+				<svg class="w-6 h-6 text-red-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.464 0L3.35 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+				</svg>
+				<h3 class="text-lg font-semibold text-red-800">Something went wrong</h3>
+			</div>
+			
+			<p class="text-red-700 mb-4">{fallback}</p>
+
+			{#if showDetails && errorMessage}
+				<details class="text-left text-sm">
+					<summary class="cursor-pointer text-red-600 hover:text-red-800 mb-2">
+						Error details
+					</summary>
+					<div class="bg-red-100 p-3 rounded border text-red-800 font-mono text-xs">
+						<p class="font-semibold mb-1">Message:</p>
+						<p class="mb-3">{errorMessage}</p>
+						{#if errorStack}
+							<p class="font-semibold mb-1">Stack trace:</p>
+							<pre class="whitespace-pre-wrap overflow-auto max-h-32">{errorStack}</pre>
+						{/if}
+					</div>
+				</details>
+			{/if}
+
+			<div class="flex gap-2 mt-4">
+				<button
+					onclick={handleRetry}
+					class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
+				>
+					Try Again
+				</button>
+				<button
+					onclick={() => window.location.reload()}
+					class="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
+				>
+					Reload Page
+				</button>
+			</div>
+		</div>
+	</div>
+{:else}
+	<slot {safeExecute} />
+{/if}
+
+<style>
+	.error-boundary {
+		min-height: 200px;
+		background-color: #fef2f2;
+	}
+</style>
