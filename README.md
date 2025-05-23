@@ -1,184 +1,170 @@
-# svelte-langserve
+# Claude Dashboard
 
-[![npm version](https://img.shields.io/npm/v/@svelte-langserve/core.svg)](https://npmjs.com/package/@svelte-langserve/core)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-A collection of packages that make it easy to integrate Svelte applications with LangServe backends, providing real-time chat interfaces and AI assistant functionality.
+A production-ready SvelteKit dashboard for interacting with multiple AI assistants via LangServe backends. Features real-time chat, Socket.IO integration, and Docker deployment support.
 
-## 📦 Packages
+## ✨ Features
 
-### Core Packages
-
-- **[@svelte-langserve/core](./packages/@svelte-langserve/core)** - Core integration package with Socket.IO client and reactive stores
-- **[@svelte-langserve/ui](./packages/@svelte-langserve/ui)** - Pre-built Svelte components for chat interfaces
-- **[@svelte-langserve/types](./packages/@svelte-langserve/types)** - Shared TypeScript type definitions
-
-### Development Tools
-
-- **[@svelte-langserve/codegen](./packages/@svelte-langserve/codegen)** - Type generation tooling for TypeScript and Python
+- **Real-time Communication**: WebSocket-based chat with instant message delivery
+- **Multiple AI Assistants**: 5 specialized agents (chatbot, code assistant, data analyst, creative writer, research assistant)
+- **Streaming Support**: Progressive message rendering as AI agents respond
+- **Docker Deployment**: Complete containerized setup with nginx reverse proxy
+- **Modern UI**: Clean, responsive interface built with SvelteKit and TailwindCSS
+- **Internationalization**: Multi-language support with Inlang/Paraglide
+- **Health Monitoring**: Real-time endpoint status and connectivity testing
+- **Mobile Optimized**: Responsive design that works on all devices
 
 ## 🚀 Quick Start
 
-Install the packages you need:
+### Prerequisites
+
+- Docker and Docker Compose
+- API keys for OpenAI, Anthropic (and optionally Tavily)
+
+### Docker Deployment (Recommended)
 
 ```bash
-npm install @svelte-langserve/core @svelte-langserve/ui
+# Clone the repository
+git clone <repository-url>
+cd claude-rocks-the-dashboard
+
+# Setup environment variables
+cp .env.example .env
+# Edit .env with your API keys
+
+# Start all services
+docker-compose up -d
+
+# View the dashboard
+open http://localhost:3000
 ```
 
-### Basic Setup
+### Development Setup
 
-```svelte
-<script>
-  import { createLangServeStore } from '@svelte-langserve/core';
-  import { LangServeFrontend } from '@svelte-langserve/ui';
+#### Frontend Development
 
-  const langserve = createLangServeStore({
-    socketUrl: 'http://localhost:3000',
-    endpoints: [
-      {
-        id: 'chatbot',
-        name: 'General Chat',
-        url: 'http://localhost:8000/chatbot',
-        type: 'chatbot'
-      }
-    ]
-  });
-
-  // Connect when component mounts
-  langserve.connection.connect();
-</script>
-
-<LangServeFrontend {langserve} />
+```bash
+cd examples/dashboard
+pnpm install
+pnpm dev
 ```
 
-### Custom Implementation
+#### Backend Development
 
-For more control, use the individual components:
-
-```svelte
-<script>
-  import { createLangServeStore } from '@svelte-langserve/core';
-  import { ChatInterface, EndpointSelector } from '@svelte-langserve/ui';
-
-  const langserve = createLangServeStore(config);
-  let selectedEndpoint = 'chatbot';
-</script>
-
-<EndpointSelector 
-  endpoints={langserve.client.getConfig().endpoints}
-  bind:selected={selectedEndpoint}
-/>
-
-<ChatInterface 
-  conversation={langserve.conversations.activeConversation}
-  on:message={(e) => langserve.conversations.sendMessage(
-    e.detail.content, 
-    conversationId, 
-    selectedEndpoint
-  )}
-/>
+```bash
+cd examples/langserve-backend
+uv run serve
+# or
+uv run uvicorn src.claude_dashboard_backend.main:create_app --factory --reload
 ```
 
-## 🏗 Examples
+## 🏗 Project Structure
 
-- **[Dashboard](./examples/dashboard)** - Complete chat interface with multiple AI assistants
-- **[LangServe Backend](./examples/langserve-backend)** - Example Python backend with multiple AI agents
+- **[examples/dashboard](./examples/dashboard)** - SvelteKit frontend with Socket.IO integration
+- **[examples/langserve-backend](./examples/langserve-backend)** - FastAPI backend with 5 specialized AI agents
+- **[nginx/](./nginx/)** - Nginx reverse proxy configuration
+- **[docker-compose.yml](./docker-compose.yml)** - Multi-service Docker deployment
 
 ## 🛠 Development
 
-This is a monorepo managed with pnpm workspaces.
+### Frontend Commands
 
 ```bash
-# Install dependencies
+cd examples/dashboard
+
+# Development
 pnpm install
-
-# Build all packages
-pnpm build
-
-# Develop all packages (watch mode)
 pnpm dev
 
-# Run tests
+# Testing
 pnpm test
+pnpm test:e2e
 
-# Type checking
-pnpm typecheck
+# Build
+pnpm build
+pnpm preview
+
+# Code quality
+pnpm check     # Type checking
+pnpm lint      # ESLint
+pnpm format    # Prettier
 ```
 
-### Package Development
-
-To work on individual packages:
+### Backend Commands
 
 ```bash
-# Work on core package
-cd packages/@svelte-langserve/core
-pnpm dev
+cd examples/langserve-backend
 
-# Work on UI components
-cd packages/@svelte-langserve/ui
-pnpm dev
+# Development
+uv run serve
+uv run uvicorn src.claude_dashboard_backend.main:create_app --factory --reload
+
+# Code quality
+uv run ruff check .    # Lint
+uv run ruff format .   # Format
+uv run pytest         # Test
+uv run mypy src/       # Type checking
 ```
 
-## 📝 Type Generation
-
-Generate shared types from JSON schemas:
+### Docker Commands
 
 ```bash
-# Install codegen globally
-npm install -g @svelte-langserve/codegen
+# Start services
+docker-compose up -d
 
-# Generate TypeScript types
-svelte-langserve-codegen typescript schema.json -o types.ts
+# View logs
+docker-compose logs -f
+docker-compose logs -f svelte-frontend
+docker-compose logs -f langserve-backend
 
-# Generate Python Pydantic models
-svelte-langserve-codegen python schema.json -o models.py
+# Rebuild services
+docker-compose up -d --build
 
-# Generate both
-svelte-langserve-codegen all schema.json --ts-output types.ts --py-output models.py
+# Stop services
+docker-compose down
 ```
 
 ## 📖 Architecture
 
 ```
 ┌─────────────────┐    WebSocket    ┌─────────────────┐    HTTP/Streaming    ┌─────────────────┐
-│   Svelte App    │ ◄─────────────► │   SvelteKit     │ ◄──────────────────► │   LangServe     │
-│                 │                 │    Server       │                      │    Backend      │
+│   Browser/Web   │ ◄─────────────► │   SvelteKit     │ ◄──────────────────► │   LangServe     │
+│     Client      │                 │    Frontend     │                      │    Backend      │
 └─────────────────┘                 └─────────────────┘                      └─────────────────┘
-         │                                   │                                         │
-         ▼                                   ▼                                         ▼
-┌─────────────────┐                 ┌─────────────────┐                      ┌─────────────────┐
-│ @svelte-        │                 │    Socket.IO    │                      │   AI Models     │
-│ langserve/core  │                 │     Server      │                      │   (GPT, Claude) │
-│ @svelte-        │                 └─────────────────┘                      └─────────────────┘
-│ langserve/ui    │
-└─────────────────┘
+                                            │                                         │
+                                            ▼                                         ▼
+                                    ┌─────────────────┐                      ┌─────────────────┐
+                                    │    Socket.IO    │                      │   5 AI Agents   │
+                                    │     Server      │                      │   OpenAI/Claude │
+                                    └─────────────────┘                      └─────────────────┘
 ```
 
-## 🎯 Problem & Solution
+## 🤖 Available AI Agents
 
-Building production-ready frontends for LangServe applications requires handling real-time streaming, multi-agent coordination, WebSocket management, and performance optimization. Most existing solutions are either React-specific, full frameworks, or lack the performance characteristics needed for complex AI interactions.
+1. **General Chatbot** - Conversational AI for general questions and discussions
+2. **Code Assistant** - Specialized in programming, debugging, and technical help
+3. **Data Analyst** - Expert in data analysis, visualization, and insights
+4. **Creative Writer** - Storytelling, creative writing, and content generation
+5. **Research Assistant** - Information gathering and research with web search capabilities
 
-**svelte-langserve** solves this by providing:
-- **Focused toolkit** - Does one thing well: connecting SvelteKit to LangServe
-- **Performance-first** - Leverages SvelteKit's speed for responsive AI interfaces  
-- **Customizable** - Components and hooks, not rigid templates
-- **Production-ready** - Built-in streaming, error handling, and real-time features
+## 🌍 Environment Variables
 
-## Features
+Required API keys (add to `.env`):
 
-- **Real-time Communication**: WebSocket-based chat with instant message delivery
-- **Multi-Agent Conversations**: Connect multiple LangServe agents in a single conversation
-- **Streaming Support**: Progressive message rendering as AI agents respond
-- **Mobile Optimized**: Responsive UI that works on all devices
-- **Auto-Discovery**: Automatically detects and connects to available LangServe endpoints
-- **Health Monitoring**: Real-time endpoint status and connectivity testing
-- **Internationalization**: Support for multiple languages with Inlang/Paraglide
-- **Modern UI**: Clean, responsive interface built with TailwindCSS and Svelte
+```bash
+# Required
+OPENAI_API_KEY=your-openai-api-key-here
+ANTHROPIC_API_KEY=your-anthropic-api-key-here
+
+# Optional (for research agent)
+TAVILY_API_KEY=your-tavily-api-key-here
+```
 
 ## 🤝 Contributing
 
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+We welcome contributions! Please feel free to submit issues and pull requests.
 
 ## 📄 License
 
-MIT © [svelte-langserve contributors](LICENSE)
+MIT © [Claude Dashboard contributors](LICENSE)

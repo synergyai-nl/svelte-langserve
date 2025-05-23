@@ -64,19 +64,52 @@ python main.py
 # Development mode with auto-reload
 cd examples/langserve-backend
 uv run uvicorn src.claude_dashboard_backend.main:create_app --factory --reload --port 8000
+
+# Development tools
+cd examples/langserve-backend
+uv run ruff check .        # Lint code
+uv run ruff format .       # Format code
+uv run pytest             # Run tests
+uv run mypy src/           # Type checking
 ```
 
 ### Docker Deployment
 
 ```bash
+# Setup environment variables (required)
+cp .env.example .env
+# Edit .env with your API keys
+
 # Start all services with Docker Compose
 docker-compose up -d
 
 # View logs
 docker-compose logs -f
 
+# View specific service logs
+docker-compose logs -f svelte-frontend
+docker-compose logs -f langserve-backend
+
+# Rebuild and restart services
+docker-compose up -d --build
+
 # Stop all services
 docker-compose down
+
+# Stop and remove volumes
+docker-compose down -v
+```
+
+### Environment Setup
+
+```bash
+# Copy environment template
+cp .env.example .env
+
+# Required environment variables:
+# - OPENAI_API_KEY: For OpenAI models
+# - ANTHROPIC_API_KEY: For Claude models  
+# - TAVILY_API_KEY: For research agent (optional)
 ```
 
 ## Architecture Overview
