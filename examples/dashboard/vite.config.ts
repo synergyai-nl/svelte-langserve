@@ -13,6 +13,11 @@ export default defineConfig({
 			outdir: './src/lib/paraglide'
 		})
 	],
+	build: {
+		rollupOptions: {
+			external: ['socket.io']
+		}
+	},
 	test: {
 		workspace: [
 			{

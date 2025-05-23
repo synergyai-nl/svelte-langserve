@@ -398,6 +398,21 @@ const createLangServeStore = () => {
 // Create and export the store
 export const langserveStore = createLangServeStore();
 
+// Export store functions for direct use
+export const { 
+	connect, 
+	disconnect, 
+	testEndpoint, 
+	getEndpointSchemas, 
+	testAllEndpoints, 
+	createConversation, 
+	joinConversation, 
+	sendMessage, 
+	loadConversations, 
+	getConversationHistory, 
+	setActiveConversationId 
+} = langserveStore;
+
 // Derived stores for convenience
 export const connected = derived(langserveStore, ($store) => $store.connected);
 export const authenticated = derived(langserveStore, ($store) => $store.authenticated);
@@ -415,6 +430,7 @@ export const hasStreamingMessages = derived(
 	langserveStore,
 	($store) => $store.streamingMessages.size > 0
 );
+export const endpointHealth = derived(langserveStore, ($store) => $store.endpointHealth);
 
 // Derived store for the active conversation
 export const activeConversation = derived([langserveStore], ([$store]) =>
