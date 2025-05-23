@@ -17,7 +17,7 @@ A SvelteKit-based dashboard for interacting with LangServe endpoints via Socket.
 
 ```
 ┌─────────────────┐    WebSocket    ┌─────────────────┐    HTTP/Streaming    ┌─────────────────┐
-│   Browser/Web    │ ◄─────────────► │   SvelteKit     │ ◄───────────────────► │   LangServe     │
+│   Browser/Web   │ ◄─────────────► │   SvelteKit     │ ◄──────────────────► │   LangServe     │
 │     Client      │                 │    Frontend     │                      │    Backends     │
 └─────────────────┘                 └─────────────────┘                      └─────────────────┘
                                             │                                         │
