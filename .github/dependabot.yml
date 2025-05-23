@@ -1,0 +1,76 @@
+version: 2
+updates:
+  # Frontend dependencies (pnpm)
+  - package-ecosystem: "npm"
+    directory: "/examples/dashboard"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 5
+    groups:
+      dev-dependencies:
+        patterns:
+          - "@*"
+          - "eslint*"
+          - "prettier*"
+          - "vitest*"
+          - "playwright*"
+          - "typescript*"
+      production-dependencies:
+        patterns:
+          - "svelte*"
+          - "socket.io*"
+          - "@langchain/*"
+
+  # Root workspace dependencies
+  - package-ecosystem: "npm" 
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 3
+    groups:
+      nx-dependencies:
+        patterns:
+          - "@nx/*"
+          - "nx"
+      dev-dependencies:
+        patterns:
+          - "@*"
+          - "eslint*"
+          - "typescript*"
+
+  # Backend dependencies (pip/uv)
+  - package-ecosystem: "pip"
+    directory: "/examples/langserve-backend"
+    schedule:
+      interval: "weekly"
+      day: "monday" 
+      time: "09:00"
+    open-pull-requests-limit: 5
+    groups:
+      langchain-dependencies:
+        patterns:
+          - "langchain*"
+          - "langserve*"
+      dev-dependencies:
+        patterns:
+          - "pytest*"
+          - "ruff"
+          - "mypy"
+      fastapi-dependencies:
+        patterns:
+          - "fastapi*"
+          - "uvicorn*"
+          - "pydantic*"
+
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 3

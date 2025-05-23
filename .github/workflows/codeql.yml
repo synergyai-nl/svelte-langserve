@@ -1,0 +1,69 @@
+name: "CodeQL"
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: '25 6 * * 1'  # Weekly on Mondays at 6:25 AM UTC
+
+jobs:
+  analyze:
+    name: Analyze
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language: ['javascript', 'python']
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v3
+      with:
+        languages: ${{ matrix.language }}
+
+    - name: Setup Node.js (for JavaScript analysis)
+      if: matrix.language == 'javascript'
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
+        cache: 'pnpm'
+
+    - name: Install pnpm (for JavaScript analysis)
+      if: matrix.language == 'javascript'
+      uses: pnpm/action-setup@v4
+      with:
+        version: 9
+
+    - name: Install dependencies (for JavaScript analysis)
+      if: matrix.language == 'javascript'
+      run: |
+        pnpm install --frozen-lockfile
+        cd examples/dashboard && pnpm install --frozen-lockfile
+
+    - name: Setup Python (for Python analysis)
+      if: matrix.language == 'python'
+      uses: astral-sh/setup-uv@v5
+      with:
+        enable-cache: true
+
+    - name: Install Python dependencies (for Python analysis)
+      if: matrix.language == 'python'
+      run: |
+        cd examples/langserve-backend
+        uv python install
+        uv sync
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v3
+      with:
+        category: "/language:${{matrix.language}}"
