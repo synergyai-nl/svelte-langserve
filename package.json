@@ -45,6 +45,10 @@
     "examples/dashboard/**/*.{js,ts,svelte}": [
       "cd examples/dashboard && pnpm format",
       "cd examples/dashboard && pnpm lint"
+    ],
+    "examples/langserve-backend/**/*.py": [
+      "cd examples/langserve-backend && uv run ruff check --fix",
+      "cd examples/langserve-backend && uv run ruff format"
     ]
   },
   "keywords": [
