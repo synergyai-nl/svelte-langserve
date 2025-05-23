@@ -6,6 +6,7 @@ A production-ready SvelteKit dashboard for interacting with multiple AI assistan
 
 ## ✨ Features
 
+- **🔐 JWT Authentication**: Secure user authentication with password hashing and token management
 - **Real-time Communication**: WebSocket-based chat with instant message delivery
 - **Multiple AI Assistants**: 5 specialized agents (chatbot, code assistant, data analyst, creative writer, research assistant)
 - **Streaming Support**: Progressive message rendering as AI agents respond
@@ -38,6 +39,10 @@ docker-compose up -d
 
 # View the dashboard
 open http://localhost:3000
+
+# Login with demo credentials
+# Username: demo or admin
+# Password: secret
 ```
 
 ### Development Setup
@@ -159,7 +164,44 @@ ANTHROPIC_API_KEY=your-anthropic-api-key-here
 
 # Optional (for research agent)
 TAVILY_API_KEY=your-tavily-api-key-here
+
+# Authentication (change in production)
+SECRET_KEY=your-secret-key-change-in-production
+ACCESS_TOKEN_EXPIRE_MINUTES=30
 ```
+
+## 🔐 Authentication
+
+The application uses JWT-based authentication to secure API access:
+
+### Demo Credentials
+
+For development and testing:
+- **Username**: `demo` or `admin`
+- **Password**: `secret`
+
+### Authentication Flow
+
+1. **Login**: POST to `/token` with username/password
+2. **Access**: Include JWT token in `Authorization: Bearer <token>` header
+3. **User Info**: GET `/users/me` to retrieve current user details
+4. **Protected Routes**: All LangServe endpoints require authentication
+
+### Security Features
+
+- Password hashing with bcrypt
+- JWT token expiration (30 minutes default)
+- Secure token storage in browser localStorage
+- Automatic logout on token expiration
+
+### Production Setup
+
+For production deployment:
+
+1. Change the `SECRET_KEY` environment variable
+2. Replace demo users with a proper user database
+3. Implement user registration/management
+4. Consider implementing refresh tokens for longer sessions
 
 ## 🤝 Contributing
 
