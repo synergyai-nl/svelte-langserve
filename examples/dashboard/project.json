@@ -1,75 +1,75 @@
 {
-  "name": "dashboard",
-  "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "projectType": "application",
-  "sourceRoot": "examples/dashboard/src",
-  "targets": {
-    "dev": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "vite dev",
-        "cwd": "examples/dashboard"
-      }
-    },
-    "build": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "vite build",
-        "cwd": "examples/dashboard"
-      },
-      "outputs": ["{projectRoot}/build"]
-    },
-    "preview": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "vite preview",
-        "cwd": "examples/dashboard"
-      },
-      "dependsOn": ["build"]
-    },
-    "check": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
-        "cwd": "examples/dashboard"
-      }
-    },
-    "lint": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "prettier --check . && eslint .",
-        "cwd": "examples/dashboard"
-      }
-    },
-    "format": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "prettier --write .",
-        "cwd": "examples/dashboard"
-      }
-    },
-    "test:unit": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "vitest",
-        "cwd": "examples/dashboard"
-      }
-    },
-    "test:e2e": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "playwright test",
-        "cwd": "examples/dashboard"
-      }
-    },
-    "test": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "npm run test:unit -- --run && npm run test:e2e",
-        "cwd": "examples/dashboard"
-      },
-      "dependsOn": ["test:unit", "test:e2e"]
-    }
-  },
-  "tags": ["type:app", "scope:frontend"]
+	"name": "dashboard",
+	"$schema": "../../node_modules/nx/schemas/project-schema.json",
+	"projectType": "application",
+	"sourceRoot": "examples/dashboard/src",
+	"targets": {
+		"dev": {
+			"executor": "nx:run-commands",
+			"options": {
+				"command": "vite dev",
+				"cwd": "examples/dashboard"
+			}
+		},
+		"build": {
+			"executor": "nx:run-commands",
+			"options": {
+				"command": "vite build",
+				"cwd": "examples/dashboard"
+			},
+			"outputs": ["{projectRoot}/build"]
+		},
+		"preview": {
+			"executor": "nx:run-commands",
+			"options": {
+				"command": "vite preview",
+				"cwd": "examples/dashboard"
+			},
+			"dependsOn": ["build"]
+		},
+		"check": {
+			"executor": "nx:run-commands",
+			"options": {
+				"command": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+				"cwd": "examples/dashboard"
+			}
+		},
+		"lint": {
+			"executor": "nx:run-commands",
+			"options": {
+				"command": "prettier --check . && eslint .",
+				"cwd": "examples/dashboard"
+			}
+		},
+		"format": {
+			"executor": "nx:run-commands",
+			"options": {
+				"command": "prettier --write .",
+				"cwd": "examples/dashboard"
+			}
+		},
+		"test:unit": {
+			"executor": "nx:run-commands",
+			"options": {
+				"command": "vitest",
+				"cwd": "examples/dashboard"
+			}
+		},
+		"test:e2e": {
+			"executor": "nx:run-commands",
+			"options": {
+				"command": "playwright test",
+				"cwd": "examples/dashboard"
+			}
+		},
+		"test": {
+			"executor": "nx:run-commands",
+			"options": {
+				"command": "npm run test:unit -- --run && npm run test:e2e",
+				"cwd": "examples/dashboard"
+			},
+			"dependsOn": ["test:unit", "test:e2e"]
+		}
+	},
+	"tags": ["type:app", "scope:frontend"]
 }

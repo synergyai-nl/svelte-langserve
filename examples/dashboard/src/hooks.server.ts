@@ -9,589 +9,590 @@ let io: Server;
 
 // LangServe Client Manager
 class LangServeClientManager {
-  private clients: Map<string, RemoteRunnable> = new Map();
-  private endpoints: Map<string, LangServeEndpoint> = new Map();
+	private clients: Map<string, RemoteRunnable> = new Map();
+	private endpoints: Map<string, LangServeEndpoint> = new Map();
 
-  constructor(private config: any) {
-    this.initializeClients();
-  }
+	constructor(private config: Record<string, unknown>) {
+		this.initializeClients();
+	}
 
-  private initializeClients() {
-    for (const endpoint of this.config.endpoints) {
-      try {
-        const client = new RemoteRunnable({
-          url: endpoint.url,
-          options: {
-            timeout: 30000,
-            headers: {
-              'Authorization': `Bearer ${process.env.LANGSERVE_API_KEY || ''}`,
-              'Content-Type': 'application/json'
-            }
-          }
-        });
+	private initializeClients() {
+		for (const endpoint of this.config.endpoints) {
+			try {
+				const client = new RemoteRunnable({
+					url: endpoint.url,
+					options: {
+						timeout: 30000,
+						headers: {
+							Authorization: `Bearer ${process.env.LANGSERVE_API_KEY || ''}`,
+							'Content-Type': 'application/json'
+						}
+					}
+				});
 
-        this.clients.set(endpoint.id, client);
-        this.endpoints.set(endpoint.id, endpoint);
-        console.log(`Initialized LangServe client for ${endpoint.name} at ${endpoint.url}`);
-      } catch (error) {
-        console.error(`Failed to initialize client for ${endpoint.name}:`, error);
-      }
-    }
-  }
+				this.clients.set(endpoint.id, client);
+				this.endpoints.set(endpoint.id, endpoint);
+				console.log(`Initialized LangServe client for ${endpoint.name} at ${endpoint.url}`);
+			} catch (error) {
+				console.error(`Failed to initialize client for ${endpoint.name}:`, error);
+			}
+		}
+	}
 
-  async getEndpointSchemas(endpointId: string) {
-    const client = this.clients.get(endpointId);
-    const endpoint = this.endpoints.get(endpointId);
+	async getEndpointSchemas(endpointId: string) {
+		const client = this.clients.get(endpointId);
+		const endpoint = this.endpoints.get(endpointId);
 
-    if (!client || !endpoint) {
-      throw new Error(`Endpoint ${endpointId} not found`);
-    }
+		if (!client || !endpoint) {
+			throw new Error(`Endpoint ${endpointId} not found`);
+		}
 
-    try {
-      // Fetch schemas from LangServe endpoint
-      const [inputSchema, outputSchema, configSchema] = await Promise.all([
-        this.fetchSchema(endpoint.url, 'input_schema'),
-        this.fetchSchema(endpoint.url, 'output_schema'),
-        this.fetchSchema(endpoint.url, 'config_schema')
-      ]);
+		try {
+			// Fetch schemas from LangServe endpoint
+			const [inputSchema, outputSchema, configSchema] = await Promise.all([
+				this.fetchSchema(endpoint.url, 'input_schema'),
+				this.fetchSchema(endpoint.url, 'output_schema'),
+				this.fetchSchema(endpoint.url, 'config_schema')
+			]);
 
-      return { inputSchema, outputSchema, configSchema };
-    } catch (error) {
-      console.error(`Failed to fetch schemas for ${endpointId}:`, error);
-      return { inputSchema: null, outputSchema: null, configSchema: null };
-    }
-  }
+			return { inputSchema, outputSchema, configSchema };
+		} catch (error) {
+			console.error(`Failed to fetch schemas for ${endpointId}:`, error);
+			return { inputSchema: null, outputSchema: null, configSchema: null };
+		}
+	}
 
-  private async fetchSchema(baseUrl: string, schemaType: string) {
-    try {
-      const response = await fetch(`${baseUrl}/${schemaType}`);
-      return await response.json();
-    } catch (error) {
-      console.warn(`Could not fetch ${schemaType} from ${baseUrl}`);
-      return null;
-    }
-  }
+	private async fetchSchema(baseUrl: string, schemaType: string) {
+		try {
+			const response = await fetch(`${baseUrl}/${schemaType}`);
+			return await response.json();
+		} catch {
+			console.warn(`Could not fetch ${schemaType} from ${baseUrl}`);
+			return null;
+		}
+	}
 
-  async invokeEndpoint(
-    endpointId: string,
-    messages: ChatMessage[],
-    config?: Record<string, any>
-  ): Promise<string> {
-    const client = this.clients.get(endpointId);
-    if (!client) {
-      throw new Error(`Endpoint ${endpointId} not found`);
-    }
+	async invokeEndpoint(
+		endpointId: string,
+		messages: ChatMessage[],
+		config?: Record<string, unknown>
+	): Promise<string> {
+		const client = this.clients.get(endpointId);
+		if (!client) {
+			throw new Error(`Endpoint ${endpointId} not found`);
+		}
 
-    // Convert chat messages to LangChain message format
-    const langchainMessages = this.convertToLangChainMessages(messages);
+		// Convert chat messages to LangChain message format
+		const langchainMessages = this.convertToLangChainMessages(messages);
 
-    const input = {
-      messages: langchainMessages,
-      ...config
-    };
+		const input = {
+			messages: langchainMessages,
+			...config
+		};
 
-    try {
-      const result = await client.invoke(input, {
-        configurable: config || this.config.default_config || {}
-      });
+		try {
+			const result = await client.invoke(input, {
+				configurable: config || this.config.default_config || {}
+			});
 
-      // Extract content from result
-      if (typeof result === 'string') {
-        return result;
-      } else if (result?.content) {
-        return result.content;
-      } else if (result?.output?.content) {
-        return result.output.content;
-      } else {
-        return JSON.stringify(result);
-      }
-    } catch (error) {
-      console.error(`Error invoking endpoint ${endpointId}:`, error);
-      throw error;
-    }
-  }
+			// Extract content from result
+			if (typeof result === 'string') {
+				return result;
+			} else if (result?.content) {
+				return result.content;
+			} else if (result?.output?.content) {
+				return result.output.content;
+			} else {
+				return JSON.stringify(result);
+			}
+		} catch (error) {
+			console.error(`Error invoking endpoint ${endpointId}:`, error);
+			throw error;
+		}
+	}
 
-  async streamEndpoint(
-    endpointId: string,
-    messages: ChatMessage[],
-    onChunk: (chunk: string) => void,
-    config?: Record<string, any>
-  ): Promise<void> {
-    const client = this.clients.get(endpointId);
-    if (!client) {
-      throw new Error(`Endpoint ${endpointId} not found`);
-    }
+	async streamEndpoint(
+		endpointId: string,
+		messages: ChatMessage[],
+		onChunk: (chunk: string) => void,
+		config?: Record<string, unknown>
+	): Promise<void> {
+		const client = this.clients.get(endpointId);
+		if (!client) {
+			throw new Error(`Endpoint ${endpointId} not found`);
+		}
 
-    const langchainMessages = this.convertToLangChainMessages(messages);
+		const langchainMessages = this.convertToLangChainMessages(messages);
 
-    const input = {
-      messages: langchainMessages,
-      ...config
-    };
+		const input = {
+			messages: langchainMessages,
+			...config
+		};
 
-    try {
-      const stream = await client.stream(input, {
-        configurable: config || this.config.default_config || {}
-      });
+		try {
+			const stream = await client.stream(input, {
+				configurable: config || this.config.default_config || {}
+			});
 
-      for await (const chunk of stream) {
-        let content = '';
+			for await (const chunk of stream) {
+				let content = '';
 
-        if (typeof chunk === 'string') {
-          content = chunk;
-        } else if (chunk?.content) {
-          content = chunk.content;
-        } else if (chunk?.output?.content) {
-          content = chunk.output.content;
-        } else if (chunk?.delta?.content) {
-          content = chunk.delta.content;
-        }
+				if (typeof chunk === 'string') {
+					content = chunk;
+				} else if (chunk?.content) {
+					content = chunk.content;
+				} else if (chunk?.output?.content) {
+					content = chunk.output.content;
+				} else if (chunk?.delta?.content) {
+					content = chunk.delta.content;
+				}
 
-        if (content) {
-          onChunk(content);
-        }
-      }
-    } catch (error) {
-      console.error(`Error streaming from endpoint ${endpointId}:`, error);
-      throw error;
-    }
-  }
+				if (content) {
+					onChunk(content);
+				}
+			}
+		} catch (error) {
+			console.error(`Error streaming from endpoint ${endpointId}:`, error);
+			throw error;
+		}
+	}
 
-  private convertToLangChainMessages(messages: ChatMessage[]) {
-    return messages.map(msg => {
-      switch (msg.type) {
-        case 'human':
-          return new HumanMessage({
-            content: msg.content,
-            additional_kwargs: msg.additional_kwargs || {}
-          });
-        case 'ai':
-          return new AIMessage({
-            content: msg.content,
-            additional_kwargs: msg.additional_kwargs || {}
-          });
-        case 'system':
-          return new SystemMessage({
-            content: msg.content,
-            additional_kwargs: msg.additional_kwargs || {}
-          });
-        default:
-          return new HumanMessage({ content: msg.content });
-      }
-    });
-  }
+	private convertToLangChainMessages(messages: ChatMessage[]) {
+		return messages.map((msg) => {
+			switch (msg.type) {
+				case 'human':
+					return new HumanMessage({
+						content: msg.content,
+						additional_kwargs: msg.additional_kwargs || {}
+					});
+				case 'ai':
+					return new AIMessage({
+						content: msg.content,
+						additional_kwargs: msg.additional_kwargs || {}
+					});
+				case 'system':
+					return new SystemMessage({
+						content: msg.content,
+						additional_kwargs: msg.additional_kwargs || {}
+					});
+				default:
+					return new HumanMessage({ content: msg.content });
+			}
+		});
+	}
 
-  getAvailableEndpoints(): LangServeEndpoint[] {
-    return Array.from(this.endpoints.values());
-  }
+	getAvailableEndpoints(): LangServeEndpoint[] {
+		return Array.from(this.endpoints.values());
+	}
 
-  async testEndpoint(endpointId: string): Promise<boolean> {
-    try {
-      const testMessage: ChatMessage = {
-        id: 'test',
-        type: 'human',
-        content: 'Hello',
-        sender_id: 'test',
-        sender_type: 'user',
-        timestamp: new Date().toISOString(),
-        conversation_id: 'test'
-      };
+	async testEndpoint(endpointId: string): Promise<boolean> {
+		try {
+			const testMessage: ChatMessage = {
+				id: 'test',
+				type: 'human',
+				content: 'Hello',
+				sender_id: 'test',
+				sender_type: 'user',
+				timestamp: new Date().toISOString(),
+				conversation_id: 'test'
+			};
 
-      await this.invokeEndpoint(endpointId, [testMessage]);
-      return true;
-    } catch (error) {
-      console.error(`Endpoint ${endpointId} test failed:`, error);
-      return false;
-    }
-  }
+			await this.invokeEndpoint(endpointId, [testMessage]);
+			return true;
+		} catch (error) {
+			console.error(`Endpoint ${endpointId} test failed:`, error);
+			return false;
+		}
+	}
 }
 
 // Socket.IO Server with LangServe Integration
 class LangServeSocketIOServer {
-  private langserveManager: LangServeClientManager;
-  private conversations: Map<string, Conversation> = new Map();
-  private activeConnections: Map<string, string> = new Map();
+	private langserveManager: LangServeClientManager;
+	private conversations: Map<string, Conversation> = new Map();
+	private activeConnections: Map<string, string> = new Map();
 
-  constructor(server: any, langserveConfig: any) {
-    if (!io) {
-      io = new Server(server, {
-        cors: {
-          origin: "*",
-          methods: ["GET", "POST"]
-        },
-        path: '/api/socket.io/'
-      });
-    }
+	constructor(server: unknown, langserveConfig: Record<string, unknown>) {
+		if (!io) {
+			io = new Server(server, {
+				cors: {
+					origin: '*',
+					methods: ['GET', 'POST']
+				},
+				path: '/api/socket.io/'
+			});
+		}
 
-    this.langserveManager = new LangServeClientManager(langserveConfig);
-    this.setupSocketHandlers();
-    
-    console.log('Socket.IO server initialized with LangServe integration');
-  }
+		this.langserveManager = new LangServeClientManager(langserveConfig);
+		this.setupSocketHandlers();
 
-  private setupSocketHandlers() {
-    io.on('connection', (socket) => {
-      console.log('Client connected:', socket.id);
+		console.log('Socket.IO server initialized with LangServe integration');
+	}
 
-      // Authentication
-      socket.on('authenticate', async (data: { user_id: string; token?: string }) => {
-        // Add authentication logic here
-        this.activeConnections.set(socket.id, data.user_id);
+	private setupSocketHandlers() {
+		io.on('connection', (socket) => {
+			console.log('Client connected:', socket.id);
 
-        // Send available LangServe endpoints
-        const endpoints = this.langserveManager.getAvailableEndpoints();
-        socket.emit('authenticated', {
-          user_id: data.user_id,
-          available_endpoints: endpoints
-        });
-      });
+			// Authentication
+			socket.on('authenticate', async (data: { user_id: string; token?: string }) => {
+				// Add authentication logic here
+				this.activeConnections.set(socket.id, data.user_id);
 
-      // Get endpoint schemas
-      socket.on('get_endpoint_schemas', async (data: { endpoint_id: string }) => {
-        try {
-          const schemas = await this.langserveManager.getEndpointSchemas(data.endpoint_id);
-          socket.emit('endpoint_schemas', {
-            endpoint_id: data.endpoint_id,
-            schemas
-          });
-        } catch (error) {
-          socket.emit('error', { message: error.message });
-        }
-      });
+				// Send available LangServe endpoints
+				const endpoints = this.langserveManager.getAvailableEndpoints();
+				socket.emit('authenticated', {
+					user_id: data.user_id,
+					available_endpoints: endpoints
+				});
+			});
 
-      // Test endpoint connectivity
-      socket.on('test_endpoint', async (data: { endpoint_id: string }) => {
-        try {
-          const isHealthy = await this.langserveManager.testEndpoint(data.endpoint_id);
-          socket.emit('endpoint_test_result', {
-            endpoint_id: data.endpoint_id,
-            healthy: isHealthy
-          });
-        } catch (error) {
-          socket.emit('endpoint_test_result', {
-            endpoint_id: data.endpoint_id,
-            healthy: false,
-            error: error.message
-          });
-        }
-      });
+			// Get endpoint schemas
+			socket.on('get_endpoint_schemas', async (data: { endpoint_id: string }) => {
+				try {
+					const schemas = await this.langserveManager.getEndpointSchemas(data.endpoint_id);
+					socket.emit('endpoint_schemas', {
+						endpoint_id: data.endpoint_id,
+						schemas
+					});
+				} catch (error) {
+					socket.emit('error', { message: error.message });
+				}
+			});
 
-      // Create conversation with specific LangServe endpoints
-      socket.on('create_conversation', async (data: {
-        endpoint_ids: string[];
-        initial_message?: string;
-        config?: Record<string, any>;
-      }) => {
-        const user_id = this.activeConnections.get(socket.id);
-        if (!user_id) {
-          socket.emit('error', { message: 'Not authenticated' });
-          return;
-        }
+			// Test endpoint connectivity
+			socket.on('test_endpoint', async (data: { endpoint_id: string }) => {
+				try {
+					const isHealthy = await this.langserveManager.testEndpoint(data.endpoint_id);
+					socket.emit('endpoint_test_result', {
+						endpoint_id: data.endpoint_id,
+						healthy: isHealthy
+					});
+				} catch (error) {
+					socket.emit('endpoint_test_result', {
+						endpoint_id: data.endpoint_id,
+						healthy: false,
+						error: error.message
+					});
+				}
+			});
 
-        try {
-          const conversation = await this.createConversation(
-            user_id,
-            data.endpoint_ids,
-            data.initial_message,
-            data.config
-          );
+			// Create conversation with specific LangServe endpoints
+			socket.on(
+				'create_conversation',
+				async (data: {
+					endpoint_ids: string[];
+					initial_message?: string;
+					config?: Record<string, unknown>;
+				}) => {
+					const user_id = this.activeConnections.get(socket.id);
+					if (!user_id) {
+						socket.emit('error', { message: 'Not authenticated' });
+						return;
+					}
 
-          socket.join(conversation.id);
-          socket.emit('conversation_created', conversation);
+					try {
+						const conversation = await this.createConversation(
+							user_id,
+							data.endpoint_ids,
+							data.initial_message,
+							data.config
+						);
 
-          // Process initial message if provided
-          if (data.initial_message) {
-            await this.processUserMessage(conversation.id, user_id, data.initial_message, data.config);
-          }
-        } catch (error) {
-          socket.emit('error', { message: error.message });
-        }
-      });
+						socket.join(conversation.id);
+						socket.emit('conversation_created', conversation);
 
-      // Send message to conversation
-      socket.on('send_message', async (data: {
-        conversation_id: string;
-        content: string;
-        config?: Record<string, any>;
-      }) => {
-        const user_id = this.activeConnections.get(socket.id);
-        if (!user_id) {
-          socket.emit('error', { message: 'Not authenticated' });
-          return;
-        }
+						// Process initial message if provided
+						if (data.initial_message) {
+							await this.processUserMessage(
+								conversation.id,
+								user_id,
+								data.initial_message,
+								data.config
+							);
+						}
+					} catch (error) {
+						socket.emit('error', { message: error.message });
+					}
+				}
+			);
 
-        try {
-          await this.processUserMessage(
-            data.conversation_id,
-            user_id,
-            data.content,
-            data.config
-          );
-        } catch (error) {
-          socket.emit('error', { message: error.message });
-        }
-      });
+			// Send message to conversation
+			socket.on(
+				'send_message',
+				async (data: {
+					conversation_id: string;
+					content: string;
+					config?: Record<string, unknown>;
+				}) => {
+					const user_id = this.activeConnections.get(socket.id);
+					if (!user_id) {
+						socket.emit('error', { message: 'Not authenticated' });
+						return;
+					}
 
-      // Join existing conversation
-      socket.on('join_conversation', (data: { conversation_id: string }) => {
-        const user_id = this.activeConnections.get(socket.id);
-        const conversation = this.conversations.get(data.conversation_id);
+					try {
+						await this.processUserMessage(data.conversation_id, user_id, data.content, data.config);
+					} catch (error) {
+						socket.emit('error', { message: error.message });
+					}
+				}
+			);
 
-        if (conversation && conversation.participants.users.includes(user_id!)) {
-          socket.join(data.conversation_id);
-          socket.emit('conversation_joined', conversation);
-        } else {
-          socket.emit('error', { message: 'Conversation not found or access denied' });
-        }
-      });
+			// Join existing conversation
+			socket.on('join_conversation', (data: { conversation_id: string }) => {
+				const user_id = this.activeConnections.get(socket.id);
+				const conversation = this.conversations.get(data.conversation_id);
 
-      // Get conversation history
-      socket.on('get_conversation_history', (data: { conversation_id: string }) => {
-        const conversation = this.conversations.get(data.conversation_id);
-        if (conversation) {
-          socket.emit('conversation_history', {
-            conversation_id: data.conversation_id,
-            messages: conversation.messages
-          });
-        } else {
-          socket.emit('error', { message: 'Conversation not found' });
-        }
-      });
+				if (conversation && conversation.participants.users.includes(user_id!)) {
+					socket.join(data.conversation_id);
+					socket.emit('conversation_joined', conversation);
+				} else {
+					socket.emit('error', { message: 'Conversation not found or access denied' });
+				}
+			});
 
-      // List user's conversations
-      socket.on('list_conversations', () => {
-        const user_id = this.activeConnections.get(socket.id);
-        if (!user_id) {
-          socket.emit('error', { message: 'Not authenticated' });
-          return;
-        }
+			// Get conversation history
+			socket.on('get_conversation_history', (data: { conversation_id: string }) => {
+				const conversation = this.conversations.get(data.conversation_id);
+				if (conversation) {
+					socket.emit('conversation_history', {
+						conversation_id: data.conversation_id,
+						messages: conversation.messages
+					});
+				} else {
+					socket.emit('error', { message: 'Conversation not found' });
+				}
+			});
 
-        const userConversations = Array.from(this.conversations.values())
-          .filter(conv => conv.participants.users.includes(user_id));
+			// List user's conversations
+			socket.on('list_conversations', () => {
+				const user_id = this.activeConnections.get(socket.id);
+				if (!user_id) {
+					socket.emit('error', { message: 'Not authenticated' });
+					return;
+				}
 
-        socket.emit('conversations_list', userConversations);
-      });
+				const userConversations = Array.from(this.conversations.values()).filter((conv) =>
+					conv.participants.users.includes(user_id)
+				);
 
-      socket.on('disconnect', () => {
-        this.activeConnections.delete(socket.id);
-      });
-    });
-  }
+				socket.emit('conversations_list', userConversations);
+			});
 
-  private async createConversation(
-    userId: string,
-    endpointIds: string[],
-    initialMessage?: string,
-    config?: Record<string, any>
-  ): Promise<Conversation> {
-    const conversationId = this.generateId();
+			socket.on('disconnect', () => {
+				this.activeConnections.delete(socket.id);
+			});
+		});
+	}
 
-    // Get endpoint details
-    const availableEndpoints = this.langserveManager.getAvailableEndpoints();
-    const selectedEndpoints = availableEndpoints.filter(ep => endpointIds.includes(ep.id));
+	private async createConversation(
+		userId: string,
+		endpointIds: string[],
+		initialMessage?: string,
+		config?: Record<string, unknown>
+	): Promise<Conversation> {
+		const conversationId = this.generateId();
 
-    if (selectedEndpoints.length === 0) {
-      throw new Error('No valid endpoints specified');
-    }
+		// Get endpoint details
+		const availableEndpoints = this.langserveManager.getAvailableEndpoints();
+		const selectedEndpoints = availableEndpoints.filter((ep) => endpointIds.includes(ep.id));
 
-    const conversation: Conversation = {
-      id: conversationId,
-      participants: {
-        users: [userId],
-        agents: selectedEndpoints
-      },
-      messages: [],
-      status: 'active',
-      created_at: new Date().toISOString(),
-      metadata: { config }
-    };
+		if (selectedEndpoints.length === 0) {
+			throw new Error('No valid endpoints specified');
+		}
 
-    this.conversations.set(conversationId, conversation);
-    return conversation;
-  }
+		const conversation: Conversation = {
+			id: conversationId,
+			participants: {
+				users: [userId],
+				agents: selectedEndpoints
+			},
+			messages: [],
+			status: 'active',
+			created_at: new Date().toISOString(),
+			metadata: { config }
+		};
 
-  private async processUserMessage(
-    conversationId: string,
-    userId: string,
-    content: string,
-    config?: Record<string, any>
-  ) {
-    const conversation = this.conversations.get(conversationId);
-    if (!conversation) {
-      throw new Error('Conversation not found');
-    }
+		this.conversations.set(conversationId, conversation);
+		return conversation;
+	}
 
-    // Add user message
-    const userMessage: ChatMessage = {
-      id: this.generateId(),
-      type: 'human',
-      content,
-      sender_id: userId,
-      sender_type: 'user',
-      timestamp: new Date().toISOString(),
-      conversation_id: conversationId
-    };
+	private async processUserMessage(
+		conversationId: string,
+		userId: string,
+		content: string,
+		config?: Record<string, unknown>
+	) {
+		const conversation = this.conversations.get(conversationId);
+		if (!conversation) {
+			throw new Error('Conversation not found');
+		}
 
-    conversation.messages.push(userMessage);
-    io.to(conversationId).emit('message_received', userMessage);
+		// Add user message
+		const userMessage: ChatMessage = {
+			id: this.generateId(),
+			type: 'human',
+			content,
+			sender_id: userId,
+			sender_type: 'user',
+			timestamp: new Date().toISOString(),
+			conversation_id: conversationId
+		};
 
-    // Process with each LangServe endpoint
-    for (const endpoint of conversation.participants.agents) {
-      try {
-        if (config?.streaming !== false) {
-          await this.streamAgentResponse(conversation, endpoint, config);
-        } else {
-          await this.invokeAgentResponse(conversation, endpoint, config);
-        }
-      } catch (error) {
-        io.to(conversationId).emit('agent_error', {
-          endpoint_id: endpoint.id,
-          endpoint_name: endpoint.name,
-          error: error.message,
-          conversation_id: conversationId
-        });
-      }
-    }
-  }
+		conversation.messages.push(userMessage);
+		io.to(conversationId).emit('message_received', userMessage);
 
-  private async streamAgentResponse(
-    conversation: Conversation,
-    endpoint: LangServeEndpoint,
-    config?: Record<string, any>
-  ) {
-    const messageId = this.generateId();
-    let accumulatedContent = '';
+		// Process with each LangServe endpoint
+		for (const endpoint of conversation.participants.agents) {
+			try {
+				if (config?.streaming !== false) {
+					await this.streamAgentResponse(conversation, endpoint, config);
+				} else {
+					await this.invokeAgentResponse(conversation, endpoint, config);
+				}
+			} catch (error) {
+				io.to(conversationId).emit('agent_error', {
+					endpoint_id: endpoint.id,
+					endpoint_name: endpoint.name,
+					error: error.message,
+					conversation_id: conversationId
+				});
+			}
+		}
+	}
 
-    io.to(conversation.id).emit('agent_response_start', {
-      message_id: messageId,
-      endpoint_id: endpoint.id,
-      endpoint_name: endpoint.name,
-      conversation_id: conversation.id
-    });
+	private async streamAgentResponse(
+		conversation: Conversation,
+		endpoint: LangServeEndpoint,
+		config?: Record<string, unknown>
+	) {
+		const messageId = this.generateId();
+		let accumulatedContent = '';
 
-    try {
-      await this.langserveManager.streamEndpoint(
-        endpoint.id,
-        conversation.messages,
-        (chunk: string) => {
-          accumulatedContent += chunk;
-          io.to(conversation.id).emit('message_chunk', {
-            message_id: messageId,
-            chunk_id: this.generateId(),
-            content: chunk,
-            sender_id: endpoint.id,
-            sender_name: endpoint.name,
-            conversation_id: conversation.id
-          });
-        },
-        config
-      );
+		io.to(conversation.id).emit('agent_response_start', {
+			message_id: messageId,
+			endpoint_id: endpoint.id,
+			endpoint_name: endpoint.name,
+			conversation_id: conversation.id
+		});
 
-      // Create final message
-      const finalMessage: ChatMessage = {
-        id: messageId,
-        type: 'ai',
-        content: accumulatedContent,
-        sender_id: endpoint.id,
-        sender_type: 'agent',
-        timestamp: new Date().toISOString(),
-        conversation_id: conversation.id,
-        additional_kwargs: { endpoint_name: endpoint.name }
-      };
+		try {
+			await this.langserveManager.streamEndpoint(
+				endpoint.id,
+				conversation.messages,
+				(chunk: string) => {
+					accumulatedContent += chunk;
+					io.to(conversation.id).emit('message_chunk', {
+						message_id: messageId,
+						chunk_id: this.generateId(),
+						content: chunk,
+						sender_id: endpoint.id,
+						sender_name: endpoint.name,
+						conversation_id: conversation.id
+					});
+				},
+				config
+			);
 
-      conversation.messages.push(finalMessage);
-      io.to(conversation.id).emit('agent_response_complete', finalMessage);
+			// Create final message
+			const finalMessage: ChatMessage = {
+				id: messageId,
+				type: 'ai',
+				content: accumulatedContent,
+				sender_id: endpoint.id,
+				sender_type: 'agent',
+				timestamp: new Date().toISOString(),
+				conversation_id: conversation.id,
+				additional_kwargs: { endpoint_name: endpoint.name }
+			};
 
-    } catch (error) {
-      io.to(conversation.id).emit('agent_response_error', {
-        message_id: messageId,
-        endpoint_id: endpoint.id,
-        error: error.message
-      });
-    }
-  }
+			conversation.messages.push(finalMessage);
+			io.to(conversation.id).emit('agent_response_complete', finalMessage);
+		} catch (error) {
+			io.to(conversation.id).emit('agent_response_error', {
+				message_id: messageId,
+				endpoint_id: endpoint.id,
+				error: error.message
+			});
+		}
+	}
 
-  private async invokeAgentResponse(
-    conversation: Conversation,
-    endpoint: LangServeEndpoint,
-    config?: Record<string, any>
-  ) {
-    try {
-      const response = await this.langserveManager.invokeEndpoint(
-        endpoint.id,
-        conversation.messages,
-        config
-      );
+	private async invokeAgentResponse(
+		conversation: Conversation,
+		endpoint: LangServeEndpoint,
+		config?: Record<string, unknown>
+	) {
+		const response = await this.langserveManager.invokeEndpoint(
+			endpoint.id,
+			conversation.messages,
+			config
+		);
 
-      const message: ChatMessage = {
-        id: this.generateId(),
-        type: 'ai',
-        content: response,
-        sender_id: endpoint.id,
-        sender_type: 'agent',
-        timestamp: new Date().toISOString(),
-        conversation_id: conversation.id,
-        additional_kwargs: { endpoint_name: endpoint.name }
-      };
+		const message: ChatMessage = {
+			id: this.generateId(),
+			type: 'ai',
+			content: response,
+			sender_id: endpoint.id,
+			sender_type: 'agent',
+			timestamp: new Date().toISOString(),
+			conversation_id: conversation.id,
+			additional_kwargs: { endpoint_name: endpoint.name }
+		};
 
-      conversation.messages.push(message);
-      io.to(conversation.id).emit('message_received', message);
+		conversation.messages.push(message);
+		io.to(conversation.id).emit('message_received', message);
+	}
 
-    } catch (error) {
-      throw error;
-    }
-  }
+	private generateId(): string {
+		return Math.random().toString(36).substring(2) + Date.now().toString(36);
+	}
 
-  private generateId(): string {
-    return Math.random().toString(36).substring(2) + Date.now().toString(36);
-  }
+	// Health check method
+	async healthCheck(): Promise<{ status: string; endpoints: unknown[] }> {
+		const endpoints = this.langserveManager.getAvailableEndpoints();
+		const endpointHealth = await Promise.all(
+			endpoints.map(async (ep) => ({
+				id: ep.id,
+				name: ep.name,
+				url: ep.url,
+				healthy: await this.langserveManager.testEndpoint(ep.id)
+			}))
+		);
 
-  // Health check method
-  async healthCheck(): Promise<{ status: string; endpoints: any[] }> {
-    const endpoints = this.langserveManager.getAvailableEndpoints();
-    const endpointHealth = await Promise.all(
-      endpoints.map(async (ep) => ({
-        id: ep.id,
-        name: ep.name,
-        url: ep.url,
-        healthy: await this.langserveManager.testEndpoint(ep.id)
-      }))
-    );
-
-    return {
-      status: 'ok',
-      endpoints: endpointHealth
-    };
-  }
+		return {
+			status: 'ok',
+			endpoints: endpointHealth
+		};
+	}
 }
 
 // LangServe configuration
 const langserveConfig = {
-  endpoints: [
-    {
-      id: 'chatbot',
-      name: 'General Chatbot',
-      url: process.env.LANGSERVE_CHATBOT_URL || 'http://localhost:8000/chatbot',
-      description: 'General purpose conversational AI'
-    },
-    {
-      id: 'code-assistant',
-      name: 'Code Assistant',
-      url: process.env.LANGSERVE_CODE_URL || 'http://localhost:8000/code-assistant',
-      description: 'Specialized coding and development assistant'
-    },
-    {
-      id: 'data-analyst',
-      name: 'Data Analyst',
-      url: process.env.LANGSERVE_DATA_URL || 'http://localhost:8000/data-analyst',
-      description: 'Data analysis and visualization expert'
-    }
-  ],
-  default_config: {
-    temperature: 0.7,
-    max_tokens: 2000
-  },
-  streaming: true
+	endpoints: [
+		{
+			id: 'chatbot',
+			name: 'General Chatbot',
+			url: process.env.LANGSERVE_CHATBOT_URL || 'http://localhost:8000/chatbot',
+			description: 'General purpose conversational AI'
+		},
+		{
+			id: 'code-assistant',
+			name: 'Code Assistant',
+			url: process.env.LANGSERVE_CODE_URL || 'http://localhost:8000/code-assistant',
+			description: 'Specialized coding and development assistant'
+		},
+		{
+			id: 'data-analyst',
+			name: 'Data Analyst',
+			url: process.env.LANGSERVE_DATA_URL || 'http://localhost:8000/data-analyst',
+			description: 'Data analysis and visualization expert'
+		}
+	],
+	default_config: {
+		temperature: 0.7,
+		max_tokens: 2000
+	},
+	streaming: true
 };
 
 // Handle middleware for SvelteKit
@@ -603,35 +604,35 @@ let langserveSocketIO: LangServeSocketIOServer | null = null;
 
 // Handle function to setup Socket.IO
 const setupSocketIO: Handle = async ({ event, resolve }) => {
-  // Skip during build
-  if (building) {
-    return resolve(event);
-  }
-  
-  // Set up Socket.IO server if not already done
-  if (!langserveSocketIO && event.platform?.node) {
-    const server = event.platform.node.server;
-    if (server) {
-      langserveSocketIO = new LangServeSocketIOServer(server, langserveConfig);
-      console.log('LangServe Socket.IO server initialized');
-    }
-  }
-  
-  // Continue with the response
-  return resolve(event);
+	// Skip during build
+	if (building) {
+		return resolve(event);
+	}
+
+	// Set up Socket.IO server if not already done
+	if (!langserveSocketIO && event.platform?.node) {
+		const server = event.platform.node.server;
+		if (server) {
+			langserveSocketIO = new LangServeSocketIOServer(server, langserveConfig);
+			console.log('LangServe Socket.IO server initialized');
+		}
+	}
+
+	// Continue with the response
+	return resolve(event);
 };
 
 // Import the original Paraglide middleware
 import { paraglideMiddleware } from '$lib/paraglide/server';
 
 const handleParaglide: Handle = ({ event, resolve }) =>
-  paraglideMiddleware(event.request, ({ request, locale }) => {
-    event.request = request;
+	paraglideMiddleware(event.request, ({ request, locale }) => {
+		event.request = request;
 
-    return resolve(event, {
-      transformPageChunk: ({ html }) => html.replace('%paraglide.lang%', locale)
-    });
-  });
+		return resolve(event, {
+			transformPageChunk: ({ html }) => html.replace('%paraglide.lang%', locale)
+		});
+	});
 
 // Combine middleware in sequence
 export const handle = sequence(setupSocketIO, handleParaglide);

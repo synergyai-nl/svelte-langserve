@@ -1,24 +1,18 @@
-import { error, json } from '@sveltejs/kit';
+import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { Server } from 'socket.io';
-import { RemoteRunnable } from '@langchain/core/runnables/remote';
-import { HumanMessage, AIMessage, SystemMessage } from '@langchain/core/messages';
-
-// Types from our LangServe module
-import type { LangServeEndpoint, ChatMessage, Conversation } from '$lib/langserve/types';
 
 // This handler is just used for health check
 export const GET: RequestHandler = async () => {
-  return json({
-    status: 'ok',
-    message: 'LangServe Socket.IO Server is running'
-  });
+	return json({
+		status: 'ok',
+		message: 'LangServe Socket.IO Server is running'
+	});
 };
 
 // The actual server implementation happens through SvelteKit's handle hook
 // See hooks.server.ts for the implementation
 
-// NOTE: This is included here for reference. The real implementation 
+// NOTE: This is included here for reference. The real implementation
 // should be in src/hooks.server.ts to properly set up the WebSocket server.
 
 /*

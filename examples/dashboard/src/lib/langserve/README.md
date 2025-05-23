@@ -46,13 +46,10 @@ The server implementation is in `hooks.server.ts` and sets up a Socket.IO server
 
 ```svelte
 <script>
-  import { LangServeFrontend } from '$lib/langserve';
+	import { LangServeFrontend } from '$lib/langserve';
 </script>
 
-<LangServeFrontend 
-  userId="user_123"
-  serverUrl="http://localhost:3000"
-/>
+<LangServeFrontend userId="user_123" serverUrl="http://localhost:3000" />
 ```
 
 ## Environment Variables
