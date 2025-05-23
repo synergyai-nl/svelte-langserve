@@ -15,8 +15,8 @@
 		<div class="space-y-2">
 			{#each $conversations as conv (conv.id)}
 				<div
-					on:click={() => setActiveConversationId(conv.id)}
-					on:keydown={(e) => e.key === 'Enter' && setActiveConversationId(conv.id)}
+					onclick={() => setActiveConversationId(conv.id)}
+					onkeydown={(e) => e.key === 'Enter' && setActiveConversationId(conv.id)}
 					class="cursor-pointer rounded-md p-2 text-sm {$activeConversationId === conv.id
 						? 'bg-blue-100'
 						: 'bg-gray-100 hover:bg-gray-200'}"

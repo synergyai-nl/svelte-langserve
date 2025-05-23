@@ -10,7 +10,7 @@
 		selectedEndpoints?: string[];
 	}
 	
-	let { selectedEndpoints = [] }: Props = $props();
+	let { selectedEndpoints = $bindable([]) }: Props = $props();
 	let showEndpointDetails = $state(false);
 
 	function getEndpointStatus(endpointId: string) {
@@ -31,7 +31,7 @@
 	<div class="mb-2 flex items-center justify-between">
 		<h3 class="text-lg font-semibold">Available Endpoints</h3>
 		<button
-			on:click={() => (showEndpointDetails = !showEndpointDetails)}
+			onclick={() => (showEndpointDetails = !showEndpointDetails)}
 			class="rounded bg-gray-100 px-2 py-1 text-xs hover:bg-gray-200"
 		>
 			{showEndpointDetails ? 'Hide' : 'Show'} Details
@@ -48,7 +48,7 @@
 						<input
 							type="checkbox"
 							checked={selectedEndpoints.includes(endpoint.id)}
-							on:change={(e) => toggleEndpoint(endpoint.id, e.currentTarget.checked)}
+							onchange={(e) => toggleEndpoint(endpoint.id, e.currentTarget.checked)}
 							class="mt-1 mr-3"
 						/>
 						<div class="flex-1">
@@ -72,13 +72,13 @@
 					</label>
 					<div class="mt-2 flex space-x-2">
 						<button
-							on:click={() => testEndpoint(endpoint.id)}
+							onclick={() => testEndpoint(endpoint.id)}
 							class="rounded bg-blue-50 px-2 py-1 text-xs hover:bg-blue-100"
 						>
 							Test
 						</button>
 						<button
-							on:click={() => getEndpointSchemas(endpoint.id)}
+							onclick={() => getEndpointSchemas(endpoint.id)}
 							class="rounded bg-blue-50 px-2 py-1 text-xs hover:bg-blue-100"
 						>
 							Schemas

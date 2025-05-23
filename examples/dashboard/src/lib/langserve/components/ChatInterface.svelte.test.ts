@@ -106,8 +106,7 @@ describe('ChatInterface', () => {
 	});
 
 	it('shows streaming indicator when messages are streaming', () => {
-		const { hasStreamingMessages } = vi.importedMocks('../stores/langserve');
-		hasStreamingMessages.set(true);
+		langserveStore.hasStreamingMessages.set(true);
 
 		render(ChatInterface, {
 			props: { sendMessage: mockSendMessage }
@@ -220,8 +219,7 @@ describe('ChatInterface', () => {
 	});
 
 	it('shows load more button when pagination has more messages', () => {
-		const { getMessagePagination } = vi.importedMocks('../stores/langserve');
-		getMessagePagination.mockReturnValue({
+		langserveStore.getMessagePagination.mockReturnValue({
 			currentPage: 1,
 			messagesPerPage: 50,
 			totalMessages: 100,
@@ -237,9 +235,8 @@ describe('ChatInterface', () => {
 
 	it('loads more messages when load more button is clicked', async () => {
 		const user = userEvent.setup();
-		const { getMessagePagination, loadMoreMessages } = vi.importedMocks('../stores/langserve');
 		
-		getMessagePagination.mockReturnValue({
+		langserveStore.getMessagePagination.mockReturnValue({
 			currentPage: 1,
 			messagesPerPage: 50,
 			totalMessages: 100,
@@ -253,14 +250,13 @@ describe('ChatInterface', () => {
 		const loadMoreButton = screen.getByRole('button', { name: /load older messages/i });
 		await user.click(loadMoreButton);
 
-		expect(loadMoreMessages).toHaveBeenCalledWith('conversation-123');
+		expect(langserveStore.loadMoreMessages).toHaveBeenCalledWith('conversation-123');
 	});
 
 	it('shows loading state when loading more messages', async () => {
 		const user = userEvent.setup();
-		const { getMessagePagination } = vi.importedMocks('../stores/langserve');
 		
-		getMessagePagination.mockReturnValue({
+		langserveStore.getMessagePagination.mockReturnValue({
 			currentPage: 1,
 			messagesPerPage: 50,
 			totalMessages: 100,
@@ -282,27 +278,24 @@ describe('ChatInterface', () => {
 
 	it('dispatches create event when create conversation button is clicked', async () => {
 		const user = userEvent.setup();
-		const { activeConversation } = vi.importedMocks('../stores/langserve');
-		activeConversation.set(null);
+		langserveStore.activeConversation.set(null);
 
+		const mockCreateEvent = vi.fn();
 		const component = render(ChatInterface, {
-			props: { sendMessage: mockSendMessage }
-		});
-
-		let createEvent = false;
-		component.component.$on('create', () => {
-			createEvent = true;
+			props: { 
+				sendMessage: mockSendMessage,
+				oncreate: mockCreateEvent
+			}
 		});
 
 		const createButton = screen.getByRole('button', { name: /create new conversation/i });
 		await user.click(createButton);
 
-		expect(createEvent).toBe(true);
+		expect(mockCreateEvent).toHaveBeenCalled();
 	});
 
 	it('shows no messages state when conversation has no messages', () => {
-		const { getDisplayMessages } = vi.importedMocks('../stores/langserve');
-		getDisplayMessages.mockReturnValue([]);
+		langserveStore.getDisplayMessages.mockReturnValue([]);
 
 		render(ChatInterface, {
 			props: { sendMessage: mockSendMessage }

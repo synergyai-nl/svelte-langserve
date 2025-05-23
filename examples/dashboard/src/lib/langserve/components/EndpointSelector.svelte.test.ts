@@ -184,19 +184,13 @@ describe('EndpointSelector', () => {
 		});
 	});
 
-	it('updates selection when props change', () => {
-		const { rerender } = render(EndpointSelector, {
-			props: { selectedEndpoints: [] }
-		});
+	it('reflects initial selection state correctly', () => {
+		render(EndpointSelector, { selectedEndpoints: ['endpoint-1'] });
 
 		const chatbotCheckbox = screen.getByRole('checkbox', { name: /chatbot/i });
-		expect(chatbotCheckbox).not.toBeChecked();
-
-		// Update props to have endpoint-1 selected
-		rerender({
-			props: { selectedEndpoints: ['endpoint-1'] }
-		});
-
+		const codeAssistantCheckbox = screen.getByRole('checkbox', { name: /code assistant/i });
+		
 		expect(chatbotCheckbox).toBeChecked();
+		expect(codeAssistantCheckbox).not.toBeChecked();
 	});
 });

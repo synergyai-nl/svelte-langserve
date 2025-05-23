@@ -7,25 +7,23 @@
 		loadMoreMessages
 	} from '../stores/langserve';
 	import ChatMessage from './ChatMessage.svelte';
-	import { createEventDispatcher } from 'svelte';
 	import { slide } from 'svelte/transition';
 	import { chatLogger, performanceLogger } from '../../utils/logger';
 
 	interface Props {
 		sendMessage: (content: string) => void;
+		oncreate?: () => void;
 	}
 	
-	let { sendMessage }: Props = $props();
+	let { sendMessage, oncreate }: Props = $props();
 
-	let messageInput = '';
+	let messageInput = $state('');
 	let chatContainer: HTMLDivElement;
 	let isLoadingMore = $state(false);
 
 	// Reactive pagination info
 	let pagination = $derived($activeConversation ? getMessagePagination($activeConversation.id) : null);
 	let displayMessages = $derived($activeConversation ? getDisplayMessages($activeConversation.id) : []);
-
-	const dispatch = createEventDispatcher();
 
 	function handleSendMessage() {
 		try {
@@ -158,7 +156,7 @@
 			<h3 class="mb-3 text-xl font-semibold">Welcome to LangServe Frontend</h3>
 			<p class="mb-2 text-gray-600">Select endpoints and create a conversation to get started.</p>
 			<button
-				onclick={() => dispatch('create')}
+				onclick={() => oncreate?.()}
 				class="mt-4 rounded-md bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
 			>
 				Create New Conversation
