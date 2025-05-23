@@ -1,7 +1,8 @@
 """Test configuration and fixtures."""
 
+from unittest.mock import MagicMock, patch
+
 import pytest
-from unittest.mock import patch, MagicMock
 from fastapi.testclient import TestClient
 
 from src.svelte_langserve.app import create_app

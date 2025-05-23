@@ -2,6 +2,7 @@
 name = "svelte-langserve-backend"
 version = "0.1.0"
 description = "LangServe backend for Claude dashboard"
+requires-python = ">=3.11"
 dependencies = [
     "fastapi",
     "uvicorn[standard]",
@@ -46,6 +47,12 @@ line-length = 88
 [tool.ruff.lint]
 select = ["E", "F", "W", "I"]
 ignore = ["E501"]
+
+[tool.ruff.format]
+docstring-code-format = true
+
+[tool.ruff.lint.isort]
+# Enable import sorting within ruff formatter
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

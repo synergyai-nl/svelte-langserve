@@ -1,12 +1,13 @@
 """Unit tests for authentication functions (no FastAPI dependencies)."""
 
-import pytest
 from datetime import timedelta
+
+import pytest
 from jose import jwt
 
 from src.svelte_langserve.auth import (
-    SECRET_KEY,
     ALGORITHM,
+    SECRET_KEY,
     authenticate_user,
     create_access_token,
     fake_users_db,

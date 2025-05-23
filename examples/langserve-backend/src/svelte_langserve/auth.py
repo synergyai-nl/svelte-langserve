@@ -123,7 +123,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
         username = payload.get("sub")
         if username is None:
             raise credentials_exception
-        token_data = TokenData(username=username)
+        TokenData(username=username)
     except JWTError:
         raise credentials_exception
 

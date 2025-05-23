@@ -66,7 +66,7 @@ def create_research_assistant_chain():
 
                 return response
 
-            except Exception as e:
+            except Exception:
                 # Fall through to knowledge-only response
                 pass
 
@@ -75,17 +75,17 @@ def create_research_assistant_chain():
             [
                 (
                     "system",
-                    """You are a research assistant with extensive knowledge. Since search tools are not available, 
+                    """You are a research assistant with extensive knowledge. Since search tools are not available,
                 I'll provide research guidance based on my training data and knowledge.
-                
+
                 I can help with:
                 - Explaining concepts and topics
                 - Providing background information
                 - Suggesting research methodologies
                 - Recommending sources to investigate
                 - Analyzing trends based on historical data
-                
-                Note: My information has a knowledge cutoff, so for current events or very recent data, 
+
+                Note: My information has a knowledge cutoff, so for current events or very recent data,
                 I recommend verifying with current sources.""",
                 ),
                 ("user", "{query}"),
