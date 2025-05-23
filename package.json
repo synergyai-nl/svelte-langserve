@@ -9,19 +9,29 @@
     "examples/*"
   ],
   "scripts": {
-    "build": "pnpm -r --filter='@svelte-langserve/*' build",
-    "dev": "pnpm -r --filter='@svelte-langserve/*' dev",
+    "build": "nx run-many -t build",
+    "dev": "nx run-many -t dev",
     "clean": "pnpm -r --filter='@svelte-langserve/*' clean",
     "typecheck": "pnpm -r --filter='@svelte-langserve/*' typecheck",
-    "lint": "pnpm -r --filter='@svelte-langserve/*' lint",
-    "test": "pnpm -r --filter='@svelte-langserve/*' test",
+    "lint": "nx run-many -t lint",
+    "lint:root": "eslint .",
+    "test": "nx run-many -t test",
     "changeset": "changeset",
     "version-packages": "changeset version",
     "release": "pnpm build && changeset publish"
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.1",
-    "typescript": "^5.0.0"
+    "@eslint/compat": "^1.2.5",
+    "@eslint/js": "^9.18.0",
+    "@nx/eslint": "^21.1.1",
+    "@nx/js": "^21.1.1",
+    "@nx/vite": "^21.1.1",
+    "@nx/workspace": "^21.1.1",
+    "eslint": "^9.18.0",
+    "nx": "^21.1.1",
+    "typescript": "^5.0.0",
+    "typescript-eslint": "^8.20.0"
   },
   "engines": {
     "node": ">=18",

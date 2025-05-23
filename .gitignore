@@ -1,1 +1,31 @@
 .claude
+
+# Dependencies
+node_modules/
+pnpm-lock.yaml
+
+# Nx
+.nx/
+dist/
+
+# Build outputs
+build/
+.svelte-kit/
+
+# Environment
+.env
+.env.local
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Coverage
+coverage/
+
+# Logs
+*.log
