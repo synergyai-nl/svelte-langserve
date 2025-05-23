@@ -13,10 +13,10 @@ class TestAppStartup:
     def test_health_endpoint(self, client):
         """Test health check endpoint."""
         response = client.get("/health")
-        
+
         assert response.status_code == 200
         data = response.json()
-        
+
         assert data["status"] == "healthy"
         assert data["version"] == "1.0"
         assert data["auth_required"] is True
@@ -26,26 +26,26 @@ class TestAppStartup:
     def test_root_endpoint(self, client):
         """Test root endpoint."""
         response = client.get("/")
-        
+
         assert response.status_code == 200
         data = response.json()
-        
+
         assert "message" in data
         assert "documentation" in data
         assert "health" in data
         assert "available_agents" in data
-        
+
         # Check that all expected agents are listed
         agents = data["available_agents"]
         expected_agents = [
             "chatbot",
-            "chatbot-persistent", 
+            "chatbot-persistent",
             "code-assistant",
             "data-analyst",
             "creative-writer",
-            "research-assistant"
+            "research-assistant",
         ]
-        
+
         for agent in expected_agents:
             assert agent in agents
             assert "path" in agents[agent]
@@ -55,7 +55,7 @@ class TestAppStartup:
     def test_cors_headers(self, client):
         """Test CORS configuration."""
         response = client.get("/health")
-        
+
         # The test client doesn't automatically include CORS headers,
         # but we can verify the app doesn't fail
         assert response.status_code == 200
@@ -74,7 +74,7 @@ class TestOpenAPISpec:
         try:
             response = client.get("/openapi.json")
             assert response.status_code == 200
-            
+
             schema = response.json()
             assert "openapi" in schema
             assert "info" in schema
@@ -107,6 +107,6 @@ class TestErrorHandling:
         """Test token endpoint with invalid content type."""
         response = client.post(
             "/token",
-            json={"username": "demo", "password": "secret"}  # Should be form data
+            json={"username": "demo", "password": "secret"},  # Should be form data
         )
         assert response.status_code == 422  # Validation error

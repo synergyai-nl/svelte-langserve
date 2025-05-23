@@ -2,9 +2,10 @@
 
 import os
 from typing import Optional
-from langchain_postgres import PostgresChatMessageHistory
+
 from langchain_core.chat_history import BaseChatMessageHistory
 from langchain_core.runnables.history import RunnableWithMessageHistory
+from langchain_postgres import PostgresChatMessageHistory
 
 
 class MemoryStore:

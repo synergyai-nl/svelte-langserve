@@ -19,6 +19,7 @@ def create_research_assistant_chain():
     search_tool = None
     try:
         from langchain_community.tools import DuckDuckGoSearchRun
+
         search_tool = DuckDuckGoSearchRun()
     except ImportError:
         pass
@@ -70,10 +71,11 @@ def create_research_assistant_chain():
                 pass
 
         # Use knowledge-only approach
-        knowledge_prompt = ChatPromptTemplate.from_messages([
-            (
-                "system",
-                """You are a research assistant with extensive knowledge. Since search tools are not available, 
+        knowledge_prompt = ChatPromptTemplate.from_messages(
+            [
+                (
+                    "system",
+                    """You are a research assistant with extensive knowledge. Since search tools are not available, 
                 I'll provide research guidance based on my training data and knowledge.
                 
                 I can help with:
@@ -84,11 +86,12 @@ def create_research_assistant_chain():
                 - Analyzing trends based on historical data
                 
                 Note: My information has a knowledge cutoff, so for current events or very recent data, 
-                I recommend verifying with current sources."""
-            ),
-            ("user", "{query}")
-        ])
-        
+                I recommend verifying with current sources.""",
+                ),
+                ("user", "{query}"),
+            ]
+        )
+
         llm = get_llm("openai")
         response = (knowledge_prompt | llm | StrOutputParser()).invoke({"query": query})
         return response

@@ -1,10 +1,9 @@
 """LLM configuration and factory functions."""
 
-from langchain_openai import ChatOpenAI
-from langchain_anthropic import ChatAnthropic
 from typing import Literal
 
-from .config import settings
+from langchain_anthropic import ChatAnthropic
+from langchain_openai import ChatOpenAI
 
 
 def get_llm(

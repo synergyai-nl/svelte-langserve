@@ -4,7 +4,7 @@ import pytest
 from unittest.mock import patch, MagicMock
 from fastapi.testclient import TestClient
 
-from src.claude_dashboard_backend.app import create_app
+from src.svelte_langserve.app import create_app
 
 
 @pytest.fixture
@@ -18,12 +18,26 @@ def mock_llm():
 @pytest.fixture
 def client(mock_llm):
     """Create a test client for the FastAPI app with mocked dependencies."""
-    with patch('src.claude_dashboard_backend.llm.get_llm', return_value=mock_llm):
-        with patch('src.claude_dashboard_backend.chains.chatbot.get_llm', return_value=mock_llm):
-            with patch('src.claude_dashboard_backend.chains.code_assistant.get_llm', return_value=mock_llm):
-                with patch('src.claude_dashboard_backend.chains.creative_writer.get_llm', return_value=mock_llm):
-                    with patch('src.claude_dashboard_backend.chains.data_analyst.get_llm', return_value=mock_llm):
-                        with patch('src.claude_dashboard_backend.chains.research_assistant.get_llm', return_value=mock_llm):
+    with patch("src.svelte_langserve.llm.get_llm", return_value=mock_llm):
+        with patch(
+            "src.svelte_langserve.chains.chatbot.get_llm", return_value=mock_llm
+        ):
+            with patch(
+                "src.svelte_langserve.chains.code_assistant.get_llm",
+                return_value=mock_llm,
+            ):
+                with patch(
+                    "src.svelte_langserve.chains.creative_writer.get_llm",
+                    return_value=mock_llm,
+                ):
+                    with patch(
+                        "src.svelte_langserve.chains.data_analyst.get_llm",
+                        return_value=mock_llm,
+                    ):
+                        with patch(
+                            "src.svelte_langserve.chains.research_assistant.get_llm",
+                            return_value=mock_llm,
+                        ):
                             app = create_app()
                             return TestClient(app)
 

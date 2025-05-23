@@ -1,5 +1,5 @@
 [project]
-name = "claude-dashboard-backend"
+name = "svelte-langserve-backend"
 version = "0.1.0"
 description = "LangServe backend for Claude dashboard"
 dependencies = [
@@ -55,6 +55,9 @@ filterwarnings = [
     "ignore::DeprecationWarning:passlib.*",
     "ignore::pydantic.warnings.PydanticDeprecatedSince211"
 ]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/svelte_langserve"]
 
 [tool.mypy]
 python_version = "3.11"

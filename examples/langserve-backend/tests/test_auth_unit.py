@@ -4,7 +4,7 @@ import pytest
 from datetime import timedelta
 from jose import jwt
 
-from src.claude_dashboard_backend.auth import (
+from src.svelte_langserve.auth import (
     SECRET_KEY,
     ALGORITHM,
     authenticate_user,
@@ -130,10 +130,10 @@ class TestJWTTokens:
         """Test JWT token creation with basic data."""
         data = {"sub": "demo"}
         token = create_access_token(data)
-        
+
         assert isinstance(token, str)
         assert len(token) > 50  # JWT tokens are typically long strings
-        
+
         # Decode and verify token
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         assert payload["sub"] == "demo"
@@ -144,7 +144,7 @@ class TestJWTTokens:
         data = {"sub": "demo"}
         expires_delta = timedelta(minutes=5)
         token = create_access_token(data, expires_delta)
-        
+
         # Decode and verify token
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         assert payload["sub"] == "demo"
@@ -154,12 +154,12 @@ class TestJWTTokens:
         """Test JWT token creation for different users."""
         demo_token = create_access_token({"sub": "demo"})
         admin_token = create_access_token({"sub": "admin"})
-        
+
         assert demo_token != admin_token
-        
+
         demo_payload = jwt.decode(demo_token, SECRET_KEY, algorithms=[ALGORITHM])
         admin_payload = jwt.decode(admin_token, SECRET_KEY, algorithms=[ALGORITHM])
-        
+
         assert demo_payload["sub"] == "demo"
         assert admin_payload["sub"] == "admin"
 
@@ -167,11 +167,11 @@ class TestJWTTokens:
         """Test JWT token has correct structure."""
         data = {"sub": "demo"}
         token = create_access_token(data)
-        
+
         # JWT tokens have 3 parts separated by dots
-        parts = token.split('.')
+        parts = token.split(".")
         assert len(parts) == 3
-        
+
         # Each part should be base64 encoded (non-empty)
         for part in parts:
             assert len(part) > 0
@@ -180,7 +180,7 @@ class TestJWTTokens:
         """Test that JWT token cannot be decoded with wrong secret."""
         data = {"sub": "demo"}
         token = create_access_token(data)
-        
+
         with pytest.raises(jwt.JWTError):
             jwt.decode(token, "wrong-secret", algorithms=[ALGORITHM])
 
@@ -188,7 +188,7 @@ class TestJWTTokens:
         """Test that JWT token cannot be decoded with wrong algorithm."""
         data = {"sub": "demo"}
         token = create_access_token(data)
-        
+
         with pytest.raises(jwt.JWTError):
             jwt.decode(token, SECRET_KEY, algorithms=["HS512"])
 
@@ -209,7 +209,7 @@ class TestAuthConstants:
         """Test that fake users database has correct structure."""
         assert isinstance(fake_users_db, dict)
         assert len(fake_users_db) >= 2  # At least demo and admin users
-        
+
         for username, user_data in fake_users_db.items():
             assert isinstance(user_data, dict)
             assert "username" in user_data

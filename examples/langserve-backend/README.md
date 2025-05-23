@@ -1,4 +1,4 @@
-# Claude Dashboard Backend
+# Svelte LangServe Backend
 
 A uv-based Python project providing LangServe endpoints for multiple AI agents accessible via Socket.IO frontend.
 
@@ -12,7 +12,7 @@ backend/
 ├── .python-version         # Python version specification
 ├── main.py                 # Entry point script
 ├── src/
-│   └── claude_dashboard_backend/
+│   └── svelte_langserve/
 │       ├── __init__.py     # Package initialization
 │       ├── main.py         # Application entry point
 │       ├── app.py          # FastAPI application setup
@@ -111,7 +111,7 @@ uv run mypy src/
 uv run pytest
 
 # Run tests with coverage
-uv run pytest --cov=src/claude_dashboard_backend
+uv run pytest --cov=src/svelte_langserve
 ```
 
 ## Architecture

@@ -1,7 +1,7 @@
 """Creative writing assistant chain implementation."""
 
-from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.output_parsers import StrOutputParser
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 
 from ..llm import get_llm
 

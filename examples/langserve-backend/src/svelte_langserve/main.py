@@ -1,6 +1,7 @@
 """Main entry point for the Claude Dashboard Backend."""
 
 import uvicorn
+
 from .app import create_app
 from .config import settings
 

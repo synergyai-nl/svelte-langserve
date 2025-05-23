@@ -19,7 +19,7 @@ def create_data_analyst_chain():
     """
     # Tools for data analysis
     tools = []
-    
+
     # Only add search tool if API key is available
     if os.getenv("TAVILY_API_KEY"):
         search_tool = TavilySearchResults(
@@ -63,7 +63,7 @@ def create_data_analyst_chain():
     # If no tools available, create a simple chain instead of agent
     if not tools:
         from langchain_core.output_parsers import StrOutputParser
-        
+
         def format_for_simple_chain(inputs: Dict[str, Any]) -> Dict[str, Any]:
             messages = inputs.get("messages", [])
             if messages:
@@ -71,20 +71,30 @@ def create_data_analyst_chain():
                 input_msg = messages[-1].content if messages else ""
                 return {"input": input_msg}
             return {"input": ""}
-        
-        simple_prompt = ChatPromptTemplate.from_messages([
-            ("system", """You are an expert data analyst. You excel at:
+
+        simple_prompt = ChatPromptTemplate.from_messages(
+            [
+                (
+                    "system",
+                    """You are an expert data analyst. You excel at:
 - Data analysis and interpretation
 - Statistical analysis concepts
 - Creating data visualization recommendations
 - Explaining analytical methods
 - Business intelligence insights
 
-Note: Search tools are not available in this configuration, but you can still provide analytical guidance based on your knowledge."""),
-            ("user", "{input}")
-        ])
-        
-        chain = RunnableLambda(format_for_simple_chain) | simple_prompt | llm | StrOutputParser()
+Note: Search tools are not available in this configuration, but you can still provide analytical guidance based on your knowledge.""",
+                ),
+                ("user", "{input}"),
+            ]
+        )
+
+        chain = (
+            RunnableLambda(format_for_simple_chain)
+            | simple_prompt
+            | llm
+            | StrOutputParser()
+        )
         return chain
 
     agent = create_openai_functions_agent(llm, tools, prompt)
