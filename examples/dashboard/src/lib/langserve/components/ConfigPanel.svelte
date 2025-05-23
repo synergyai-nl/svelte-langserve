@@ -9,7 +9,7 @@
 		temperature?: number;
 		streaming?: boolean;
 	}
-	
+
 	let { temperature = 0.7, streaming = true }: Props = $props();
 
 	function updateConfig() {

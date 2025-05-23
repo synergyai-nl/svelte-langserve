@@ -15,17 +15,19 @@ vi.mock('../stores/langserve', () => {
 			description: 'General chatbot'
 		},
 		{
-			id: 'endpoint-2', 
+			id: 'endpoint-2',
 			name: 'Code Assistant',
 			url: 'http://localhost:8000/code-assistant',
 			description: 'Helps with code'
 		}
 	]);
 
-	const mockEndpointHealth = writable(new Map([
-		['endpoint-1', true],
-		['endpoint-2', false]
-	]));
+	const mockEndpointHealth = writable(
+		new Map([
+			['endpoint-1', true],
+			['endpoint-2', false]
+		])
+	);
 
 	const mockTestEndpoint = vi.fn();
 	const mockGetEndpointSchemas = vi.fn();
@@ -41,7 +43,7 @@ vi.mock('../stores/langserve', () => {
 describe('EndpointSelector', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
-		
+
 		// Reset mock data to default state
 		langserveStore.availableEndpoints.set([
 			{
@@ -51,22 +53,24 @@ describe('EndpointSelector', () => {
 				description: 'General chatbot'
 			},
 			{
-				id: 'endpoint-2', 
+				id: 'endpoint-2',
 				name: 'Code Assistant',
 				url: 'http://localhost:8000/code-assistant',
 				description: 'Helps with code'
 			}
 		]);
-		
-		langserveStore.endpointHealth.set(new Map([
-			['endpoint-1', true],
-			['endpoint-2', false]
-		]));
+
+		langserveStore.endpointHealth.set(
+			new Map([
+				['endpoint-1', true],
+				['endpoint-2', false]
+			])
+		);
 	});
 
 	it('renders available endpoints', () => {
 		render(EndpointSelector);
-		
+
 		expect(screen.getByText('Available Endpoints')).toBeInTheDocument();
 		expect(screen.getByText('Chatbot')).toBeInTheDocument();
 		expect(screen.getByText('Code Assistant')).toBeInTheDocument();
@@ -74,7 +78,7 @@ describe('EndpointSelector', () => {
 
 	it('shows endpoint health status', () => {
 		render(EndpointSelector);
-		
+
 		expect(screen.getByText('Status: healthy')).toBeInTheDocument();
 		expect(screen.getByText('Status: unhealthy')).toBeInTheDocument();
 	});
@@ -84,13 +88,13 @@ describe('EndpointSelector', () => {
 		langserveStore.availableEndpoints.set([]);
 
 		render(EndpointSelector);
-		
+
 		expect(screen.getByText('No endpoints available')).toBeInTheDocument();
 	});
 
 	it('allows selecting and deselecting endpoints', async () => {
 		const user = userEvent.setup();
-		const component = render(EndpointSelector, {
+		render(EndpointSelector, {
 			props: { selectedEndpoints: [] }
 		});
 
@@ -120,20 +124,20 @@ describe('EndpointSelector', () => {
 		render(EndpointSelector);
 
 		const detailsButton = screen.getByRole('button', { name: /show details/i });
-		
+
 		// Initially hidden
 		expect(screen.queryByText('URL: http://localhost:8000/chatbot')).not.toBeInTheDocument();
-		
+
 		// Show details
 		await user.click(detailsButton);
 		expect(screen.getByText('URL: http://localhost:8000/chatbot')).toBeInTheDocument();
 		expect(screen.getByText('URL: http://localhost:8000/code-assistant')).toBeInTheDocument();
 		expect(screen.getByText('General chatbot')).toBeInTheDocument();
 		expect(screen.getByText('Helps with code')).toBeInTheDocument();
-		
+
 		// Button text changes
 		expect(screen.getByRole('button', { name: /hide details/i })).toBeInTheDocument();
-		
+
 		// Hide details
 		await user.click(screen.getByRole('button', { name: /hide details/i }));
 		expect(screen.queryByText('URL: http://localhost:8000/chatbot')).not.toBeInTheDocument();
@@ -141,7 +145,7 @@ describe('EndpointSelector', () => {
 
 	it('calls testEndpoint when test button is clicked', async () => {
 		const user = userEvent.setup();
-		
+
 		render(EndpointSelector);
 
 		const testButtons = screen.getAllByRole('button', { name: /test/i });
@@ -152,7 +156,7 @@ describe('EndpointSelector', () => {
 
 	it('calls getEndpointSchemas when schemas button is clicked', async () => {
 		const user = userEvent.setup();
-		
+
 		render(EndpointSelector);
 
 		const schemaButtons = screen.getAllByRole('button', { name: /schemas/i });
@@ -163,10 +167,10 @@ describe('EndpointSelector', () => {
 
 	it('applies correct styling based on endpoint health', () => {
 		render(EndpointSelector);
-		
+
 		const healthyStatus = screen.getByText('Status: healthy');
 		const unhealthyStatus = screen.getByText('Status: unhealthy');
-		
+
 		expect(healthyStatus).toHaveClass('text-green-600');
 		expect(unhealthyStatus).toHaveClass('text-red-600');
 	});
@@ -176,10 +180,10 @@ describe('EndpointSelector', () => {
 		langserveStore.endpointHealth.set(new Map());
 
 		render(EndpointSelector);
-		
+
 		const unknownStatuses = screen.getAllByText('Status: unknown');
 		expect(unknownStatuses).toHaveLength(2);
-		unknownStatuses.forEach(status => {
+		unknownStatuses.forEach((status) => {
 			expect(status).toHaveClass('text-gray-500');
 		});
 	});
@@ -189,7 +193,7 @@ describe('EndpointSelector', () => {
 
 		const chatbotCheckbox = screen.getByRole('checkbox', { name: /chatbot/i });
 		const codeAssistantCheckbox = screen.getByRole('checkbox', { name: /code assistant/i });
-		
+
 		expect(chatbotCheckbox).toBeChecked();
 		expect(codeAssistantCheckbox).not.toBeChecked();
 	});

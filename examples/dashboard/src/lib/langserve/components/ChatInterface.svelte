@@ -14,7 +14,7 @@
 		sendMessage: (content: string) => void;
 		oncreate?: () => void;
 	}
-	
+
 	let { sendMessage, oncreate }: Props = $props();
 
 	let messageInput = $state('');
@@ -22,8 +22,12 @@
 	let isLoadingMore = $state(false);
 
 	// Reactive pagination info
-	let pagination = $derived($activeConversation ? getMessagePagination($activeConversation.id) : null);
-	let displayMessages = $derived($activeConversation ? getDisplayMessages($activeConversation.id) : []);
+	let pagination = $derived(
+		$activeConversation ? getMessagePagination($activeConversation.id) : null
+	);
+	let displayMessages = $derived(
+		$activeConversation ? getDisplayMessages($activeConversation.id) : []
+	);
 
 	function handleSendMessage() {
 		try {
@@ -32,7 +36,7 @@
 					conversationId: $activeConversation.id.substring(0, 8) + '...',
 					messageLength: messageInput.trim().length
 				});
-				
+
 				performanceLogger.time('message-send');
 				sendMessage(messageInput.trim());
 				messageInput = '';
@@ -64,13 +68,13 @@
 
 	async function handleLoadMore() {
 		if (!$activeConversation || !pagination?.hasMore || isLoadingMore) return;
-		
+
 		isLoadingMore = true;
 		chatLogger.info('Loading more messages', {
 			conversationId: $activeConversation.id.substring(0, 8) + '...',
 			currentPage: pagination.currentPage
 		});
-		
+
 		try {
 			performanceLogger.time('load-more-messages');
 			await loadMoreMessages($activeConversation.id);
@@ -85,7 +89,7 @@
 	// Auto-scroll when messages change
 	$effect(() => {
 		// Watch displayMessages for changes
-		displayMessages;
+		void displayMessages;
 		scrollToBottom();
 	});
 </script>
@@ -114,13 +118,15 @@
 			{:else}
 				<!-- Load More Button -->
 				{#if pagination?.hasMore}
-					<div class="text-center py-2 mb-4">
+					<div class="mb-4 py-2 text-center">
 						<button
 							onclick={handleLoadMore}
 							disabled={isLoadingMore}
-							class="px-4 py-2 text-sm bg-gray-100 hover:bg-gray-200 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
+							class="rounded-md bg-gray-100 px-4 py-2 text-sm hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-50"
 						>
-							{isLoadingMore ? 'Loading older messages...' : `Load older messages (${pagination.totalMessages - displayMessages.length} more)`}
+							{isLoadingMore
+								? 'Loading older messages...'
+								: `Load older messages (${pagination.totalMessages - displayMessages.length} more)`}
 						</button>
 					</div>
 				{/if}

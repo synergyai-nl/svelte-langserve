@@ -85,7 +85,7 @@
 	}
 </script>
 
-<ErrorBoundary 
+<ErrorBoundary
 	fallback="The LangServe Frontend encountered an error. Please try refreshing the page."
 	showDetails={true}
 	onError={(error) => console.error('LangServe Frontend Error:', error)}
@@ -96,7 +96,7 @@
 			<ErrorBoundary fallback="Login form encountered an error.">
 				<LoginForm serverUrl={backendUrl} on:loginSuccess={handleLoginSuccess} />
 			</ErrorBoundary>
-		<!-- If authenticated but not connected to langserve, show loading state -->
+			<!-- If authenticated but not connected to langserve, show loading state -->
 		{:else if !$connected}
 			<div class="flex h-full w-full items-center justify-center">
 				<div class="p-6 text-center">

@@ -14,12 +14,15 @@ interface LangServeState {
 	streamingMessages: Map<string, string>;
 	connectionError: string | null;
 	endpointHealth: Map<string, boolean>;
-	messagePagination: Map<string, {
-		currentPage: number;
-		messagesPerPage: number;
-		totalMessages: number;
-		hasMore: boolean;
-	}>;
+	messagePagination: Map<
+		string,
+		{
+			currentPage: number;
+			messagesPerPage: number;
+			totalMessages: number;
+			hasMore: boolean;
+		}
+	>;
 }
 
 // Create the initial state
@@ -44,7 +47,7 @@ const createLangServeStore = () => {
 	// Map to store streaming message timeouts and cleanup functions
 	const streamingTimeouts = new Map<string, NodeJS.Timeout>();
 	const streamingCleanup = new Map<string, () => void>();
-	
+
 	// Constants for memory management
 	const STREAMING_TIMEOUT = 30000; // 30 seconds
 	const MAX_STREAMING_MESSAGES = 10; // Maximum concurrent streaming messages
@@ -52,7 +55,7 @@ const createLangServeStore = () => {
 
 	// Periodic cleanup function
 	let cleanupInterval: NodeJS.Timeout | null = null;
-	
+
 	const startCleanupInterval = () => {
 		if (cleanupInterval) clearInterval(cleanupInterval);
 		cleanupInterval = setInterval(() => {
@@ -103,9 +106,12 @@ const createLangServeStore = () => {
 
 	// Connect to the Socket.IO server
 	const connect = (serverUrl: string, userId: string, authToken?: string) => {
-		socketLogger.info('Initiating connection', { serverUrl, userId: userId.substring(0, 8) + '...' });
+		socketLogger.info('Initiating connection', {
+			serverUrl,
+			userId: userId.substring(0, 8) + '...'
+		});
 		performanceLogger.time('connection-establish');
-		
+
 		update((state) => {
 			// Clean up existing socket if there is one
 			if (state.socket) {
@@ -117,7 +123,7 @@ const createLangServeStore = () => {
 				streamingTimeouts.clear();
 				streamingCleanup.forEach((cleanup) => cleanup());
 				streamingCleanup.clear();
-				
+
 				// Stop cleanup interval
 				stopCleanupInterval();
 			}
@@ -134,7 +140,7 @@ const createLangServeStore = () => {
 			newSocket.on('connect', () => {
 				socketLogger.info('Socket connected successfully');
 				performanceLogger.timeEnd('connection-establish');
-				
+
 				update((s) => {
 					s.connected = true;
 					s.connectionError = null;
@@ -142,7 +148,9 @@ const createLangServeStore = () => {
 				});
 				// Start cleanup interval when connected
 				startCleanupInterval();
-				socketLogger.debug('Sending authentication request', { userId: userId.substring(0, 8) + '...' });
+				socketLogger.debug('Sending authentication request', {
+					userId: userId.substring(0, 8) + '...'
+				});
 				newSocket.emit('authenticate', { user_id: userId, token: authToken });
 			});
 
@@ -167,17 +175,17 @@ const createLangServeStore = () => {
 			newSocket.on(
 				'authenticated',
 				(data: { user_id: string; available_endpoints: LangServeEndpoint[] }) => {
-					socketLogger.info('Authentication successful', { 
-						userId: data.user_id.substring(0, 8) + '...', 
-						endpointCount: data.available_endpoints.length 
+					socketLogger.info('Authentication successful', {
+						userId: data.user_id.substring(0, 8) + '...',
+						endpointCount: data.available_endpoints.length
 					});
-					
+
 					update((s) => {
 						s.authenticated = true;
 						s.availableEndpoints = data.available_endpoints;
 						return s;
 					});
-					
+
 					logger.setUserContext(data.user_id);
 				}
 			);
@@ -235,11 +243,14 @@ const createLangServeStore = () => {
 
 					// Check for too many concurrent streaming messages
 					if (streamingTimeouts.size >= MAX_STREAMING_MESSAGES) {
-						streamingLogger.warn('Maximum concurrent streaming messages reached, cleaning up oldest', {
-							currentCount: streamingTimeouts.size,
-							maxAllowed: MAX_STREAMING_MESSAGES
-						});
-						
+						streamingLogger.warn(
+							'Maximum concurrent streaming messages reached, cleaning up oldest',
+							{
+								currentCount: streamingTimeouts.size,
+								maxAllowed: MAX_STREAMING_MESSAGES
+							}
+						);
+
 						// Clean up oldest streaming messages
 						const oldestMessageId = Array.from(streamingTimeouts.keys())[0];
 						if (oldestMessageId) {
@@ -495,12 +506,15 @@ const createLangServeStore = () => {
 		});
 	};
 
-	const updateMessagePagination = (conversationId: string, updates: Partial<{
-		currentPage: number;
-		messagesPerPage: number;
-		totalMessages: number;
-		hasMore: boolean;
-	}>) => {
+	const updateMessagePagination = (
+		conversationId: string,
+		updates: Partial<{
+			currentPage: number;
+			messagesPerPage: number;
+			totalMessages: number;
+			hasMore: boolean;
+		}>
+	) => {
 		update((state) => {
 			const existing = state.messagePagination.get(conversationId) || {
 				currentPage: 1,
@@ -560,17 +574,17 @@ const createLangServeStore = () => {
 export const langserveStore = createLangServeStore();
 
 // Export store functions for direct use
-export const { 
-	connect, 
-	disconnect, 
-	testEndpoint, 
-	getEndpointSchemas, 
-	testAllEndpoints, 
-	createConversation, 
-	joinConversation, 
-	sendMessage, 
-	loadConversations, 
-	getConversationHistory, 
+export const {
+	connect,
+	disconnect,
+	testEndpoint,
+	getEndpointSchemas,
+	testAllEndpoints,
+	createConversation,
+	joinConversation,
+	sendMessage,
+	loadConversations,
+	getConversationHistory,
 	setActiveConversationId,
 	updateMessagePagination,
 	loadMoreMessages
@@ -625,13 +639,18 @@ export function getDisplayMessages(conversationId: string, limit?: number) {
 		}
 	});
 
-	const sortedMessages = messages.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
-	
+	const sortedMessages = messages.sort(
+		(a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+	);
+
 	// Apply pagination if specified
 	if (limit && limit > 0) {
 		const pagination = state.messagePagination.get(conversationId);
 		if (pagination) {
-			const startIndex = Math.max(0, sortedMessages.length - (pagination.currentPage * pagination.messagesPerPage));
+			const startIndex = Math.max(
+				0,
+				sortedMessages.length - pagination.currentPage * pagination.messagesPerPage
+			);
 			return sortedMessages.slice(startIndex);
 		}
 		// Fallback: return last N messages
@@ -644,10 +663,12 @@ export function getDisplayMessages(conversationId: string, limit?: number) {
 // Helper to get pagination info for a conversation
 export function getMessagePagination(conversationId: string) {
 	const state = get(langserveStore);
-	return state.messagePagination.get(conversationId) || {
-		currentPage: 1,
-		messagesPerPage: 50,
-		totalMessages: 0,
-		hasMore: false
-	};
+	return (
+		state.messagePagination.get(conversationId) || {
+			currentPage: 1,
+			messagesPerPage: 50,
+			totalMessages: 0,
+			hasMore: false
+		}
+	);
 }

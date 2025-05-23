@@ -30,7 +30,7 @@
 <div class="login-container">
 	<div class="login-card">
 		<h2>Login to Claude Dashboard</h2>
-		
+
 		{#if $authError}
 			<div class="error-banner">
 				<span class="error-text">{$authError}</span>

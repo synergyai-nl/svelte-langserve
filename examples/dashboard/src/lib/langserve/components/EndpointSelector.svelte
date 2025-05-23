@@ -9,7 +9,7 @@
 	interface Props {
 		selectedEndpoints?: string[];
 	}
-	
+
 	let { selectedEndpoints = $bindable([]) }: Props = $props();
 	let showEndpointDetails = $state(false);
 

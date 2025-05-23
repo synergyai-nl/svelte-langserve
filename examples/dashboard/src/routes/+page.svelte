@@ -4,7 +4,7 @@
 
 	// Generate a random user ID for demo purposes
 	// In a real app, this would come from authentication
-	let userId = "";
+	let userId = '';
 
 	if (browser) {
 		// Get existing user ID from localStorage or create a new one

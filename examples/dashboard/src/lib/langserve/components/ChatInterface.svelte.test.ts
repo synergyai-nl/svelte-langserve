@@ -62,7 +62,7 @@ describe('ChatInterface', () => {
 
 	beforeEach(() => {
 		vi.clearAllMocks();
-		
+
 		// Reset mock data to default state
 		langserveStore.activeConversation.set({
 			id: 'conversation-123',
@@ -77,7 +77,7 @@ describe('ChatInterface', () => {
 				{ id: 'msg-2', content: 'How can I help?', type: 'ai' }
 			]
 		});
-		
+
 		langserveStore.hasStreamingMessages.set(false);
 	});
 
@@ -90,7 +90,9 @@ describe('ChatInterface', () => {
 		});
 
 		expect(screen.getByText('Welcome to LangServe Frontend')).toBeInTheDocument();
-		expect(screen.getByText('Select endpoints and create a conversation to get started.')).toBeInTheDocument();
+		expect(
+			screen.getByText('Select endpoints and create a conversation to get started.')
+		).toBeInTheDocument();
 		expect(screen.getByRole('button', { name: /create new conversation/i })).toBeInTheDocument();
 	});
 
@@ -117,7 +119,7 @@ describe('ChatInterface', () => {
 
 	it('sends message when send button is clicked', async () => {
 		const user = userEvent.setup();
-		
+
 		render(ChatInterface, {
 			props: { sendMessage: mockSendMessage }
 		});
@@ -133,7 +135,7 @@ describe('ChatInterface', () => {
 
 	it('sends message when Enter key is pressed', async () => {
 		const user = userEvent.setup();
-		
+
 		render(ChatInterface, {
 			props: { sendMessage: mockSendMessage }
 		});
@@ -148,7 +150,7 @@ describe('ChatInterface', () => {
 
 	it('does not send message when Shift+Enter is pressed', async () => {
 		const user = userEvent.setup();
-		
+
 		render(ChatInterface, {
 			props: { sendMessage: mockSendMessage }
 		});
@@ -163,7 +165,7 @@ describe('ChatInterface', () => {
 
 	it('clears input after sending message', async () => {
 		const user = userEvent.setup();
-		
+
 		render(ChatInterface, {
 			props: { sendMessage: mockSendMessage }
 		});
@@ -188,7 +190,7 @@ describe('ChatInterface', () => {
 
 	it('enables send button when input has content', async () => {
 		const user = userEvent.setup();
-		
+
 		render(ChatInterface, {
 			props: { sendMessage: mockSendMessage }
 		});
@@ -203,7 +205,7 @@ describe('ChatInterface', () => {
 
 	it('does not send empty or whitespace-only messages', async () => {
 		const user = userEvent.setup();
-		
+
 		render(ChatInterface, {
 			props: { sendMessage: mockSendMessage }
 		});
@@ -235,7 +237,7 @@ describe('ChatInterface', () => {
 
 	it('loads more messages when load more button is clicked', async () => {
 		const user = userEvent.setup();
-		
+
 		langserveStore.getMessagePagination.mockReturnValue({
 			currentPage: 1,
 			messagesPerPage: 50,
@@ -255,7 +257,7 @@ describe('ChatInterface', () => {
 
 	it('shows loading state when loading more messages', async () => {
 		const user = userEvent.setup();
-		
+
 		langserveStore.getMessagePagination.mockReturnValue({
 			currentPage: 1,
 			messagesPerPage: 50,
@@ -268,10 +270,10 @@ describe('ChatInterface', () => {
 		});
 
 		const loadMoreButton = screen.getByRole('button', { name: /load older messages/i });
-		
+
 		// Start loading (button click triggers async action)
 		await user.click(loadMoreButton);
-		
+
 		// Note: In a real test, you might need to mock the async behavior more explicitly
 		// to test the loading state properly
 	});
@@ -281,8 +283,8 @@ describe('ChatInterface', () => {
 		langserveStore.activeConversation.set(null);
 
 		const mockCreateEvent = vi.fn();
-		const component = render(ChatInterface, {
-			props: { 
+		render(ChatInterface, {
+			props: {
 				sendMessage: mockSendMessage,
 				oncreate: mockCreateEvent
 			}

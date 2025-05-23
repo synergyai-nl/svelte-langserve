@@ -16,7 +16,7 @@ interface LogEntry {
 	level: LogLevel;
 	context: string;
 	message: string;
-	data?: any;
+	data?: unknown;
 	error?: Error;
 	userId?: string;
 	conversationId?: string;
@@ -32,7 +32,7 @@ class Logger {
 
 	constructor(logLevel = LogLevel.INFO) {
 		this.logLevel = logLevel;
-		
+
 		// Try to read log level from environment or localStorage
 		if (typeof window !== 'undefined') {
 			const storedLevel = localStorage.getItem('langserve_log_level');
@@ -50,7 +50,7 @@ class Logger {
 		level: LogLevel,
 		context: string,
 		message: string,
-		data?: any,
+		data?: unknown,
 		error?: Error
 	): LogEntry {
 		return {
@@ -72,7 +72,7 @@ class Logger {
 		if (!this.enableConsole) return;
 
 		const prefix = `[${entry.timestamp}] [${LogLevel[entry.level]}] [${entry.context}]`;
-		
+
 		switch (entry.level) {
 			case LogLevel.ERROR:
 				if (entry.error) {
@@ -98,7 +98,7 @@ class Logger {
 
 	private storeLog(entry: LogEntry): void {
 		this.logs.push(entry);
-		
+
 		// Remove old logs if we exceed the limit
 		if (this.logs.length > this.maxLogs) {
 			this.logs = this.logs.slice(-this.maxLogs);
@@ -109,13 +109,19 @@ class Logger {
 			try {
 				const recentLogs = this.logs.slice(-100); // Store only last 100 logs
 				localStorage.setItem('langserve_logs', JSON.stringify(recentLogs));
-			} catch (error) {
+			} catch {
 				// Ignore storage errors
 			}
 		}
 	}
 
-	private log(level: LogLevel, context: string, message: string, data?: any, error?: Error): void {
+	private log(
+		level: LogLevel,
+		context: string,
+		message: string,
+		data?: unknown,
+		error?: Error
+	): void {
 		if (!this.shouldLog(level)) return;
 
 		const entry = this.createLogEntry(level, context, message, data, error);
@@ -124,23 +130,23 @@ class Logger {
 	}
 
 	// Public logging methods
-	error(context: string, message: string, data?: any, error?: Error): void {
+	error(context: string, message: string, data?: unknown, error?: Error): void {
 		this.log(LogLevel.ERROR, context, message, data, error);
 	}
 
-	warn(context: string, message: string, data?: any): void {
+	warn(context: string, message: string, data?: unknown): void {
 		this.log(LogLevel.WARN, context, message, data);
 	}
 
-	info(context: string, message: string, data?: any): void {
+	info(context: string, message: string, data?: unknown): void {
 		this.log(LogLevel.INFO, context, message, data);
 	}
 
-	debug(context: string, message: string, data?: any): void {
+	debug(context: string, message: string, data?: unknown): void {
 		this.log(LogLevel.DEBUG, context, message, data);
 	}
 
-	trace(context: string, message: string, data?: any): void {
+	trace(context: string, message: string, data?: unknown): void {
 		this.log(LogLevel.TRACE, context, message, data);
 	}
 
@@ -161,10 +167,10 @@ class Logger {
 
 		if (filter) {
 			if (filter.level !== undefined) {
-				filteredLogs = filteredLogs.filter(log => log.level === filter.level);
+				filteredLogs = filteredLogs.filter((log) => log.level === filter.level);
 			}
 			if (filter.context) {
-				filteredLogs = filteredLogs.filter(log => log.context.includes(filter.context!));
+				filteredLogs = filteredLogs.filter((log) => log.context.includes(filter.context!));
 			}
 			if (filter.limit) {
 				filteredLogs = filteredLogs.slice(-filter.limit);
@@ -193,11 +199,12 @@ class Logger {
 	// Context-specific loggers
 	createContextLogger(context: string) {
 		return {
-			error: (message: string, data?: any, error?: Error) => this.error(context, message, data, error),
-			warn: (message: string, data?: any) => this.warn(context, message, data),
-			info: (message: string, data?: any) => this.info(context, message, data),
-			debug: (message: string, data?: any) => this.debug(context, message, data),
-			trace: (message: string, data?: any) => this.trace(context, message, data)
+			error: (message: string, data?: unknown, error?: Error) =>
+				this.error(context, message, data, error),
+			warn: (message: string, data?: unknown) => this.warn(context, message, data),
+			info: (message: string, data?: unknown) => this.info(context, message, data),
+			debug: (message: string, data?: unknown) => this.debug(context, message, data),
+			trace: (message: string, data?: unknown) => this.trace(context, message, data)
 		};
 	}
 
@@ -214,13 +221,13 @@ class Logger {
 
 	// User and conversation context
 	setUserContext(userId: string): void {
-		this.logs.forEach(log => {
+		this.logs.forEach((log) => {
 			if (!log.userId) log.userId = userId;
 		});
 	}
 
 	setConversationContext(conversationId: string): void {
-		this.logs.forEach(log => {
+		this.logs.forEach((log) => {
 			if (!log.conversationId) log.conversationId = conversationId;
 		});
 	}
@@ -252,13 +259,13 @@ export function enableProductionLogging(): void {
 
 // Browser debugging helpers
 if (typeof window !== 'undefined') {
-	// @ts-ignore - Add to window for debugging
+	// @ts-expect-error - Add to window for debugging
 	window.langserveLogger = {
 		logger,
 		enableDebug: enableDebugLogging,
 		enableProduction: enableProductionLogging,
 		setLevel: (level: string) => logger.setLogLevel(LogLevel[level as keyof typeof LogLevel]),
-		getLogs: (filter?: any) => logger.getLogs(filter),
+		getLogs: (filter?: unknown) => logger.getLogs(filter),
 		clearLogs: () => logger.clearLogs()
 	};
 }
