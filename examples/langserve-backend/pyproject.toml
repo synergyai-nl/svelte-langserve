@@ -1,0 +1,25 @@
+[project]
+name = "claude-dashboard-backend"
+version = "0.1.0"
+description = "LangServe backend for Claude dashboard"
+dependencies = [
+    "fastapi",
+    "uvicorn[standard]",
+    "langserve[all]",
+    "langchain-core",
+    "langchain-openai",
+    "langchain-anthropic",
+    "langchain-community",
+    "langchain",
+    "tavily-python"
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.pyright]
+venvPath = "."
+venv = ".venv"
+include = ["src", "*.py"]
+exclude = ["**/__pycache__"]

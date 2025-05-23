@@ -28,15 +28,14 @@ def get_llm(model_type: str = "openai", temperature: float = 0.7):
     """Get configured LLM based on type"""
     if model_type == "openai":
         return ChatOpenAI(
-            temperature=temperature,
             model="gpt-4",
-            openai_api_key=os.getenv("OPENAI_API_KEY"),
+            temperature=temperature,
         )
     elif model_type == "anthropic":
         return ChatAnthropic(
+            model="claude-3-5-sonnet-20241022",
             temperature=temperature,
-            model="claude-3-sonnet-20240229",
-            anthropic_api_key=os.getenv("ANTHROPIC_API_KEY"),
+            max_tokens=1024,
         )
     else:
         raise ValueError(f"Unknown model type: {model_type}")
