@@ -7,6 +7,7 @@ from langserve import add_routes
 from .config import settings
 from .chains import (
     create_chatbot_chain,
+    create_chatbot_chain_with_history,
     create_code_assistant_chain,
     create_data_analyst_chain,
     create_creative_writer_chain,
@@ -16,7 +17,7 @@ from .chains import (
 
 def create_app() -> FastAPI:
     """Create and configure the FastAPI application.
-    
+
     Returns:
         Configured FastAPI application instance
     """
@@ -37,7 +38,7 @@ def create_app() -> FastAPI:
 
     # Setup LangServe routes
     _setup_routes(app)
-    
+
     # Add health and info endpoints
     _setup_endpoints(app)
 
@@ -46,12 +47,22 @@ def create_app() -> FastAPI:
 
 def _setup_routes(app: FastAPI) -> None:
     """Add all LangServe routes to the FastAPI app."""
-    
+
     # General Chatbot
     add_routes(
         app,
         create_chatbot_chain(),
         path="/chatbot",
+        enable_feedback_endpoint=True,
+        enable_public_trace_link_endpoint=True,
+        playground_type="chat",
+    )
+
+    # General Chatbot with Persistence
+    add_routes(
+        app,
+        create_chatbot_chain_with_history(),
+        path="/chatbot-persistent",
         enable_feedback_endpoint=True,
         enable_public_trace_link_endpoint=True,
         playground_type="chat",
@@ -100,7 +111,7 @@ def _setup_routes(app: FastAPI) -> None:
 
 def _setup_endpoints(app: FastAPI) -> None:
     """Add health and info endpoints."""
-    
+
     @app.get("/health")
     async def health_check():
         """Health check endpoint."""
@@ -108,6 +119,7 @@ def _setup_endpoints(app: FastAPI) -> None:
             "status": "healthy",
             "endpoints": [
                 "/chatbot",
+                "/chatbot-persistent",
                 "/code-assistant",
                 "/data-analyst",
                 "/creative-writer",
@@ -128,6 +140,11 @@ def _setup_endpoints(app: FastAPI) -> None:
                     "path": "/chatbot",
                     "description": "General-purpose conversational AI",
                     "playground": "/chatbot/playground",
+                },
+                "chatbot-persistent": {
+                    "path": "/chatbot-persistent",
+                    "description": "General-purpose conversational AI with memory persistence",
+                    "playground": "/chatbot-persistent/playground",
                 },
                 "code-assistant": {
                     "path": "/code-assistant",

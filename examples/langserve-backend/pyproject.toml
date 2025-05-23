@@ -11,7 +11,9 @@ dependencies = [
     "langchain-anthropic",
     "langchain-community",
     "langchain",
-    "tavily-python"
+    "tavily-python",
+    "langchain-postgres",
+    "psycopg2-binary"
 ]
 
 [dependency-groups]

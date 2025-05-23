@@ -1,6 +1,24 @@
 version: '3.8'
 
 services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15
+    environment:
+      - POSTGRES_DB=chat_history
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   # LangServe Backend
   langserve-backend:
     build:
@@ -12,9 +30,13 @@ services:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
       - TAVILY_API_KEY=${TAVILY_API_KEY}
+      - POSTGRES_CONNECTION_STRING=postgresql://postgres:password@postgres:5432/chat_history
       - ENVIRONMENT=production
     volumes:
       - ./examples/langserve-backend:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
@@ -32,6 +54,7 @@ services:
     environment:
       - NODE_ENV=production
       - PUBLIC_LANGSERVE_CHATBOT_URL=http://langserve-backend:8000/chatbot
+      - PUBLIC_LANGSERVE_CHATBOT_PERSISTENT_URL=http://langserve-backend:8000/chatbot-persistent
       - PUBLIC_LANGSERVE_CODE_URL=http://langserve-backend:8000/code-assistant
       - PUBLIC_LANGSERVE_DATA_URL=http://langserve-backend:8000/data-analyst
       - PUBLIC_LANGSERVE_CREATIVE_URL=http://langserve-backend:8000/creative-writer
@@ -57,3 +80,6 @@ services:
       - svelte-frontend
       - langserve-backend
     restart: unless-stopped
+
+volumes:
+  postgres_data:

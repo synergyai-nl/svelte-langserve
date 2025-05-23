@@ -12,7 +12,7 @@ from ..llm import get_llm
 
 def create_research_assistant_chain():
     """Create a research assistant with search capabilities.
-    
+
     Returns:
         Configured research assistant chain with search functionality
     """
@@ -31,10 +31,11 @@ def create_research_assistant_chain():
             search_results = search_tool.run(query)
 
             # Create context with search results
-            context_prompt = ChatPromptTemplate.from_messages([
-                (
-                    "system",
-                    """You are a research assistant. Use the search results below to provide a comprehensive answer.
+            context_prompt = ChatPromptTemplate.from_messages(
+                [
+                    (
+                        "system",
+                        """You are a research assistant. Use the search results below to provide a comprehensive answer.
 
             Search Results:
             {search_results}
@@ -45,9 +46,10 @@ def create_research_assistant_chain():
             - Cite key points from the results
             - If information is limited, acknowledge this
             """,
-                ),
-                MessagesPlaceholder(variable_name="messages"),
-            ])
+                    ),
+                    MessagesPlaceholder(variable_name="messages"),
+                ]
+            )
 
             llm = get_llm("openai")
 

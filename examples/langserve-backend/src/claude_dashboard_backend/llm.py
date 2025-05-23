@@ -7,16 +7,18 @@ from typing import Literal
 from .config import settings
 
 
-def get_llm(model_type: Literal["openai", "anthropic"] = "openai", temperature: float = 0.7):
+def get_llm(
+    model_type: Literal["openai", "anthropic"] = "openai", temperature: float = 0.7
+):
     """Get configured LLM based on type.
-    
+
     Args:
         model_type: The type of model to use ("openai" or "anthropic")
         temperature: The temperature setting for the model
-        
+
     Returns:
         Configured LLM instance
-        
+
     Raises:
         ValueError: If model_type is not supported
     """

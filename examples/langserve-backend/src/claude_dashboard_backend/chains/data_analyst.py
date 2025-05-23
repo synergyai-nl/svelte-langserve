@@ -12,7 +12,7 @@ from ..llm import get_llm
 
 def create_data_analyst_chain():
     """Create a data analysis assistant with search capabilities.
-    
+
     Returns:
         Configured data analyst chain with search tools
     """
@@ -25,10 +25,11 @@ def create_data_analyst_chain():
 
     tools = [search_tool]
 
-    prompt = ChatPromptTemplate.from_messages([
-        (
-            "system",
-            """You are an expert data analyst and researcher. You excel at:
+    prompt = ChatPromptTemplate.from_messages(
+        [
+            (
+                "system",
+                """You are an expert data analyst and researcher. You excel at:
     - Data analysis and interpretation
     - Statistical analysis
     - Creating data visualizations
@@ -46,11 +47,12 @@ def create_data_analyst_chain():
 
     You have access to search tools to find current data and research.
     """,
-        ),
-        MessagesPlaceholder(variable_name="chat_history"),
-        ("user", "{input}"),
-        MessagesPlaceholder(variable_name="agent_scratchpad"),
-    ])
+            ),
+            MessagesPlaceholder(variable_name="chat_history"),
+            ("user", "{input}"),
+            MessagesPlaceholder(variable_name="agent_scratchpad"),
+        ]
+    )
 
     llm = get_llm("openai")
 

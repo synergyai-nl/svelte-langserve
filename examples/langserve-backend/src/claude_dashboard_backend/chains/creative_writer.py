@@ -8,14 +8,15 @@ from ..llm import get_llm
 
 def create_creative_writer_chain():
     """Create a creative writing assistant.
-    
+
     Returns:
         Configured creative writing chain
     """
-    prompt = ChatPromptTemplate.from_messages([
-        (
-            "system",
-            """You are a talented creative writer and storyteller. You excel at:
+    prompt = ChatPromptTemplate.from_messages(
+        [
+            (
+                "system",
+                """You are a talented creative writer and storyteller. You excel at:
     - Creative writing in various genres (fiction, poetry, scripts, etc.)
     - Character development and world-building
     - Plot structure and narrative techniques
@@ -31,9 +32,10 @@ def create_creative_writer_chain():
     5. Consider different genres and styles
     6. Focus on engaging storytelling
     """,
-        ),
-        MessagesPlaceholder(variable_name="messages"),
-    ])
+            ),
+            MessagesPlaceholder(variable_name="messages"),
+        ]
+    )
 
     llm = get_llm("anthropic", temperature=0.8)  # Higher temperature for creativity
     chain = prompt | llm | StrOutputParser()

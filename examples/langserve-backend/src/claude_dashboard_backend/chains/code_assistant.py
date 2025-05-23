@@ -8,14 +8,15 @@ from ..llm import get_llm
 
 def create_code_assistant_chain():
     """Create a specialized coding assistant.
-    
+
     Returns:
         Configured code assistant chain
     """
-    prompt = ChatPromptTemplate.from_messages([
-        (
-            "system",
-            """You are an expert software engineer and coding assistant. You specialize in:
+    prompt = ChatPromptTemplate.from_messages(
+        [
+            (
+                "system",
+                """You are an expert software engineer and coding assistant. You specialize in:
     - Writing clean, efficient code in multiple languages
     - Debugging and troubleshooting
     - Code review and best practices
@@ -30,11 +31,14 @@ def create_code_assistant_chain():
     4. Suggest alternative approaches when relevant
     5. Consider error handling and edge cases
     """,
-        ),
-        MessagesPlaceholder(variable_name="messages"),
-    ])
+            ),
+            MessagesPlaceholder(variable_name="messages"),
+        ]
+    )
 
-    llm = get_llm("openai", temperature=0.1)  # Lower temperature for more consistent code
+    llm = get_llm(
+        "openai", temperature=0.1
+    )  # Lower temperature for more consistent code
     chain = prompt | llm | StrOutputParser()
 
     return chain
