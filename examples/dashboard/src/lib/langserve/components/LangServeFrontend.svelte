@@ -8,25 +8,43 @@
 		testAllEndpoints,
 		loadConversations
 	} from '../stores/langserve';
+	import { authStore, isAuthenticated, accessToken, currentUser } from '../stores/auth';
 
 	import EndpointSelector from './EndpointSelector.svelte';
 	import ConfigPanel from './ConfigPanel.svelte';
 	import ConversationList from './ConversationList.svelte';
 	import ChatInterface from './ChatInterface.svelte';
+	import LoginForm from './LoginForm.svelte';
 
-	export let userId: string;
+	export let userId: string = 'user123';
 	export let authToken: string | undefined = undefined;
 	export let serverUrl: string = 'http://localhost:3000';
+	export let backendUrl: string = 'http://localhost:8000';
 
 	let selectedEndpoints: string[] = [];
 	let config = { temperature: 0.7, streaming: true };
 
 	onMount(() => {
-		// Connect to the server
-		langserveStore.connect(serverUrl, userId, authToken);
+		// If already authenticated via auth store, connect immediately
+		if ($isAuthenticated && $accessToken) {
+			const token = $accessToken;
+			const user = $currentUser?.username || userId;
+			langserveStore.connect(serverUrl, user, token);
+		}
 
-		// Initial data loading after authentication
-		const unsubscribe = authenticated.subscribe((value) => {
+		// Watch for authentication changes
+		const unsubscribeAuth = isAuthenticated.subscribe((authenticated) => {
+			if (authenticated && $accessToken) {
+				const token = $accessToken;
+				const user = $currentUser?.username || userId;
+				langserveStore.connect(serverUrl, user, token);
+			} else {
+				langserveStore.disconnect();
+			}
+		});
+
+		// Initial data loading after langserve authentication
+		const unsubscribeLangserve = authenticated.subscribe((value) => {
 			if (value) {
 				loadConversations();
 				testAllEndpoints();
@@ -34,7 +52,8 @@
 		});
 
 		return () => {
-			unsubscribe();
+			unsubscribeAuth();
+			unsubscribeLangserve();
 		};
 	});
 
@@ -55,11 +74,22 @@
 	function handleSendChatMessage(content: string) {
 		langserveStore.sendMessage($langserveStore.activeConversationId!, content, config);
 	}
+
+	function handleLoginSuccess() {
+		// Connection will be handled automatically by the isAuthenticated subscription
+	}
+
+	function handleLogout() {
+		authStore.logout();
+	}
 </script>
 
 <div class="flex h-screen bg-white">
-	<!-- If not connected or authenticated, show loading state -->
-	{#if !$connected}
+	<!-- Show login form if not authenticated -->
+	{#if !$isAuthenticated}
+		<LoginForm serverUrl={backendUrl} on:loginSuccess={handleLoginSuccess} />
+	<!-- If authenticated but not connected to langserve, show loading state -->
+	{:else if !$connected}
 		<div class="flex h-full w-full items-center justify-center">
 			<div class="p-6 text-center">
 				<h2 class="mb-4 text-xl">Connecting to LangServe Frontend...</h2>
@@ -68,24 +98,50 @@
 						Error: {$connectionError}
 					</div>
 				{/if}
-				<button
-					on:click={() => langserveStore.connect(serverUrl, userId, authToken)}
-					class="rounded-md bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
-				>
-					Retry Connection
-				</button>
+				<div class="space-y-2">
+					<button
+						on:click={() => {
+							const token = $accessToken;
+							const user = $currentUser?.username || userId;
+							langserveStore.connect(serverUrl, user, token);
+						}}
+						class="rounded-md bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
+					>
+						Retry Connection
+					</button>
+					<button
+						on:click={handleLogout}
+						class="rounded-md bg-gray-500 px-4 py-2 text-white hover:bg-gray-600"
+					>
+						Logout
+					</button>
+				</div>
 			</div>
 		</div>
 	{:else if !$authenticated}
 		<div class="flex h-full w-full items-center justify-center">
 			<div class="text-center">
-				<h2 class="text-xl">Authenticating...</h2>
+				<h2 class="text-xl">Authenticating with LangServe...</h2>
+				<button
+					on:click={handleLogout}
+					class="mt-4 rounded-md bg-gray-500 px-4 py-2 text-white hover:bg-gray-600"
+				>
+					Logout
+				</button>
 			</div>
 		</div>
 	{:else}
 		<!-- Main interface when connected and authenticated -->
 		<div class="flex w-80 flex-col overflow-y-auto border-r p-4">
-			<h2 class="mb-4 text-xl font-bold">LangServe Frontend</h2>
+			<div class="mb-4 flex items-center justify-between">
+				<h2 class="text-xl font-bold">LangServe Frontend</h2>
+				<button
+					on:click={handleLogout}
+					class="rounded-md bg-red-500 px-3 py-1 text-sm text-white hover:bg-red-600"
+				>
+					Logout
+				</button>
+			</div>
 
 			<EndpointSelector bind:selectedEndpoints />
 

@@ -1,11 +1,12 @@
 """Data analyst chain implementation with search capabilities."""
 
-from typing import Dict, Any
+import os
+from typing import Any, Dict
 
+from langchain.agents import AgentExecutor, create_openai_functions_agent
+from langchain_community.tools.tavily_search import TavilySearchResults
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.runnables import RunnableLambda
-from langchain.agents import create_openai_functions_agent, AgentExecutor
-from langchain_community.tools.tavily_search import TavilySearchResults
 
 from ..llm import get_llm
 
@@ -17,13 +18,16 @@ def create_data_analyst_chain():
         Configured data analyst chain with search tools
     """
     # Tools for data analysis
-    search_tool = TavilySearchResults(
-        max_results=3,
-        search_depth="advanced",
-        api_wrapper_kwargs={"search_depth": "advanced"},
-    )
-
-    tools = [search_tool]
+    tools = []
+    
+    # Only add search tool if API key is available
+    if os.getenv("TAVILY_API_KEY"):
+        search_tool = TavilySearchResults(
+            max_results=3,
+            search_depth="advanced",
+            api_wrapper_kwargs={"search_depth": "advanced"},
+        )
+        tools.append(search_tool)
 
     prompt = ChatPromptTemplate.from_messages(
         [
@@ -55,6 +59,33 @@ def create_data_analyst_chain():
     )
 
     llm = get_llm("openai")
+
+    # If no tools available, create a simple chain instead of agent
+    if not tools:
+        from langchain_core.output_parsers import StrOutputParser
+        
+        def format_for_simple_chain(inputs: Dict[str, Any]) -> Dict[str, Any]:
+            messages = inputs.get("messages", [])
+            if messages:
+                # Convert last message to input
+                input_msg = messages[-1].content if messages else ""
+                return {"input": input_msg}
+            return {"input": ""}
+        
+        simple_prompt = ChatPromptTemplate.from_messages([
+            ("system", """You are an expert data analyst. You excel at:
+- Data analysis and interpretation
+- Statistical analysis concepts
+- Creating data visualization recommendations
+- Explaining analytical methods
+- Business intelligence insights
+
+Note: Search tools are not available in this configuration, but you can still provide analytical guidance based on your knowledge."""),
+            ("user", "{input}")
+        ])
+        
+        chain = RunnableLambda(format_for_simple_chain) | simple_prompt | llm | StrOutputParser()
+        return chain
 
     agent = create_openai_functions_agent(llm, tools, prompt)
     agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True)

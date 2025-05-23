@@ -13,7 +13,11 @@ dependencies = [
     "langchain",
     "tavily-python",
     "langchain-postgres",
-    "psycopg2-binary"
+    "psycopg2-binary",
+    "python-jose[cryptography]",
+    "passlib[bcrypt]",
+    "python-multipart",
+    "duckduckgo-search"
 ]
 
 [dependency-groups]
