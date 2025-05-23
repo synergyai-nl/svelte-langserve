@@ -8,39 +8,39 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ```bash
 # Install dependencies
-cd frontend
+cd examples/dashboard
 pnpm install
 
 # Start frontend in development mode
-cd frontend
+cd examples/dashboard
 pnpm dev
 
 # Build frontend for production
-cd frontend
+cd examples/dashboard
 pnpm build
 
 # Preview production build
-cd frontend
+cd examples/dashboard
 pnpm preview
 
 # Run unit tests
-cd frontend
+cd examples/dashboard
 pnpm test:unit
 
 # Run end-to-end tests
-cd frontend
+cd examples/dashboard
 pnpm test:e2e
 
 # Run all tests
-cd frontend
+cd examples/dashboard
 pnpm test
 
 # Check types
-cd frontend
+cd examples/dashboard
 pnpm check
 
 # Lint and format code
-cd frontend
+cd examples/dashboard
 pnpm lint
 pnpm format
 ```
@@ -49,20 +49,20 @@ pnpm format
 
 ```bash
 # Install backend dependencies and run (using uv - recommended)
-cd backend
+cd examples/langserve-backend
 uv run serve
 
 # Or run directly
-cd backend
+cd examples/langserve-backend
 uv run main.py
 
 # Alternative: Manual setup
-cd backend
+cd examples/langserve-backend
 pip install -e .
 python main.py
 
 # Development mode with auto-reload
-cd backend
+cd examples/langserve-backend
 uv run uvicorn src.claude_dashboard_backend.main:create_app --factory --reload --port 8000
 ```
 
