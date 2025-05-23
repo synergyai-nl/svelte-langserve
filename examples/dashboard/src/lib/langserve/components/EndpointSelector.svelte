@@ -6,8 +6,12 @@
 		getEndpointSchemas
 	} from '../stores/langserve';
 
-	export let selectedEndpoints: string[] = [];
-	let showEndpointDetails = false;
+	interface Props {
+		selectedEndpoints?: string[];
+	}
+	
+	let { selectedEndpoints = [] }: Props = $props();
+	let showEndpointDetails = $state(false);
 
 	function getEndpointStatus(endpointId: string) {
 		const health = $endpointHealth.get(endpointId);

@@ -5,8 +5,12 @@
 		change: { temperature: number; streaming: boolean };
 	}>();
 
-	export let temperature = 0.7;
-	export let streaming = true;
+	interface Props {
+		temperature?: number;
+		streaming?: boolean;
+	}
+	
+	let { temperature = 0.7, streaming = true }: Props = $props();
 
 	function updateConfig() {
 		dispatch('change', { temperature, streaming });
@@ -25,7 +29,7 @@
 				max="1"
 				step="0.1"
 				bind:value={temperature}
-				on:change={updateConfig}
+				onchange={updateConfig}
 				class="mx-2 flex-1"
 			/>
 			<span class="text-sm">{temperature}</span>
@@ -34,7 +38,7 @@
 
 	<div>
 		<label class="flex items-center">
-			<input type="checkbox" bind:checked={streaming} on:change={updateConfig} class="mr-2" />
+			<input type="checkbox" bind:checked={streaming} onchange={updateConfig} class="mr-2" />
 			<span>Enable Streaming</span>
 		</label>
 	</div>

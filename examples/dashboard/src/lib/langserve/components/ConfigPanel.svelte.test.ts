@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { render, screen } from '@testing-library/svelte';
+import { render, screen, waitFor } from '@testing-library/svelte';
 import userEvent from '@testing-library/user-event';
 import ConfigPanel from './ConfigPanel.svelte';
 
@@ -45,7 +45,7 @@ describe('ConfigPanel', () => {
 		expect(streamingCheckbox).toHaveAttribute('type', 'checkbox');
 	});
 
-	it('displays temperature value correctly', () => {
+	it('displays temperature value correctly', async () => {
 		const { rerender } = render(ConfigPanel, {
 			temperature: 0.2,
 			streaming: false
@@ -61,6 +61,8 @@ describe('ConfigPanel', () => {
 		});
 		
 		// Give time for reactivity
-		expect(screen.getByRole('checkbox')).toBeChecked();
+		await waitFor(() => {
+			expect(screen.getByRole('checkbox')).toBeChecked();
+		});
 	});
 });

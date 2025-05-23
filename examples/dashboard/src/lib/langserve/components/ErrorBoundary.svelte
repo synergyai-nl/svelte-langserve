@@ -1,9 +1,17 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 
-	export let fallback: string = 'An error occurred. Please try again.';
-	export let showDetails: boolean = false;
-	export let onError: ((error: Error) => void) | undefined = undefined;
+	interface Props {
+		fallback?: string;
+		showDetails?: boolean;
+		onError?: ((error: Error) => void) | undefined;
+	}
+	
+	let { 
+		fallback = 'An error occurred. Please try again.',
+		showDetails = false,
+		onError = undefined
+	}: Props = $props();
 
 	let hasError = $state(false);
 	let errorMessage = $state('');

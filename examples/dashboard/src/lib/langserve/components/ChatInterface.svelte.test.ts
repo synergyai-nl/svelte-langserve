@@ -3,6 +3,7 @@ import { render, screen } from '@testing-library/svelte';
 import userEvent from '@testing-library/user-event';
 import { writable } from 'svelte/store';
 import ChatInterface from './ChatInterface.svelte';
+import * as langserveStore from '../stores/langserve';
 
 // Mock the ChatMessage component
 vi.mock('./ChatMessage.svelte', () => ({
@@ -61,12 +62,28 @@ describe('ChatInterface', () => {
 
 	beforeEach(() => {
 		vi.clearAllMocks();
+		
+		// Reset mock data to default state
+		langserveStore.activeConversation.set({
+			id: 'conversation-123',
+			participants: {
+				agents: [
+					{ id: 'agent-1', name: 'Chatbot' },
+					{ id: 'agent-2', name: 'Code Assistant' }
+				]
+			},
+			messages: [
+				{ id: 'msg-1', content: 'Hello', type: 'human' },
+				{ id: 'msg-2', content: 'How can I help?', type: 'ai' }
+			]
+		});
+		
+		langserveStore.hasStreamingMessages.set(false);
 	});
 
 	it('renders welcome message when no active conversation', () => {
 		// Mock no active conversation
-		const { activeConversation } = vi.importedMocks('../stores/langserve');
-		activeConversation.set(null);
+		langserveStore.activeConversation.set(null);
 
 		render(ChatInterface, {
 			props: { sendMessage: mockSendMessage }

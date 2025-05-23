@@ -11,15 +11,19 @@
 	import { slide } from 'svelte/transition';
 	import { chatLogger, performanceLogger } from '../../utils/logger';
 
-	export let sendMessage: (content: string) => void;
+	interface Props {
+		sendMessage: (content: string) => void;
+	}
+	
+	let { sendMessage }: Props = $props();
 
 	let messageInput = '';
 	let chatContainer: HTMLDivElement;
 	let isLoadingMore = $state(false);
 
 	// Reactive pagination info
-	$: pagination = $activeConversation ? getMessagePagination($activeConversation.id) : null;
-	$: displayMessages = $activeConversation ? getDisplayMessages($activeConversation.id) : [];
+	let pagination = $derived($activeConversation ? getMessagePagination($activeConversation.id) : null);
+	let displayMessages = $derived($activeConversation ? getDisplayMessages($activeConversation.id) : []);
 
 	const dispatch = createEventDispatcher();
 
@@ -136,11 +140,11 @@
 				class="mr-2 flex-1 resize-none rounded-md border p-2"
 				rows="2"
 				bind:value={messageInput}
-				on:keydown={handleKeyPress}
+				onkeydown={handleKeyPress}
 				placeholder="Type a message..."
 			></textarea>
 			<button
-				on:click={handleSendMessage}
+				onclick={handleSendMessage}
 				disabled={!messageInput.trim()}
 				class="rounded-md bg-blue-500 px-4 py-2 text-white disabled:cursor-not-allowed disabled:bg-blue-300"
 			>
@@ -154,7 +158,7 @@
 			<h3 class="mb-3 text-xl font-semibold">Welcome to LangServe Frontend</h3>
 			<p class="mb-2 text-gray-600">Select endpoints and create a conversation to get started.</p>
 			<button
-				on:click={() => dispatch('create')}
+				onclick={() => dispatch('create')}
 				class="mt-4 rounded-md bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
 			>
 				Create New Conversation

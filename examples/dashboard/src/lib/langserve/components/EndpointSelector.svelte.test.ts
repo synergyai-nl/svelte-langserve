@@ -3,6 +3,7 @@ import { render, screen } from '@testing-library/svelte';
 import userEvent from '@testing-library/user-event';
 import { writable } from 'svelte/store';
 import EndpointSelector from './EndpointSelector.svelte';
+import * as langserveStore from '../stores/langserve';
 
 // Mock the langserve store
 vi.mock('../stores/langserve', () => {
@@ -26,20 +27,41 @@ vi.mock('../stores/langserve', () => {
 		['endpoint-2', false]
 	]));
 
+	const mockTestEndpoint = vi.fn();
+	const mockGetEndpointSchemas = vi.fn();
+
 	return {
 		availableEndpoints: mockAvailableEndpoints,
 		endpointHealth: mockEndpointHealth,
-		testEndpoint: vi.fn(),
-		getEndpointSchemas: vi.fn()
+		testEndpoint: mockTestEndpoint,
+		getEndpointSchemas: mockGetEndpointSchemas
 	};
 });
 
 describe('EndpointSelector', () => {
-	const mockTestEndpoint = vi.fn();
-	const mockGetEndpointSchemas = vi.fn();
-
 	beforeEach(() => {
 		vi.clearAllMocks();
+		
+		// Reset mock data to default state
+		langserveStore.availableEndpoints.set([
+			{
+				id: 'endpoint-1',
+				name: 'Chatbot',
+				url: 'http://localhost:8000/chatbot',
+				description: 'General chatbot'
+			},
+			{
+				id: 'endpoint-2', 
+				name: 'Code Assistant',
+				url: 'http://localhost:8000/code-assistant',
+				description: 'Helps with code'
+			}
+		]);
+		
+		langserveStore.endpointHealth.set(new Map([
+			['endpoint-1', true],
+			['endpoint-2', false]
+		]));
 	});
 
 	it('renders available endpoints', () => {
@@ -59,8 +81,7 @@ describe('EndpointSelector', () => {
 
 	it('renders no endpoints message when list is empty', () => {
 		// Mock empty endpoints
-		const { availableEndpoints } = vi.importedMocks('../stores/langserve');
-		availableEndpoints.set([]);
+		langserveStore.availableEndpoints.set([]);
 
 		render(EndpointSelector);
 		
@@ -120,26 +141,24 @@ describe('EndpointSelector', () => {
 
 	it('calls testEndpoint when test button is clicked', async () => {
 		const user = userEvent.setup();
-		const { testEndpoint } = vi.importedMocks('../stores/langserve');
 		
 		render(EndpointSelector);
 
 		const testButtons = screen.getAllByRole('button', { name: /test/i });
 		await user.click(testButtons[0]);
 
-		expect(testEndpoint).toHaveBeenCalledWith('endpoint-1');
+		expect(langserveStore.testEndpoint).toHaveBeenCalledWith('endpoint-1');
 	});
 
 	it('calls getEndpointSchemas when schemas button is clicked', async () => {
 		const user = userEvent.setup();
-		const { getEndpointSchemas } = vi.importedMocks('../stores/langserve');
 		
 		render(EndpointSelector);
 
 		const schemaButtons = screen.getAllByRole('button', { name: /schemas/i });
 		await user.click(schemaButtons[0]);
 
-		expect(getEndpointSchemas).toHaveBeenCalledWith('endpoint-1');
+		expect(langserveStore.getEndpointSchemas).toHaveBeenCalledWith('endpoint-1');
 	});
 
 	it('applies correct styling based on endpoint health', () => {
@@ -154,8 +173,7 @@ describe('EndpointSelector', () => {
 
 	it('handles unknown endpoint health status', () => {
 		// Mock endpoint with unknown health
-		const { endpointHealth } = vi.importedMocks('../stores/langserve');
-		endpointHealth.set(new Map());
+		langserveStore.endpointHealth.set(new Map());
 
 		render(EndpointSelector);
 		
