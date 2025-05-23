@@ -1,16 +1,31 @@
 """Test configuration and fixtures."""
 
 import pytest
+from unittest.mock import patch, MagicMock
 from fastapi.testclient import TestClient
 
 from src.claude_dashboard_backend.app import create_app
 
 
 @pytest.fixture
-def client():
-    """Create a test client for the FastAPI app."""
-    app = create_app()
-    return TestClient(app)
+def mock_llm():
+    """Mock LLM for testing."""
+    mock = MagicMock()
+    mock.invoke.return_value = "Mocked LLM response"
+    return mock
+
+
+@pytest.fixture
+def client(mock_llm):
+    """Create a test client for the FastAPI app with mocked dependencies."""
+    with patch('src.claude_dashboard_backend.llm.get_llm', return_value=mock_llm):
+        with patch('src.claude_dashboard_backend.chains.chatbot.get_llm', return_value=mock_llm):
+            with patch('src.claude_dashboard_backend.chains.code_assistant.get_llm', return_value=mock_llm):
+                with patch('src.claude_dashboard_backend.chains.creative_writer.get_llm', return_value=mock_llm):
+                    with patch('src.claude_dashboard_backend.chains.data_analyst.get_llm', return_value=mock_llm):
+                        with patch('src.claude_dashboard_backend.chains.research_assistant.get_llm', return_value=mock_llm):
+                            app = create_app()
+                            return TestClient(app)
 
 
 @pytest.fixture
