@@ -27,7 +27,7 @@
   "dependencies": {
     "@svelte-langserve/types": "workspace:*",
     "json-schema-to-typescript": "^13.1.2",
-    "commander": "^11.1.0"
+    "commander": "^14.0.0"
   },
   "devDependencies": {
     "@types/node": "^20.10.0",
