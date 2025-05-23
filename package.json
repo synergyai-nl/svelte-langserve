@@ -48,7 +48,8 @@
     ],
     "examples/langserve-backend/**/*.py": [
       "cd examples/langserve-backend && uv run ruff check --fix",
-      "cd examples/langserve-backend && uv run ruff format"
+      "cd examples/langserve-backend && uv run ruff format",
+      "cd examples/langserve-backend && uv run pyright"
     ]
   },
   "keywords": [
