@@ -51,7 +51,7 @@
 		"test:unit": {
 			"executor": "nx:run-commands",
 			"options": {
-				"command": "vitest",
+				"command": "vitest --run",
 				"cwd": "examples/dashboard"
 			}
 		},
@@ -63,11 +63,6 @@
 			}
 		},
 		"test": {
-			"executor": "nx:run-commands",
-			"options": {
-				"command": "npm run test:unit -- --run && npm run test:e2e",
-				"cwd": "examples/dashboard"
-			},
 			"dependsOn": ["test:unit", "test:e2e"]
 		}
 	},
