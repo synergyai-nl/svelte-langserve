@@ -48,16 +48,22 @@ pnpm format
 ### Backend Development (Python/FastAPI/LangServe)
 
 ```bash
-# Install backend dependencies
+# Install backend dependencies and run (using uv - recommended)
 cd backend
-pip install -r requirements.txt
+uv run serve
 
-# Start backend in development mode
+# Or run directly
 cd backend
-python -m uvicorn main:app --reload --port 8000
+uv run main.py
 
-# Run the backend with the Python script
-python backend.py
+# Alternative: Manual setup
+cd backend
+pip install -e .
+python main.py
+
+# Development mode with auto-reload
+cd backend
+uv run uvicorn src.claude_dashboard_backend.main:create_app --factory --reload --port 8000
 ```
 
 ### Docker Deployment
