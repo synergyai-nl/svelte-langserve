@@ -4,12 +4,39 @@ import { RemoteRunnable } from '@langchain/core/runnables/remote';
 import { HumanMessage, AIMessage, SystemMessage } from '@langchain/core/messages';
 import type { LangServeEndpoint, ChatMessage, Conversation } from '$lib/langserve/types';
 
+// Type definitions for LangChain responses
+interface LangChainOutput {
+	content?: string;
+	output?: {
+		content?: string;
+	};
+}
+
+interface StreamChunk {
+	content?: string;
+	output?: {
+		content?: string;
+	};
+	delta?: {
+		content?: string;
+	};
+}
+
+interface PlatformNode {
+	node: {
+		server: unknown;
+	};
+}
+
 // Keep track of the IO server instance
 let io: Server;
 
 // LangServe Client Manager
 class LangServeClientManager {
-	private clients: Map<string, RemoteRunnable<any, any, any>> = new Map();
+	private clients: Map<
+		string,
+		RemoteRunnable<Record<string, unknown>, unknown, Record<string, unknown>>
+	> = new Map();
 	private endpoints: Map<string, LangServeEndpoint> = new Map();
 
 	constructor(private config: Record<string, unknown>) {
@@ -100,10 +127,16 @@ class LangServeClientManager {
 			if (typeof result === 'string') {
 				return result;
 			} else if (result && typeof result === 'object' && 'content' in result) {
-				return (result as any).content;
-			} else if (result && typeof result === 'object' && 'output' in result && 
-				typeof (result as any).output === 'object' && (result as any).output && 'content' in (result as any).output) {
-				return (result as any).output.content;
+				return (result as LangChainOutput).content || '';
+			} else if (
+				result &&
+				typeof result === 'object' &&
+				'output' in result &&
+				typeof (result as LangChainOutput).output === 'object' &&
+				(result as LangChainOutput).output &&
+				'content' in (result as LangChainOutput).output!
+			) {
+				return (result as LangChainOutput).output!.content || '';
 			} else {
 				return JSON.stringify(result);
 			}
@@ -142,13 +175,25 @@ class LangServeClientManager {
 				if (typeof chunk === 'string') {
 					content = chunk;
 				} else if (chunk && typeof chunk === 'object' && 'content' in chunk) {
-					content = (chunk as any).content;
-				} else if (chunk && typeof chunk === 'object' && 'output' in chunk && 
-					typeof (chunk as any).output === 'object' && (chunk as any).output && 'content' in (chunk as any).output) {
-					content = (chunk as any).output.content;
-				} else if (chunk && typeof chunk === 'object' && 'delta' in chunk && 
-					typeof (chunk as any).delta === 'object' && (chunk as any).delta && 'content' in (chunk as any).delta) {
-					content = (chunk as any).delta.content;
+					content = (chunk as StreamChunk).content || '';
+				} else if (
+					chunk &&
+					typeof chunk === 'object' &&
+					'output' in chunk &&
+					typeof (chunk as StreamChunk).output === 'object' &&
+					(chunk as StreamChunk).output &&
+					'content' in (chunk as StreamChunk).output!
+				) {
+					content = (chunk as StreamChunk).output!.content || '';
+				} else if (
+					chunk &&
+					typeof chunk === 'object' &&
+					'delta' in chunk &&
+					typeof (chunk as StreamChunk).delta === 'object' &&
+					(chunk as StreamChunk).delta &&
+					'content' in (chunk as StreamChunk).delta!
+				) {
+					content = (chunk as StreamChunk).delta!.content || '';
 				}
 
 				if (content) {
@@ -180,7 +225,9 @@ class LangServeClientManager {
 						additional_kwargs: msg.additional_kwargs || {}
 					});
 				default:
-					return new HumanMessage({ content: typeof msg.content === 'string' ? msg.content : JSON.stringify(msg.content) });
+					return new HumanMessage({
+						content: typeof msg.content === 'string' ? msg.content : JSON.stringify(msg.content)
+					});
 			}
 		});
 	}
@@ -317,7 +364,9 @@ class LangServeSocketIOServer {
 							);
 						}
 					} catch (error) {
-						socket.emit('error', { message: error instanceof Error ? error.message : String(error) });
+						socket.emit('error', {
+							message: error instanceof Error ? error.message : String(error)
+						});
 					}
 				}
 			);
@@ -339,7 +388,9 @@ class LangServeSocketIOServer {
 					try {
 						await this.processUserMessage(data.conversation_id, user_id, data.content, data.config);
 					} catch (error) {
-						socket.emit('error', { message: error instanceof Error ? error.message : String(error) });
+						socket.emit('error', {
+							message: error instanceof Error ? error.message : String(error)
+						});
 					}
 				}
 			);
@@ -629,7 +680,7 @@ const setupSocketIO: Handle = async ({ event, resolve }) => {
 
 	// Set up Socket.IO server if not already done
 	if (!langserveSocketIO && event.platform && 'node' in event.platform) {
-		const server = (event.platform as any).node.server;
+		const server = (event.platform as PlatformNode).node.server;
 		if (server) {
 			langserveSocketIO = new LangServeSocketIOServer(server, langserveConfig);
 			console.log('LangServe Socket.IO server initialized');

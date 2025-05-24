@@ -62,7 +62,7 @@
 	}
 
 	// Wrap component execution to catch synchronous errors
-	let safeExecute = $state((fn: () => any, defaultValue: any) => {
+	let safeExecute = $state((fn: () => unknown, defaultValue: unknown) => {
 		try {
 			return fn();
 		} catch (error) {
