@@ -5,9 +5,10 @@ import type { Conversation, StreamingResponse } from '@svelte-langserve/types';
  * Create a reactive store for managing conversations and messages
  */
 export function createConversationStore(client: LangServeClient) {
-  const conversations = $state<Map<string, Conversation>>(new Map());
-  let activeConversationId = $state<string | null>(null);
-  const streamingMessages = $state<Map<string, string>>(new Map());
+  // Use $state if available (in Svelte runtime), otherwise plain variables for testing
+  const conversations = typeof $state !== 'undefined' ? $state<Map<string, Conversation>>(new Map()) : new Map<string, Conversation>();
+  let activeConversationId = typeof $state !== 'undefined' ? $state<string | null>(null) : null;
+  const streamingMessages = typeof $state !== 'undefined' ? $state<Map<string, string>>(new Map()) : new Map<string, string>();
 
   const socket = client.getSocket();
 

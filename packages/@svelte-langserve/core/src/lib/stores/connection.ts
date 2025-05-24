@@ -4,9 +4,10 @@ import type { LangServeClient } from '../client.js';
  * Create a reactive store for Socket.IO connection state
  */
 export function createConnectionStore(client: LangServeClient) {
-  let connected = $state(false);
-  let connecting = $state(false);
-  let error = $state<string | null>(null);
+  // Use $state if available (in Svelte runtime), otherwise plain variables for testing
+  let connected = typeof $state !== 'undefined' ? $state(false) : false;
+  let connecting = typeof $state !== 'undefined' ? $state(false) : false;
+  let error = typeof $state !== 'undefined' ? $state<string | null>(null) : null;
 
   const socket = client.getSocket();
 
