@@ -1,13 +1,13 @@
 import type { LangServeClient } from '../client.js';
-import type { Conversation, Message, StreamingResponse } from '@svelte-langserve/types';
+import type { Conversation, StreamingResponse } from '@svelte-langserve/types';
 
 /**
  * Create a reactive store for managing conversations and messages
  */
 export function createConversationStore(client: LangServeClient) {
-  let conversations = $state<Map<string, Conversation>>(new Map());
+  const conversations = $state<Map<string, Conversation>>(new Map());
   let activeConversationId = $state<string | null>(null);
-  let streamingMessages = $state<Map<string, string>>(new Map());
+  const streamingMessages = $state<Map<string, string>>(new Map());
 
   const socket = client.getSocket();
 

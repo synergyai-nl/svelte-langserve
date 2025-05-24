@@ -1,7 +1,7 @@
 <script lang="ts">
   import { activeConversation, hasStreamingMessages, getDisplayMessages } from '@svelte-langserve/core';
   import ChatMessage from './ChatMessage.svelte';
-  import { createEventDispatcher, onMount } from 'svelte';
+  import { createEventDispatcher } from 'svelte';
   import { slide } from 'svelte/transition';
 
   export let sendMessage: (content: string) => void;
@@ -26,11 +26,16 @@
   }
   
   // Auto-scroll to bottom when new messages arrive
-  $: if ($activeConversation && chatContainer) {
-    // Use setTimeout to ensure the DOM has updated
-    setTimeout(() => {
-      chatContainer.scrollTop = chatContainer.scrollHeight;
-    }, 0);
+  function scrollToBottom() {
+    if (chatContainer) {
+      setTimeout(() => {
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+      }, 0);
+    }
+  }
+  
+  $: if ($activeConversation) {
+    scrollToBottom();
   }
 </script>
 

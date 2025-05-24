@@ -2,7 +2,7 @@
   import { onMount, onDestroy } from 'svelte';
   import { 
     langserveStore, connected, authenticated, connectionError, 
-    testAllEndpoints, loadConversations, sendMessage
+    testAllEndpoints, loadConversations
   } from '@svelte-langserve/core';
   
   import EndpointSelector from './EndpointSelector.svelte';
@@ -83,12 +83,7 @@
     <div class="w-80 border-r p-4 overflow-y-auto flex flex-col">
       <h2 class="text-xl font-bold mb-4">LangServe Frontend</h2>
       
-      <EndpointSelector let:selectedEndpoints={endpoints}>
-        {#if endpoints}
-          {@const endpointsList = endpoints}
-          {@update selectedEndpoints = endpointsList}
-        {/if}
-      </EndpointSelector>
+      <EndpointSelector bind:selectedEndpoints />
       
       <ConfigPanel 
         temperature={config.temperature} 
