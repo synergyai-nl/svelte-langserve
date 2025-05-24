@@ -1,9 +1,12 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
+  import { useTheme } from '../themes/utils.js';
 
   const dispatch = createEventDispatcher<{
     change: { temperature: number; streaming: boolean };
   }>();
+
+  const theme = useTheme();
 
   let { 
     temperature = 0.7,
@@ -18,10 +21,10 @@
   }
 </script>
 
-<div class="p-4 border border-gray-200 rounded-lg mb-4">
-  <h3 class="text-lg font-semibold mb-3">Configuration</h3>
+<div class={theme.configPanel}>
+  <h3 class={theme.configLabel}>Configuration</h3>
   
-  <div class="mb-3">
+  <div class={theme.configSection}>
     <label class="flex items-center">
       <span class="mr-2">Temperature:</span>
       <input
@@ -31,13 +34,13 @@
         step="0.1"
         bind:value={temperature}
         on:change={updateConfig}
-        class="flex-1 mx-2"
+        class={theme.configSlider}
       />
-      <span class="text-sm">{temperature}</span>
+      <span class="text-sm ml-2">{temperature}</span>
     </label>
   </div>
   
-  <div>
+  <div class={theme.configSection}>
     <label class="flex items-center">
       <input
         type="checkbox"

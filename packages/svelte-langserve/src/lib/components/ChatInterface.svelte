@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { Conversation } from '../types.js';
   import ChatMessage from './ChatMessage.svelte';
+  import { useTheme } from '../themes/utils.js';
 
   let { 
     sendMessage,
@@ -13,6 +14,8 @@
     isLoading?: boolean;
     oncreate?: (() => void) | undefined;
   } = $props();
+  
+  const theme = useTheme();
   
   let messageInput = $state('');
   let chatContainer: HTMLDivElement;
@@ -48,72 +51,100 @@
 </script>
 
 {#if conversation}
-  <div class="flex flex-col h-full">
+  <div class={theme.chatArea}>
     <!-- Chat Header -->
-    <div class="p-3 border-b bg-gray-50">
-      <h3 class="text-lg font-semibold">
+    <div class={theme.header}>
+      <h3 class={theme.title}>
         {conversation.title || `Conversation: ${conversation.id.slice(0, 12)}...`}
       </h3>
-      <div class="text-sm text-gray-600">
+      <div class={theme.subtitle}>
         {conversation.messages.length} messages
       </div>
       {#if isLoading}
-        <div class="text-xs text-blue-500 italic mt-1">
-          🔄 AI is responding...
+        <div class={theme.loading}>
+          <span class={theme.loadingSpinner}>🔄</span>
+          <span class={theme.loadingText}>AI is responding...</span>
         </div>
       {/if}
     </div>
     
     <!-- Messages -->
-    <div class="flex-1 overflow-y-auto p-4" bind:this={chatContainer}>
+    <div class={theme.messageContainer} bind:this={chatContainer}>
       {#if conversation.messages.length === 0}
-        <div class="text-gray-400 text-center py-4">
-          No messages yet. Start the conversation!
+        <div class={theme.emptyState}>
+          <div class={theme.emptyStateDescription}>
+            No messages yet. Start the conversation!
+          </div>
         </div>
       {:else}
         {#each conversation.messages as chatMessage (chatMessage.id)}
-          <ChatMessage message={{
-            id: chatMessage.id,
-            role: chatMessage.type === 'human' ? 'user' : chatMessage.type === 'ai' ? 'assistant' : 'system',
-            content: typeof chatMessage.content === 'string' ? chatMessage.content : JSON.stringify(chatMessage.content),
-            timestamp: new Date(chatMessage.timestamp),
-            metadata: {
-              endpoint_name: chatMessage.sender_id
-            }
-          }} />
+          <div class={theme.messageWrapper}>
+            {#if chatMessage.type === 'human'}
+              <div class={theme.messageUser}>
+                <div class={theme.messageUserBubble}>
+                  <div class={theme.messageContent}>
+                    {typeof chatMessage.content === 'string' ? chatMessage.content : JSON.stringify(chatMessage.content)}
+                  </div>
+                  <div class={theme.messageTimestamp}>
+                    {new Date(chatMessage.timestamp).toLocaleTimeString()}
+                  </div>
+                </div>
+              </div>
+            {:else if chatMessage.type === 'ai'}
+              <div class={theme.messageAssistant}>
+                <div class={theme.messageAssistantBubble}>
+                  <div class={theme.messageContent}>
+                    {typeof chatMessage.content === 'string' ? chatMessage.content : JSON.stringify(chatMessage.content)}
+                  </div>
+                  <div class={theme.messageTimestamp}>
+                    {new Date(chatMessage.timestamp).toLocaleTimeString()}
+                  </div>
+                </div>
+              </div>
+            {:else}
+              <div class={theme.messageSystem}>
+                <div class={theme.messageContent}>
+                  {typeof chatMessage.content === 'string' ? chatMessage.content : JSON.stringify(chatMessage.content)}
+                </div>
+                <div class={theme.messageTimestamp}>
+                  {new Date(chatMessage.timestamp).toLocaleTimeString()}
+                </div>
+              </div>
+            {/if}
+          </div>
         {/each}
       {/if}
     </div>
     
     <!-- Input -->
-    <div class="p-3 border-t flex">
-      <textarea
-        class="flex-1 border rounded-md p-2 mr-2 resize-none"
-        rows="2"
-        bind:value={messageInput}
-        on:keydown={handleKeyPress}
-        placeholder="Type a message..."
-      ></textarea>
-      <button
-        on:click={handleSendMessage}
-        disabled={!messageInput.trim() || isLoading}
-        class="px-4 py-2 bg-blue-500 text-white rounded-md disabled:bg-blue-300 disabled:cursor-not-allowed"
-      >
-        Send
-      </button>
+    <div class={theme.inputContainer}>
+      <div class={theme.inputWrapper}>
+        <textarea
+          class={theme.inputField}
+          rows="2"
+          bind:value={messageInput}
+          on:keydown={handleKeyPress}
+          placeholder="Type a message..."
+        ></textarea>
+        <button
+          on:click={handleSendMessage}
+          disabled={!messageInput.trim() || isLoading}
+          class={!messageInput.trim() || isLoading ? theme.sendButtonDisabled : theme.sendButton}
+        >
+          Send
+        </button>
+      </div>
     </div>
   </div>
 {:else}
-  <div class="flex items-center justify-center h-full">
-    <div class="text-center p-8">
-      <h3 class="text-xl font-semibold mb-3">Welcome to LangServe Frontend</h3>
-      <p class="text-gray-600 mb-2">Select endpoints and create a conversation to get started.</p>
-      <button
-        on:click={oncreate}
-        class="mt-4 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-      >
-        Create New Conversation
-      </button>
-    </div>
+  <div class={theme.emptyState}>
+    <div class={theme.emptyStateTitle}>Welcome to LangServe Frontend</div>
+    <div class={theme.emptyStateDescription}>Select endpoints and create a conversation to get started.</div>
+    <button
+      on:click={oncreate}
+      class={theme.emptyStateAction}
+    >
+      Create New Conversation
+    </button>
   </div>
 {/if}

@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { Conversation } from '../types.js';
+  import { useTheme } from '../themes/utils.js';
 
   let { 
     conversations = [],
@@ -10,28 +11,29 @@
     activeConversationId?: string | null;
     onSelect?: (conversationId: string) => void;
   } = $props();
+
+  const theme = useTheme();
 </script>
 
-<div class="p-4 border border-gray-200 rounded-lg mb-4">
-  <h3 class="text-lg font-semibold mb-3">Conversations</h3>
+<div class={theme.conversationList}>
+  <h3 class={theme.configLabel}>Conversations</h3>
   
   {#if conversations.length === 0}
-    <div class="text-gray-500 text-sm py-2">No conversations yet</div>
+    <div class={theme.emptyStateDescription}>No conversations yet</div>
   {:else}
-    <div class="space-y-2">
+    <div class="space-y-1">
       {#each conversations as conv (conv.id)}
         <div
           on:click={() => onSelect(conv.id)}
           on:keydown={(e) => e.key === 'Enter' && onSelect(conv.id)}
-          class="p-2 rounded-md text-sm cursor-pointer {activeConversationId === conv.id ? 'bg-blue-100' : 'bg-gray-100 hover:bg-gray-200'}"
+          class={activeConversationId === conv.id ? theme.conversationItemActive : theme.conversationItem}
           tabindex="0"
           role="button"
         >
-          <div><strong>ID:</strong> {conv.id.slice(0, 8)}...</div>
-          <div><strong>Title:</strong> {conv.title || 'Untitled'}</div>
-          <div><strong>Messages:</strong> {conv.messages.length}</div>
-          <div class="text-xs text-gray-500">
-            Created: {new Date(conv.createdAt).toLocaleDateString()}
+          <div class={theme.conversationTitle}>{conv.title || `Conversation ${conv.id.slice(0, 8)}...`}</div>
+          <div class={theme.conversationPreview}>{conv.messages.length} messages</div>
+          <div class={theme.conversationTimestamp}>
+            {new Date(conv.createdAt).toLocaleDateString()}
           </div>
         </div>
       {/each}

@@ -5,6 +5,7 @@
   import ConfigPanel from './ConfigPanel.svelte';
   import ConversationList from './ConversationList.svelte';
   import ChatInterface from './ChatInterface.svelte';
+  import { useTheme } from '../themes/utils.js';
   
   let { 
     userId,
@@ -15,6 +16,8 @@
     authToken?: string | undefined;
     serverUrl?: string;
   } = $props();
+  
+  const theme = useTheme();
   
   // Sample data for demonstration
   let endpoints: LangServeEndpoint[] = [
@@ -117,10 +120,10 @@
   }
 </script>
 
-<div class="flex h-screen bg-white">
-  <!-- Main interface -->
-  <div class="w-80 border-r p-4 overflow-y-auto flex flex-col">
-    <h2 class="text-xl font-bold mb-4">LangServe Frontend</h2>
+<div class={theme.container}>
+  <!-- Sidebar -->
+  <div class={theme.sidebar}>
+    <h2 class={theme.title}>LangServe Frontend</h2>
     
     <EndpointSelector 
       {endpoints}
@@ -139,7 +142,7 @@
     <button
       on:click={handleCreateConversation}
       disabled={selectedEndpoints.length === 0}
-      class="w-full py-2 mb-4 {selectedEndpoints.length > 0 ? 'bg-blue-500 hover:bg-blue-600' : 'bg-gray-300 cursor-not-allowed'} text-white rounded-md"
+      class={selectedEndpoints.length > 0 ? theme.createConversationButton : theme.sendButtonDisabled}
     >
       Create Conversation ({selectedEndpoints.length} endpoints)
     </button>
@@ -151,12 +154,11 @@
     />
   </div>
   
-  <div class="flex-1 flex flex-col">
-    <ChatInterface 
-      sendMessage={handleSendChatMessage}
-      conversation={activeConversation}
-      isLoading={isLoading}
-      oncreate={handleCreateConversation}
-    />
-  </div>
+  <!-- Chat Area -->
+  <ChatInterface 
+    sendMessage={handleSendChatMessage}
+    conversation={activeConversation}
+    isLoading={isLoading}
+    oncreate={handleCreateConversation}
+  />
 </div>
