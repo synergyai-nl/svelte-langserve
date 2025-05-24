@@ -1,20 +1,21 @@
 <script lang="ts">
 	import { authStore, authLoading, authError } from '../stores/auth.js';
-	import { createEventDispatcher } from 'svelte';
 
-	const dispatch = createEventDispatcher<{
-		loginSuccess: void;
-	}>();
+	interface Props {
+		serverUrl?: string;
+		onloginSuccess?: () => void;
+	}
 
-	let username = 'demo';
-	let password = 'secret';
-	let serverUrl = 'http://localhost:8000';
-	let showPassword = false;
+	let { serverUrl = 'http://localhost:8000', onloginSuccess }: Props = $props();
+
+	let username = $state('demo');
+	let password = $state('secret');
+	let showPassword = $state(false);
 
 	async function handleSubmit() {
 		const result = await authStore.login(username, password, serverUrl);
 		if (result.success) {
-			dispatch('loginSuccess');
+			onloginSuccess?.();
 		}
 	}
 

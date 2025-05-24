@@ -62,14 +62,14 @@
 	}
 
 	// Wrap component execution to catch synchronous errors
-	function safeExecute<T>(fn: () => T, defaultValue: T): T {
+	let safeExecute = $state((fn: () => any, defaultValue: any) => {
 		try {
 			return fn();
 		} catch (error) {
 			captureError(error instanceof Error ? error : new Error(String(error)));
 			return defaultValue;
 		}
-	}
+	});
 
 	// Export the safeExecute function for use by child components
 	export { safeExecute };

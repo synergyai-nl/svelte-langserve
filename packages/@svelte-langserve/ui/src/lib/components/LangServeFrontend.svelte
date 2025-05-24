@@ -1,9 +1,5 @@
 <script lang="ts">
-  import { onMount, onDestroy } from 'svelte';
-  import { 
-    langserveStore, connected, authenticated, connectionError, 
-    testAllEndpoints, loadConversations
-  } from '@svelte-langserve/core';
+  import type { LangServeEndpoint, Conversation } from '@svelte-langserve/types';
   
   import EndpointSelector from './EndpointSelector.svelte';
   import ConfigPanel from './ConfigPanel.svelte';
@@ -14,29 +10,25 @@
   export let authToken: string | undefined = undefined;
   export let serverUrl: string = 'http://localhost:3000';
   
-  let selectedEndpoints: string[] = [];
-  let config = { temperature: 0.7, streaming: true };
-
-  onMount(() => {
-    // Connect to the server
-    langserveStore.connect(serverUrl, userId, authToken);
-    
-    // Initial data loading after authentication
-    const unsubscribe = authenticated.subscribe(value => {
-      if (value) {
-        loadConversations();
-        testAllEndpoints();
-      }
-    });
-    
-    return () => {
-      unsubscribe();
-    };
-  });
+  // Sample data for demonstration
+  let endpoints: LangServeEndpoint[] = [
+    { id: 'chatbot', name: 'General Chatbot', url: 'http://localhost:8000/chatbot', type: 'chatbot' },
+    { id: 'code', name: 'Code Assistant', url: 'http://localhost:8000/code', type: 'code-assistant' }
+  ];
   
-  onDestroy(() => {
-    langserveStore.disconnect();
-  });
+  let conversations: Conversation[] = [];
+  let selectedEndpoints: string[] = [];
+  let activeConversationId: string | null = null;
+  let config = { temperature: 0.7, streaming: true };
+  let isConnected = false;
+  let isLoading = false;
+
+  // Get active conversation
+  $: activeConversation = conversations.find(c => c.id === activeConversationId) || null;
+  
+  function handleEndpointSelectionChange(selected: string[]) {
+    selectedEndpoints = selected;
+  }
   
   function handleConfigChange(event: CustomEvent<{ temperature: number; streaming: boolean }>) {
     config = event.detail;
@@ -44,69 +36,104 @@
   
   function handleCreateConversation() {
     if (selectedEndpoints.length > 0) {
-      langserveStore.createConversation(selectedEndpoints, undefined, config);
+      const newConversation: Conversation = {
+        id: Date.now().toString(),
+        title: `Conversation with ${selectedEndpoints.length} endpoint(s)`,
+        messages: [],
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+      conversations = [...conversations, newConversation];
+      activeConversationId = newConversation.id;
     }
   }
   
   function handleSendChatMessage(content: string) {
-    langserveStore.sendMessage($langserveStore.activeConversationId!, content, config);
+    if (activeConversation) {
+      // Add user message
+      const userMessage = {
+        id: Date.now().toString(),
+        content,
+        role: 'user' as const,
+        timestamp: new Date(),
+        conversationId: activeConversation.id
+      };
+      
+      activeConversation.messages = [...activeConversation.messages, userMessage];
+      conversations = conversations; // Trigger reactivity
+      
+      // Simulate AI response
+      isLoading = true;
+      setTimeout(() => {
+        if (activeConversation) {
+          const aiMessage = {
+            id: (Date.now() + 1).toString(),
+            content: `Echo: ${content}`,
+            role: 'assistant' as const,
+            timestamp: new Date(),
+            conversationId: activeConversation.id
+          };
+          activeConversation.messages = [...activeConversation.messages, aiMessage];
+          conversations = conversations; // Trigger reactivity
+        }
+        isLoading = false;
+      }, 1000);
+    }
+  }
+  
+  function handleConversationSelect(conversationId: string) {
+    activeConversationId = conversationId;
+  }
+  
+  function handleTestEndpoint(endpointId: string) {
+    console.log('Testing endpoint:', endpointId);
+  }
+  
+  function handleGetSchemas(endpointId: string) {
+    console.log('Getting schemas for endpoint:', endpointId);
   }
 </script>
 
 <div class="flex h-screen bg-white">
-  <!-- If not connected or authenticated, show loading state -->
-  {#if !$connected}
-    <div class="w-full h-full flex items-center justify-center">
-      <div class="text-center p-6">
-        <h2 class="text-xl mb-4">Connecting to LangServe Frontend...</h2>
-        {#if $connectionError}
-          <div class="text-red-500 mb-4">
-            Error: {$connectionError}
-          </div>
-        {/if}
-        <button 
-          on:click={() => langserveStore.connect(serverUrl, userId, authToken)}
-          class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-        >
-          Retry Connection
-        </button>
-      </div>
-    </div>
-  {:else if !$authenticated}
-    <div class="w-full h-full flex items-center justify-center">
-      <div class="text-center">
-        <h2 class="text-xl">Authenticating...</h2>
-      </div>
-    </div>
-  {:else}
-    <!-- Main interface when connected and authenticated -->
-    <div class="w-80 border-r p-4 overflow-y-auto flex flex-col">
-      <h2 class="text-xl font-bold mb-4">LangServe Frontend</h2>
-      
-      <EndpointSelector bind:selectedEndpoints />
-      
-      <ConfigPanel 
-        temperature={config.temperature} 
-        streaming={config.streaming} 
-        on:change={handleConfigChange} 
-      />
-      
-      <button
-        on:click={handleCreateConversation}
-        disabled={selectedEndpoints.length === 0}
-        class="w-full py-2 mb-4 {selectedEndpoints.length > 0 ? 'bg-blue-500 hover:bg-blue-600' : 'bg-gray-300 cursor-not-allowed'} text-white rounded-md"
-      >
-        Create Conversation ({selectedEndpoints.length} endpoints)
-      </button>
-      
-      <ConversationList />
-    </div>
+  <!-- Main interface -->
+  <div class="w-80 border-r p-4 overflow-y-auto flex flex-col">
+    <h2 class="text-xl font-bold mb-4">LangServe Frontend</h2>
     
-    <div class="flex-1 flex flex-col">
-      <ChatInterface 
-        sendMessage={handleSendChatMessage}
-        on:create={handleCreateConversation}
-      />
-    </div>
-  {/if}
+    <EndpointSelector 
+      {endpoints}
+      {selectedEndpoints}
+      onSelectionChange={handleEndpointSelectionChange}
+      onTest={handleTestEndpoint}
+      onGetSchemas={handleGetSchemas}
+    />
+    
+    <ConfigPanel 
+      temperature={config.temperature} 
+      streaming={config.streaming} 
+      on:change={handleConfigChange} 
+    />
+    
+    <button
+      on:click={handleCreateConversation}
+      disabled={selectedEndpoints.length === 0}
+      class="w-full py-2 mb-4 {selectedEndpoints.length > 0 ? 'bg-blue-500 hover:bg-blue-600' : 'bg-gray-300 cursor-not-allowed'} text-white rounded-md"
+    >
+      Create Conversation ({selectedEndpoints.length} endpoints)
+    </button>
+    
+    <ConversationList 
+      {conversations}
+      {activeConversationId}
+      onSelect={handleConversationSelect}
+    />
+  </div>
+  
+  <div class="flex-1 flex flex-col">
+    <ChatInterface 
+      sendMessage={handleSendChatMessage}
+      conversation={activeConversation}
+      isLoading={isLoading}
+      oncreate={handleCreateConversation}
+    />
+  </div>
 </div>

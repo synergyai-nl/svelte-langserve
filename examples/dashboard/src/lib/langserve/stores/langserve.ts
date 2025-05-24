@@ -323,7 +323,7 @@ const createLangServeStore = () => {
 			newSocket.on('endpoint_schemas', (data: { endpoint_id: string; schemas: unknown }) => {
 				update((s) => {
 					s.availableEndpoints = s.availableEndpoints.map((ep) =>
-						ep.id === data.endpoint_id ? { ...ep, ...data.schemas } : ep
+						ep.id === data.endpoint_id ? { ...ep, ...(data.schemas as Record<string, unknown>) } : ep
 					);
 					return s;
 				});

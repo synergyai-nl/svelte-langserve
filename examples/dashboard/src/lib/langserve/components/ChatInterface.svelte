@@ -18,7 +18,7 @@
 	let { sendMessage, oncreate }: Props = $props();
 
 	let messageInput = $state('');
-	let chatContainer: HTMLDivElement;
+	let chatContainer = $state<HTMLDivElement>();
 	let isLoadingMore = $state(false);
 
 	// Reactive pagination info

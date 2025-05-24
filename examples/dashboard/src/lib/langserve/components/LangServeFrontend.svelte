@@ -18,7 +18,7 @@
 	import ErrorBoundary from './ErrorBoundary.svelte';
 
 	export let userId: string = 'user123';
-	export let authToken: string | undefined = undefined;
+	export const authToken: string | undefined = undefined;
 	export let serverUrl: string = 'http://localhost:3000';
 	export let backendUrl: string = 'http://localhost:8000';
 
@@ -94,7 +94,7 @@
 		<!-- Show login form if not authenticated -->
 		{#if !$isAuthenticated}
 			<ErrorBoundary fallback="Login form encountered an error.">
-				<LoginForm serverUrl={backendUrl} on:loginSuccess={handleLoginSuccess} />
+				<LoginForm serverUrl={backendUrl} onloginSuccess={handleLoginSuccess} />
 			</ErrorBoundary>
 			<!-- If authenticated but not connected to langserve, show loading state -->
 		{:else if !$connected}
@@ -109,7 +109,7 @@
 					<div class="space-y-2">
 						<button
 							on:click={() => {
-								const token = $accessToken;
+								const token = $accessToken || undefined;
 								const user = $currentUser?.username || userId;
 								langserveStore.connect(serverUrl, user, token);
 							}}
@@ -182,7 +182,7 @@
 
 			<ErrorBoundary fallback="Chat interface encountered an error.">
 				<div class="flex flex-1 flex-col">
-					<ChatInterface sendMessage={handleSendChatMessage} on:create={handleCreateConversation} />
+					<ChatInterface sendMessage={handleSendChatMessage} oncreate={handleCreateConversation} />
 				</div>
 			</ErrorBoundary>
 		{/if}

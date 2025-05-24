@@ -9,7 +9,7 @@ let io: Server;
 
 // LangServe Client Manager
 class LangServeClientManager {
-	private clients: Map<string, RemoteRunnable<unknown, unknown, unknown>> = new Map();
+	private clients: Map<string, RemoteRunnable<any, any, any>> = new Map();
 	private endpoints: Map<string, LangServeEndpoint> = new Map();
 
 	constructor(private config: Record<string, unknown>) {
@@ -99,10 +99,11 @@ class LangServeClientManager {
 			// Extract content from result
 			if (typeof result === 'string') {
 				return result;
-			} else if (result?.content) {
-				return result.content;
-			} else if (result?.output?.content) {
-				return result.output.content;
+			} else if (result && typeof result === 'object' && 'content' in result) {
+				return (result as any).content;
+			} else if (result && typeof result === 'object' && 'output' in result && 
+				typeof (result as any).output === 'object' && (result as any).output && 'content' in (result as any).output) {
+				return (result as any).output.content;
 			} else {
 				return JSON.stringify(result);
 			}
@@ -140,12 +141,14 @@ class LangServeClientManager {
 
 				if (typeof chunk === 'string') {
 					content = chunk;
-				} else if (chunk?.content) {
-					content = chunk.content;
-				} else if (chunk?.output?.content) {
-					content = chunk.output.content;
-				} else if (chunk?.delta?.content) {
-					content = chunk.delta.content;
+				} else if (chunk && typeof chunk === 'object' && 'content' in chunk) {
+					content = (chunk as any).content;
+				} else if (chunk && typeof chunk === 'object' && 'output' in chunk && 
+					typeof (chunk as any).output === 'object' && (chunk as any).output && 'content' in (chunk as any).output) {
+					content = (chunk as any).output.content;
+				} else if (chunk && typeof chunk === 'object' && 'delta' in chunk && 
+					typeof (chunk as any).delta === 'object' && (chunk as any).delta && 'content' in (chunk as any).delta) {
+					content = (chunk as any).delta.content;
 				}
 
 				if (content) {
@@ -163,21 +166,21 @@ class LangServeClientManager {
 			switch (msg.type) {
 				case 'human':
 					return new HumanMessage({
-						content: msg.content,
+						content: typeof msg.content === 'string' ? msg.content : JSON.stringify(msg.content),
 						additional_kwargs: msg.additional_kwargs || {}
 					});
 				case 'ai':
 					return new AIMessage({
-						content: msg.content,
+						content: typeof msg.content === 'string' ? msg.content : JSON.stringify(msg.content),
 						additional_kwargs: msg.additional_kwargs || {}
 					});
 				case 'system':
 					return new SystemMessage({
-						content: msg.content,
+						content: typeof msg.content === 'string' ? msg.content : JSON.stringify(msg.content),
 						additional_kwargs: msg.additional_kwargs || {}
 					});
 				default:
-					return new HumanMessage({ content: msg.content });
+					return new HumanMessage({ content: typeof msg.content === 'string' ? msg.content : JSON.stringify(msg.content) });
 			}
 		});
 	}
@@ -314,7 +317,7 @@ class LangServeSocketIOServer {
 							);
 						}
 					} catch (error) {
-						socket.emit('error', { message: error.message });
+						socket.emit('error', { message: error instanceof Error ? error.message : String(error) });
 					}
 				}
 			);
@@ -336,7 +339,7 @@ class LangServeSocketIOServer {
 					try {
 						await this.processUserMessage(data.conversation_id, user_id, data.content, data.config);
 					} catch (error) {
-						socket.emit('error', { message: error.message });
+						socket.emit('error', { message: error instanceof Error ? error.message : String(error) });
 					}
 				}
 			);
@@ -457,7 +460,7 @@ class LangServeSocketIOServer {
 				io.to(conversationId).emit('agent_error', {
 					endpoint_id: endpoint.id,
 					endpoint_name: endpoint.name,
-					error: error.message,
+					error: error instanceof Error ? error.message : String(error),
 					conversation_id: conversationId
 				});
 			}
@@ -515,7 +518,7 @@ class LangServeSocketIOServer {
 			io.to(conversation.id).emit('agent_response_error', {
 				message_id: messageId,
 				endpoint_id: endpoint.id,
-				error: error.message
+				error: error instanceof Error ? error.message : String(error)
 			});
 		}
 	}
@@ -625,8 +628,8 @@ const setupSocketIO: Handle = async ({ event, resolve }) => {
 	}
 
 	// Set up Socket.IO server if not already done
-	if (!langserveSocketIO && event.platform?.node) {
-		const server = event.platform.node.server;
+	if (!langserveSocketIO && event.platform && 'node' in event.platform) {
+		const server = (event.platform as any).node.server;
 		if (server) {
 			langserveSocketIO = new LangServeSocketIOServer(server, langserveConfig);
 			console.log('LangServe Socket.IO server initialized');

@@ -1,20 +1,22 @@
 <script lang="ts">
-  import { availableEndpoints, endpointHealth, testEndpoint, getEndpointSchemas } from '@svelte-langserve/core';
+  import type { LangServeEndpoint } from '@svelte-langserve/types';
 
-  let selectedEndpoints: string[] = [];
+  export let endpoints: LangServeEndpoint[] = [];
+  export let selectedEndpoints: string[] = [];
+  export let onSelectionChange: (selected: string[]) => void = () => {};
+  export let onTest: (endpointId: string) => void = () => {};
+  export let onGetSchemas: (endpointId: string) => void = () => {};
+
   let showEndpointDetails = false;
 
-  function getEndpointStatus(endpointId: string) {
-    const health = $endpointHealth.get(endpointId);
-    return health === undefined ? 'unknown' : health ? 'healthy' : 'unhealthy';
-  }
-
   function toggleEndpoint(endpointId: string, checked: boolean) {
+    let newSelected: string[];
     if (checked) {
-      selectedEndpoints = [...selectedEndpoints, endpointId];
+      newSelected = [...selectedEndpoints, endpointId];
     } else {
-      selectedEndpoints = selectedEndpoints.filter(id => id !== endpointId);
+      newSelected = selectedEndpoints.filter(id => id !== endpointId);
     }
+    onSelectionChange(newSelected);
   }
 </script>
 
@@ -29,11 +31,11 @@
     </button>
   </div>
 
-  {#if $availableEndpoints.length === 0}
+  {#if endpoints.length === 0}
     <div class="text-gray-500 text-sm py-2">No endpoints available</div>
   {:else}
     <div class="space-y-3">
-      {#each $availableEndpoints as endpoint (endpoint.id)}
+      {#each endpoints as endpoint (endpoint.id)}
         <div class="p-2 border border-gray-200 rounded-md">
           <label class="flex items-start cursor-pointer">
             <input
@@ -44,11 +46,8 @@
             />
             <div class="flex-1">
               <div class="font-medium">{endpoint.name}</div>
-              <div class="text-xs {
-                getEndpointStatus(endpoint.id) === 'healthy' ? 'text-green-600' :
-                getEndpointStatus(endpoint.id) === 'unhealthy' ? 'text-red-600' : 'text-gray-500'
-              }">
-                Status: {getEndpointStatus(endpoint.id)}
+              <div class="text-xs text-gray-500">
+                Type: {endpoint.type}
               </div>
               {#if showEndpointDetails}
                 <div class="text-xs text-gray-600 mt-1">
@@ -60,13 +59,13 @@
           </label>
           <div class="mt-2 flex space-x-2">
             <button
-              on:click={() => testEndpoint(endpoint.id)}
+              on:click={() => onTest(endpoint.id)}
               class="text-xs px-2 py-1 bg-blue-50 hover:bg-blue-100 rounded"
             >
               Test
             </button>
             <button
-              on:click={() => getEndpointSchemas(endpoint.id)}
+              on:click={() => onGetSchemas(endpoint.id)}
               class="text-xs px-2 py-1 bg-blue-50 hover:bg-blue-100 rounded"
             >
               Schemas
@@ -77,5 +76,3 @@
     </div>
   {/if}
 </div>
-
-<slot selectedEndpoints={selectedEndpoints}></slot>

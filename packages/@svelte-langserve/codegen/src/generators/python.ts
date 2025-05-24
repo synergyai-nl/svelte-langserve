@@ -23,7 +23,7 @@ from pydantic import BaseModel
     }
   } else if (schema.properties) {
     // Single schema
-    const name = schema.title || 'GeneratedModel';
+    const name = (typeof schema.title === 'string' ? schema.title : 'GeneratedModel');
     output += generatePydanticModel(name, schema);
   }
 
@@ -37,7 +37,7 @@ function generatePydanticModel(name: string, schema: JSONSchema): string {
     for (const [propName, propSchema] of Object.entries(schema.properties)) {
       const prop = propSchema as JSONSchema;
       const pythonType = jsonTypeToPython(prop);
-      const required = schema.required?.includes(propName) !== false;
+      const required = Array.isArray(schema.required) ? schema.required.includes(propName) : false;
       const optional = required ? '' : ' = None';
       
       model += `    ${propName}: ${pythonType}${optional}\n`;
