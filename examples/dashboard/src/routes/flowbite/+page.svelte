@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { LangServeFrontend, ThemeProvider, flowbiteTheme } from 'svelte-langserve';
+	import { Button, Card, Badge, Alert } from 'flowbite-svelte';
+	import { CheckCircleSolid } from 'flowbite-svelte-icons';
 
 	const userId = 'demo-user-flowbite';
 </script>
@@ -9,12 +11,6 @@
 	<meta
 		name="description"
 		content="Demonstration of LangServe Frontend with Flowbite theme integration"
-	/>
-
-	<!-- Flowbite CSS -->
-	<link
-		href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/flowbite.min.css"
-		rel="stylesheet"
 	/>
 </svelte:head>
 
@@ -41,42 +37,50 @@
 		<div class="mt-8 text-center">
 			<div class="mx-auto max-w-4xl">
 				<h2 class="mb-4 text-2xl font-semibold text-gray-900 dark:text-white">
-					Theme Features Demonstrated
+					Flowbite Components Test
 				</h2>
 
+				<Alert class="mb-6">
+					{#snippet icon()}<CheckCircleSolid class="h-4 w-4" />{/snippet}
+					<span class="font-medium">Success!</span> Flowbite Svelte components are working correctly.
+				</Alert>
+
 				<div class="grid grid-cols-1 gap-6 md:grid-cols-3">
-					<div class="rounded-lg bg-white p-6 shadow dark:bg-gray-800">
+					<Card>
 						<div class="mb-2 text-3xl text-blue-600 dark:text-blue-400">🎨</div>
-						<h3 class="mb-2 text-lg font-semibold text-gray-900 dark:text-white">
-							Authentic Flowbite Design
-						</h3>
+						<h3 class="mb-2 text-lg font-semibold">Authentic Flowbite Design</h3>
 						<p class="text-gray-600 dark:text-gray-400">
 							Uses genuine Flowbite component classes for professional appearance
 						</p>
-					</div>
+						<Badge color="blue" class="mt-2">Components</Badge>
+					</Card>
 
-					<div class="rounded-lg bg-white p-6 shadow dark:bg-gray-800">
+					<Card>
 						<div class="mb-2 text-3xl text-green-600 dark:text-green-400">🌙</div>
-						<h3 class="mb-2 text-lg font-semibold text-gray-900 dark:text-white">
-							Dark Mode Support
-						</h3>
+						<h3 class="mb-2 text-lg font-semibold">Dark Mode Support</h3>
 						<p class="text-gray-600 dark:text-gray-400">
 							Full dark mode integration with automatic theme switching
 						</p>
-					</div>
+						<Badge color="green" class="mt-2">Theme</Badge>
+					</Card>
 
-					<div class="rounded-lg bg-white p-6 shadow dark:bg-gray-800">
+					<Card>
 						<div class="mb-2 text-3xl text-purple-600 dark:text-purple-400">📱</div>
-						<h3 class="mb-2 text-lg font-semibold text-gray-900 dark:text-white">
-							Responsive Layout
-						</h3>
+						<h3 class="mb-2 text-lg font-semibold">Responsive Layout</h3>
 						<p class="text-gray-600 dark:text-gray-400">
 							Optimized for all screen sizes with Flowbite's responsive utilities
 						</p>
-					</div>
+						<Badge color="purple" class="mt-2">Responsive</Badge>
+					</Card>
 				</div>
 
-				<div class="mt-8 rounded-lg bg-blue-50 p-6 dark:bg-blue-900/20">
+				<div class="mt-8 flex justify-center gap-4">
+					<Button color="blue">Primary Button</Button>
+					<Button color="alternative">Secondary Button</Button>
+					<Button color="green">Success Button</Button>
+				</div>
+
+				<Card class="mt-8">
 					<h3 class="mb-2 text-lg font-semibold text-blue-900 dark:text-blue-100">
 						Implementation Note
 					</h3>
@@ -88,7 +92,7 @@
 						<code class="rounded bg-blue-100 px-2 py-1 dark:bg-blue-800">LangServeFrontend</code> component.
 						All core LLM functionality remains unchanged.
 					</p>
-				</div>
+				</Card>
 			</div>
 		</div>
 	</div>

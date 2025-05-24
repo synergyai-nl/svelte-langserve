@@ -1,38 +1,129 @@
-# sv
+# LangServe Frontend with Flowbite Theme
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+A SvelteKit-based dashboard for interacting with LangServe endpoints via Socket.IO, featuring beautiful Flowbite UI components and real-time chat interface for AI assistants.
 
-## Creating a project
+## Features
 
-If you're seeing this, you've probably already done this step. Congrats!
+- 🤖 **Real-time AI Chat** - Socket.IO integration with streaming responses
+- 🎨 **Flowbite UI** - Beautiful, accessible components with dark mode support
+- 🌍 **Internationalization** - Built-in i18n support with Paraglide
+- ⚡ **Modern Stack** - SvelteKit + Tailwind CSS v4 + TypeScript
+- 📱 **Responsive Design** - Works seamlessly across all devices
 
-```bash
-# create a new project in the current directory
-npx sv create
+## Quick Start
 
-# create a new project in my-app
-npx sv create my-app
-```
+### Prerequisites
 
-## Developing
+- Node.js 18+
+- pnpm (recommended)
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
-
-```bash
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
-
-## Building
-
-To create a production version of your app:
+### Installation
 
 ```bash
-npm run build
+# Install dependencies
+pnpm install
+
+# Generate internationalization files
+pnpm exec paraglide-js compile --project ./project.inlang --outdir ./src/lib/paraglide
+
+# Start development server
+pnpm dev
 ```
 
-You can preview the production build with `npm run preview`.
+Visit:
+- `http://localhost:5173` - Main dashboard
+- `http://localhost:5173/flowbite` - Flowbite theme demo
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+### Building
+
+```bash
+# Build for production
+pnpm build
+
+# Preview production build
+pnpm preview
+```
+
+## Development
+
+### Available Scripts
+
+- `pnpm dev` - Start development server
+- `pnpm build` - Build for production
+- `pnpm preview` - Preview production build
+- `pnpm test` - Run all tests (unit + e2e)
+- `pnpm test:unit` - Run unit tests
+- `pnpm test:e2e` - Run end-to-end tests
+- `pnpm check` - TypeScript type checking
+- `pnpm lint` - Code linting
+- `pnpm format` - Code formatting
+
+### Tech Stack
+
+- **Framework**: SvelteKit 2.x
+- **UI Library**: Flowbite Svelte
+- **Styling**: Tailwind CSS v4
+- **Icons**: Flowbite Svelte Icons
+- **Real-time**: Socket.IO
+- **i18n**: Inlang Paraglide
+- **Testing**: Vitest + Playwright
+- **Type Safety**: TypeScript
+
+### Flowbite Integration
+
+This project includes a complete Flowbite theme integration:
+
+1. **Components**: Access to all Flowbite Svelte components
+2. **Configuration**: Tailwind CSS v4 with Flowbite plugin
+3. **Dark Mode**: Automatic dark/light theme switching
+4. **Icons**: Full Flowbite icon library
+5. **Theme System**: Seamless integration with LangServe theming
+
+Example usage:
+```svelte
+<script>
+  import { Button, Card, Alert } from 'flowbite-svelte';
+  import { CheckCircleSolid } from 'flowbite-svelte-icons';
+</script>
+
+<Alert>
+  {#snippet icon()}<CheckCircleSolid class="h-4 w-4" />{/snippet}
+  Success message with icon
+</Alert>
+
+<Card>
+  <h3>Card Title</h3>
+  <p>Card content with Flowbite styling</p>
+  <Button color="blue">Action Button</Button>
+</Card>
+```
+
+### Backend Integration
+
+This frontend connects to a LangServe backend for AI capabilities. Ensure the backend is running:
+
+```bash
+cd ../langserve-backend
+uv run serve
+```
+
+## Architecture
+
+```
+Browser ←→ SvelteKit Frontend ←→ Socket.IO ←→ LangServe Backend ←→ AI Models
+                ↓
+         Flowbite Components
+                ↓
+        Tailwind CSS Styling
+```
+
+## Contributing
+
+1. Follow the existing code style
+2. Run `pnpm check` and `pnpm lint` before committing
+3. Write tests for new features
+4. Update documentation as needed
+
+## License
+
+See the project root for license information.
