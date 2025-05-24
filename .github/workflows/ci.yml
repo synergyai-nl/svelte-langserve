@@ -109,8 +109,8 @@ jobs:
       - name: Format check with ruff
         run: uv run ruff format --check .
 
-      - name: Type check with mypy
-        run: uv run mypy src/
+      - name: Type check with pyright
+        run: uv run pyright src/
 
       - name: Run tests
         run: uv run pytest
@@ -148,6 +148,9 @@ jobs:
       - name: Install backend dependencies
         working-directory: examples/langserve-backend
         run: uv sync --dev
+
+      - name: Build packages
+        run: npx nx run svelte-langserve:build --output-style=stream
 
       - name: Run quality checks (excluding e2e tests)
         run: npx nx run-many -t lint,check --output-style=stream --parallel=3
