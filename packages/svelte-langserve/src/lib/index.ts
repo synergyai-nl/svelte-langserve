@@ -1,5 +1,8 @@
-// Use types from consolidated package instead of duplicate definitions
-export * from 'svelte-langserve/types';
+// Export everything from the unified package
+export * from './stores/index.js';
+export * from './components/index.js';
+export * from './client/index.js';
+export * from './types.js';
 
 // Re-export commonly used LangChain types for convenience
 export type { 

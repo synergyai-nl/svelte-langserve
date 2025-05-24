@@ -466,7 +466,8 @@ class LangServeSocketIOServer {
 			},
 			messages: [],
 			status: 'active',
-			created_at: new Date().toISOString(),
+			createdAt: new Date().toISOString(),
+			updatedAt: new Date().toISOString(),
 			metadata: { config }
 		};
 
