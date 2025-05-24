@@ -16,7 +16,7 @@ Object.defineProperty(globalThis, 'document', {
 
 // Ensure browser environment is detected
 globalThis.process = globalThis.process || {};
-globalThis.process.browser = true;
+(globalThis.process as typeof globalThis.process & { browser?: boolean }).browser = true;
 
 // required for svelte5 + jsdom as jsdom does not support matchMedia
 Object.defineProperty(window, 'matchMedia', {
@@ -49,7 +49,7 @@ global.IntersectionObserver = vi.fn().mockImplementation(() => ({
 // Mock performance API
 global.performance = global.performance || {
   now: vi.fn(() => Date.now())
-} as Performance;
+} as unknown as Performance;
 
 // Mock Socket.IO client
 vi.mock('socket.io-client', () => ({
