@@ -6,11 +6,8 @@ A **monorepo** containing reusable packages and examples for building SvelteKit 
 
 ## ✨ Features
 
-### 📦 Reusable Packages
-- **@svelte-langserve/core**: Socket.IO client, stores, and connection management
-- **@svelte-langserve/ui**: Pre-built Svelte components for chat interfaces
-- **@svelte-langserve/types**: Shared TypeScript definitions
-- **@svelte-langserve/codegen**: Code generation utilities
+### 📦 Consolidated Package
+- **svelte-langserve**: Complete Svelte integration for LangServe with Socket.IO, UI components, stores, and LangChain-compatible types
 
 ### 🚀 Example Application Features
 - **🔐 JWT Authentication**: Secure user authentication with password hashing and token management
@@ -76,11 +73,11 @@ uv run uvicorn src.svelte_langserve.main:create_app --factory --reload
 ### Monorepo Layout
 ```
 svelte-langserve/
-├── packages/@svelte-langserve/     # 📦 Reusable npm packages
-│   ├── core/                       #    Connection logic & stores
-│   ├── ui/                         #    Svelte components library
-│   ├── types/                      #    Shared TypeScript definitions
-│   └── codegen/                    #    Code generation utilities
+├── packages/svelte-langserve/      # 📦 Consolidated npm package
+│   ├── stores/                     #    Socket.IO & state management
+│   ├── components/                 #    Svelte UI components
+│   ├── client/                     #    LangServe client adapters
+│   └── types.ts                    #    LangChain-compatible types
 ├── examples/                       # 🚀 Example applications  
 │   ├── dashboard/                  #    SvelteKit frontend demo
 │   └── langserve-backend/          #    FastAPI backend demo
@@ -90,7 +87,7 @@ svelte-langserve/
 ```
 
 ### Key Directories
-- **[packages/@svelte-langserve](./packages/@svelte-langserve/)** - Reusable libraries for any SvelteKit project
+- **[packages/svelte-langserve](./packages/svelte-langserve/)** - Consolidated library for any SvelteKit project
 - **[examples/dashboard](./examples/dashboard)** - Complete SvelteKit frontend example
 - **[examples/langserve-backend](./examples/langserve-backend)** - FastAPI backend with 5 AI agents
 - **[nginx/](./nginx/)** - Production nginx configuration
@@ -143,24 +140,23 @@ uv run pyright         # Type checking
 # Install all dependencies (run from root)
 pnpm install
 
-# Build all packages
-nx run-many -t build
-
-# Test all packages
-nx run-many -t test
-
-# Lint all packages
-nx run-many -t lint
-
-# Work on specific package
-cd packages/@svelte-langserve/core
+# Build consolidated package
+cd packages/svelte-langserve
 pnpm build
-pnpm test:watch
 
-# Publish packages (when ready)
-pnpm changeset
-pnpm version-packages
-pnpm release
+# Test consolidated package
+cd packages/svelte-langserve
+pnpm test
+
+cd packages/svelte-langserve
+pnpm lint
+
+# Run all quality checks
+nx run-many -t test,lint,check
+
+# Publish package (when ready)
+cd packages/svelte-langserve
+npm publish
 ```
 
 ### Docker Commands

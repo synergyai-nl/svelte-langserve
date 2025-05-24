@@ -1,7 +1,7 @@
 <script lang="ts">
-  import type { Message } from '@svelte-langserve/types';
+  import type { Message } from '../types.js';
 
-  export let message: Message;
+  let { message }: { message: Message } = $props();
 </script>
 
 <div 

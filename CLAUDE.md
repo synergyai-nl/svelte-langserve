@@ -87,27 +87,27 @@ uv run pytest             # Run tests
 uv run pyright            # Type checking
 ```
 
-### Package Development (Reusable Libraries)
+### Package Development (Consolidated Library)
 
 ```bash
-# Build all packages
-nx run-many -t build
-
-# Test all packages
-nx run-many -t test
-
-# Lint all packages
-nx run-many -t lint
-
-# Work on specific package
-cd packages/@svelte-langserve/core
+# Build consolidated package
+cd packages/svelte-langserve
 pnpm build
-pnpm test:watch
 
-# Publish packages (when ready)
-pnpm changeset
-pnpm version-packages
-pnpm release
+# Test consolidated package
+cd packages/svelte-langserve
+pnpm test
+
+# Lint consolidated package
+cd packages/svelte-langserve
+pnpm lint
+
+# Run all quality checks
+nx run-many -t test,lint,check
+
+# Publish package (when ready)
+cd packages/svelte-langserve
+npm publish
 ```
 
 ### Docker Deployment
@@ -166,17 +166,19 @@ cp .env.example .env
 
 This project is a **monorepo** containing a SvelteKit-based dashboard for interacting with LangServe endpoints via Socket.IO, providing a responsive and real-time chat interface for AI assistants.
 
+**Architecture Note**: The project has been simplified from 4 separate packages to a single consolidated `svelte-langserve` package for improved maintainability and reduced complexity.
+
 ### Monorepo Structure
 ```
 claude-rocks-the-dashboard/
 ├── examples/                    # Example applications
 │   ├── dashboard/              # SvelteKit frontend demo
 │   └── langserve-backend/      # FastAPI backend demo
-├── packages/@svelte-langserve/ # Reusable npm packages
-│   ├── core/                   # Connection logic & stores
-│   ├── ui/                     # Svelte components
-│   ├── types/                  # TypeScript definitions
-│   └── codegen/                # Code generation utilities
+├── packages/svelte-langserve/  # Consolidated npm package
+│   ├── stores/                 # Socket.IO & state management
+│   ├── components/             # Svelte UI components
+│   ├── client/                 # LangServe client adapters
+│   └── types.ts                # LangChain-compatible types
 └── nx.json                     # Nx monorepo configuration
 ```
 
