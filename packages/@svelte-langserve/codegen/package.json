@@ -22,7 +22,10 @@
     "build": "tsc",
     "dev": "tsc --watch",
     "clean": "rm -rf dist",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@svelte-langserve/types": "workspace:*",
@@ -31,7 +34,12 @@
   },
   "devDependencies": {
     "@types/node": "^20.10.0",
-    "typescript": "^5.0.0"
+    "eslint": "^9.18.0",
+    "eslint-config-prettier": "^10.0.1",
+    "globals": "^16.0.0",
+    "typescript": "^5.0.0",
+    "typescript-eslint": "^8.20.0",
+    "vitest": "^3.0.0"
   },
   "publishConfig": {
     "access": "public"

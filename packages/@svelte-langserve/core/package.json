@@ -25,7 +25,10 @@
     "build": "svelte-package",
     "dev": "svelte-package --watch",
     "clean": "rm -rf dist",
-    "typecheck": "svelte-check --tsconfig ./tsconfig.json"
+    "typecheck": "svelte-check --tsconfig ./tsconfig.json",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "peerDependencies": {
     "svelte": "^5.0.0",
@@ -36,9 +39,19 @@
   },
   "devDependencies": {
     "@sveltejs/package": "^2.3.0",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/svelte": "^5.2.4",
+    "@testing-library/user-event": "^14.6.1",
+    "eslint": "^9.18.0",
+    "eslint-config-prettier": "^10.0.1",
+    "eslint-plugin-svelte": "^3.0.0",
+    "globals": "^16.0.0",
+    "jsdom": "^26.0.0",
     "svelte": "^5.0.0",
     "svelte-check": "^4.0.0",
     "typescript": "^5.0.0",
+    "typescript-eslint": "^8.20.0",
+    "vitest": "^3.0.0",
     "socket.io-client": "^4.8.0"
   },
   "publishConfig": {

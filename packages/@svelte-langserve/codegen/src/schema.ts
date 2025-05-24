@@ -1,7 +1,7 @@
 import { readFile } from 'fs/promises';
 
 export interface JSONSchema {
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 /**
