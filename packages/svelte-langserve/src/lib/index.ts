@@ -1,8 +1,15 @@
 // Export everything from the unified package
 export * from './stores/index.js';
-export * from './components/index.js';
 export * from './client/index.js';
 export * from './types.js';
+
+// Re-export individual components for convenience
+export { default as ChatInterface } from './components/ChatInterface.svelte';
+export { default as ChatMessage } from './components/ChatMessage.svelte';
+export { default as ConfigPanel } from './components/ConfigPanel.svelte';
+export { default as ConversationList } from './components/ConversationList.svelte';
+export { default as EndpointSelector } from './components/EndpointSelector.svelte';
+export { default as LangServeFrontend } from './components/LangServeFrontend.svelte';
 
 // Re-export commonly used LangChain types for convenience
 export type { 

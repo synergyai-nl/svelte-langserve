@@ -1,14 +1,20 @@
 <script lang="ts">
-  import type { LangServeEndpoint, Conversation } from '@svelte-langserve/types';
+  import type { LangServeEndpoint, Conversation, ChatMessage } from '../types.js';
   
   import EndpointSelector from './EndpointSelector.svelte';
   import ConfigPanel from './ConfigPanel.svelte';
   import ConversationList from './ConversationList.svelte';
   import ChatInterface from './ChatInterface.svelte';
   
-  export let userId: string;
-  export let authToken: string | undefined = undefined;
-  export let serverUrl: string = 'http://localhost:3000';
+  let { 
+    userId,
+    authToken = undefined,
+    serverUrl = 'http://localhost:3000'
+  }: {
+    userId: string;
+    authToken?: string | undefined;
+    serverUrl?: string;
+  } = $props();
   
   // Sample data for demonstration
   let endpoints: LangServeEndpoint[] = [
@@ -16,15 +22,15 @@
     { id: 'code', name: 'Code Assistant', url: 'http://localhost:8000/code', type: 'code-assistant' }
   ];
   
-  let conversations: Conversation[] = [];
-  let selectedEndpoints: string[] = [];
-  let activeConversationId: string | null = null;
-  let config = { temperature: 0.7, streaming: true };
+  let conversations: Conversation[] = $state([]);
+  let selectedEndpoints: string[] = $state([]);
+  let activeConversationId: string | null = $state(null);
+  let config = $state({ temperature: 0.7, streaming: true });
   let _isConnected = false;
-  let isLoading = false;
+  let isLoading = $state(false);
 
   // Get active conversation
-  $: activeConversation = conversations.find(c => c.id === activeConversationId) || null;
+  let activeConversation = $derived(conversations.find(c => c.id === activeConversationId) || null);
   
   function handleEndpointSelectionChange(selected: string[]) {
     selectedEndpoints = selected;
@@ -40,8 +46,13 @@
         id: Date.now().toString(),
         title: `Conversation with ${selectedEndpoints.length} endpoint(s)`,
         messages: [],
-        createdAt: new Date(),
-        updatedAt: new Date()
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        participants: {
+          users: [userId],
+          agents: []
+        },
+        status: 'active'
       };
       conversations = [...conversations, newConversation];
       activeConversationId = newConversation.id;
@@ -51,12 +62,14 @@
   function handleSendChatMessage(content: string) {
     if (activeConversation) {
       // Add user message
-      const userMessage = {
+      const userMessage: ChatMessage = {
         id: Date.now().toString(),
+        type: 'human',
         content,
-        role: 'user' as const,
-        timestamp: new Date(),
-        conversationId: activeConversation.id
+        sender_id: userId,
+        sender_type: 'user',
+        timestamp: new Date().toISOString(),
+        conversation_id: activeConversation.id
       };
       
       // Update conversation messages
@@ -70,12 +83,14 @@
       isLoading = true;
       setTimeout(() => {
         if (activeConversation) {
-          const aiMessage = {
+          const aiMessage: ChatMessage = {
             id: (Date.now() + 1).toString(),
+            type: 'ai',
             content: `Echo: ${content}`,
-            role: 'assistant' as const,
-            timestamp: new Date(),
-            conversationId: activeConversation.id
+            sender_id: selectedEndpoints[0] || 'assistant',
+            sender_type: 'agent',
+            timestamp: new Date().toISOString(),
+            conversation_id: activeConversation.id
           };
           // Update conversation messages
           const updatedConversation = {

@@ -38,6 +38,7 @@
     "build": "svelte-package",
     "dev": "svelte-package --watch",
     "clean": "rm -rf dist",
+    "check": "svelte-check --tsconfig ./tsconfig.json",
     "typecheck": "svelte-check --tsconfig ./tsconfig.json",
     "lint": "eslint .",
     "test": "vitest run",

@@ -1,19 +1,14 @@
 <script lang="ts">
-	import { createEventDispatcher } from 'svelte';
-
-	const dispatch = createEventDispatcher<{
-		change: { temperature: number; streaming: boolean };
-	}>();
-
 	interface Props {
 		temperature?: number;
 		streaming?: boolean;
+		onchange?: (event: { temperature: number; streaming: boolean }) => void;
 	}
 
-	let { temperature = 0.7, streaming = true }: Props = $props();
+	let { temperature = 0.7, streaming = true, onchange }: Props = $props();
 
 	function updateConfig() {
-		dispatch('change', { temperature, streaming });
+		onchange?.({ temperature, streaming });
 	}
 </script>
 

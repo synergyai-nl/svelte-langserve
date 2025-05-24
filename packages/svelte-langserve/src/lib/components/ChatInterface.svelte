@@ -1,13 +1,20 @@
 <script lang="ts">
-  import type { Conversation } from '@svelte-langserve/types';
+  import type { Conversation } from '../types.js';
   import ChatMessage from './ChatMessage.svelte';
 
-  export let sendMessage: (content: string) => void;
-  export let conversation: Conversation | null = null;
-  export let isLoading: boolean = false;
-  export let oncreate: (() => void) | undefined = undefined;
+  let { 
+    sendMessage,
+    conversation = null,
+    isLoading = false,
+    oncreate = undefined
+  }: {
+    sendMessage: (content: string) => void;
+    conversation?: Conversation | null;
+    isLoading?: boolean;
+    oncreate?: (() => void) | undefined;
+  } = $props();
   
-  let messageInput = '';
+  let messageInput = $state('');
   let chatContainer: HTMLDivElement;
   
   function handleSendMessage() {
@@ -33,9 +40,11 @@
     }
   }
   
-  $: if (conversation) {
-    scrollToBottom();
-  }
+  $effect(() => {
+    if (conversation) {
+      scrollToBottom();
+    }
+  });
 </script>
 
 {#if conversation}
@@ -62,8 +71,16 @@
           No messages yet. Start the conversation!
         </div>
       {:else}
-        {#each conversation.messages as message (message.id)}
-          <ChatMessage {message} />
+        {#each conversation.messages as chatMessage (chatMessage.id)}
+          <ChatMessage message={{
+            id: chatMessage.id,
+            role: chatMessage.type === 'human' ? 'user' : chatMessage.type === 'ai' ? 'assistant' : 'system',
+            content: typeof chatMessage.content === 'string' ? chatMessage.content : JSON.stringify(chatMessage.content),
+            timestamp: new Date(chatMessage.timestamp),
+            metadata: {
+              endpoint_name: chatMessage.sender_id
+            }
+          }} />
         {/each}
       {/if}
     </div>

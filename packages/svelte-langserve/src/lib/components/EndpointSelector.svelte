@@ -1,13 +1,21 @@
 <script lang="ts">
-  import type { LangServeEndpoint } from '@svelte-langserve/types';
+  import type { LangServeEndpoint } from '../types.js';
 
-  export let endpoints: LangServeEndpoint[] = [];
-  export let selectedEndpoints: string[] = [];
-  export let onSelectionChange: (selected: string[]) => void = () => {};
-  export let onTest: (endpointId: string) => void = () => {};
-  export let onGetSchemas: (endpointId: string) => void = () => {};
+  let { 
+    endpoints = [],
+    selectedEndpoints = [],
+    onSelectionChange = () => {},
+    onTest = () => {},
+    onGetSchemas = () => {}
+  }: {
+    endpoints?: LangServeEndpoint[];
+    selectedEndpoints?: string[];
+    onSelectionChange?: (selected: string[]) => void;
+    onTest?: (endpointId: string) => void;
+    onGetSchemas?: (endpointId: string) => void;
+  } = $props();
 
-  let showEndpointDetails = false;
+  let showEndpointDetails = $state(false);
 
   function toggleEndpoint(endpointId: string, checked: boolean) {
     let newSelected: string[];

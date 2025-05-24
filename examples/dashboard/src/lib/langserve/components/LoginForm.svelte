@@ -35,11 +35,11 @@
 		{#if $authError}
 			<div class="error-banner">
 				<span class="error-text">{$authError}</span>
-				<button class="error-close" on:click={clearError} aria-label="Clear error">×</button>
+				<button class="error-close" onclick={clearError} aria-label="Clear error">×</button>
 			</div>
 		{/if}
 
-		<form on:submit|preventDefault={handleSubmit}>
+		<form onsubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
 			<div class="form-group">
 				<label for="server-url">Server URL</label>
 				<input
@@ -78,7 +78,7 @@
 					<button
 						type="button"
 						class="password-toggle"
-						on:click={togglePasswordVisibility}
+						onclick={togglePasswordVisibility}
 						disabled={$authLoading}
 						aria-label={showPassword ? 'Hide password' : 'Show password'}
 					>

@@ -7,8 +7,9 @@ export type {
 } from '@langchain/core/messages';
 export type { RunnableConfig } from '@langchain/core/runnables';
 
-// Extend LangChain types for Socket.IO specific needs
-import type { BaseMessage, RunnableConfig } from '@langchain/core/messages';
+// Extend LangChain types for Socket.IO specific needs  
+import type { BaseMessage } from '@langchain/core/messages';
+import type { RunnableConfig } from '@langchain/core/runnables';
 
 export interface LangServeEndpoint {
   id: string;
@@ -43,6 +44,18 @@ export interface ChatMessage {
   timestamp: string;
   conversation_id: string;
   additional_kwargs?: Record<string, unknown>;
+}
+
+// Message type for UI components
+export interface Message {
+  id: string;
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+  timestamp: Date;
+  metadata?: {
+    streaming?: boolean;
+    endpoint_name?: string;
+  };
 }
 
 // For new implementations, we'll gradually migrate to use BaseMessage directly

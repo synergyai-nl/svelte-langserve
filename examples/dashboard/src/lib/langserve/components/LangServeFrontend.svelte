@@ -33,9 +33,9 @@
 			langserveStore.connect(serverUrl, user, token);
 		}
 
-		// Watch for authentication changes
-		const unsubscribeAuth = isAuthenticated.subscribe((authenticated) => {
-			if (authenticated && $accessToken) {
+		// Watch for authentication changes using $effect
+		$effect(() => {
+			if ($isAuthenticated && $accessToken) {
 				const token = $accessToken;
 				const user = $currentUser?.username || userId;
 				langserveStore.connect(serverUrl, user, token);
@@ -44,26 +44,21 @@
 			}
 		});
 
-		// Initial data loading after langserve authentication
-		const unsubscribeLangserve = authenticated.subscribe((value) => {
-			if (value) {
+		// Initial data loading after langserve authentication using $effect
+		$effect(() => {
+			if ($authenticated) {
 				loadConversations();
 				testAllEndpoints();
 			}
 		});
-
-		return () => {
-			unsubscribeAuth();
-			unsubscribeLangserve();
-		};
 	});
 
 	onDestroy(() => {
 		langserveStore.disconnect();
 	});
 
-	function handleConfigChange(event: CustomEvent<{ temperature: number; streaming: boolean }>) {
-		config = event.detail;
+	function handleConfigChange(data: { temperature: number; streaming: boolean }) {
+		config = data;
 	}
 
 	function handleCreateConversation() {
@@ -108,7 +103,7 @@
 					{/if}
 					<div class="space-y-2">
 						<button
-							on:click={() => {
+							onclick={() => {
 								const token = $accessToken || undefined;
 								const user = $currentUser?.username || userId;
 								langserveStore.connect(serverUrl, user, token);
@@ -118,7 +113,7 @@
 							Retry Connection
 						</button>
 						<button
-							on:click={handleLogout}
+							onclick={handleLogout}
 							class="rounded-md bg-gray-500 px-4 py-2 text-white hover:bg-gray-600"
 						>
 							Logout
@@ -131,7 +126,7 @@
 				<div class="text-center">
 					<h2 class="text-xl">Authenticating with LangServe...</h2>
 					<button
-						on:click={handleLogout}
+						onclick={handleLogout}
 						class="mt-4 rounded-md bg-gray-500 px-4 py-2 text-white hover:bg-gray-600"
 					>
 						Logout
@@ -145,7 +140,7 @@
 					<div class="mb-4 flex items-center justify-between">
 						<h2 class="text-xl font-bold">LangServe Frontend</h2>
 						<button
-							on:click={handleLogout}
+							onclick={handleLogout}
 							class="rounded-md bg-red-500 px-3 py-1 text-sm text-white hover:bg-red-600"
 						>
 							Logout
@@ -160,12 +155,12 @@
 						<ConfigPanel
 							temperature={config.temperature}
 							streaming={config.streaming}
-							on:change={handleConfigChange}
+							onchange={handleConfigChange}
 						/>
 					</ErrorBoundary>
 
 					<button
-						on:click={handleCreateConversation}
+						onclick={handleCreateConversation}
 						disabled={selectedEndpoints.length === 0}
 						class="mb-4 w-full py-2 {selectedEndpoints.length > 0
 							? 'bg-blue-500 hover:bg-blue-600'

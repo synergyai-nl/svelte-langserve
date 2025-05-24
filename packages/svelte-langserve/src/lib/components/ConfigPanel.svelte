@@ -5,8 +5,13 @@
     change: { temperature: number; streaming: boolean };
   }>();
 
-  export let temperature = 0.7;
-  export let streaming = true;
+  let { 
+    temperature = 0.7,
+    streaming = true
+  }: {
+    temperature?: number;
+    streaming?: boolean;
+  } = $props();
 
   function updateConfig() {
     dispatch('change', { temperature, streaming });

@@ -1,9 +1,15 @@
 <script lang="ts">
-  import type { Conversation } from '@svelte-langserve/types';
+  import type { Conversation } from '../types.js';
 
-  export let conversations: Conversation[] = [];
-  export let activeConversationId: string | null = null;
-  export let onSelect: (conversationId: string) => void = () => {};
+  let { 
+    conversations = [],
+    activeConversationId = null,
+    onSelect = () => {}
+  }: {
+    conversations?: Conversation[];
+    activeConversationId?: string | null;
+    onSelect?: (conversationId: string) => void;
+  } = $props();
 </script>
 
 <div class="p-4 border border-gray-200 rounded-lg mb-4">
@@ -25,7 +31,7 @@
           <div><strong>Title:</strong> {conv.title || 'Untitled'}</div>
           <div><strong>Messages:</strong> {conv.messages.length}</div>
           <div class="text-xs text-gray-500">
-            Created: {conv.createdAt.toLocaleDateString()}
+            Created: {new Date(conv.createdAt).toLocaleDateString()}
           </div>
         </div>
       {/each}
