@@ -189,6 +189,10 @@ jobs:
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
 
+      - name: Build dashboard  
+        run: npx nx run dashboard:build
+        working-directory: .
+
       - name: Install Playwright browsers
         run: pnpm exec playwright install --with-deps
 
