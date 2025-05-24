@@ -8,8 +8,8 @@
   
   let { 
     userId,
-    authToken = undefined,
-    serverUrl = 'http://localhost:3000'
+    authToken: _authToken = undefined,
+    serverUrl: _serverUrl = 'http://localhost:3000'
   }: {
     userId: string;
     authToken?: string | undefined;

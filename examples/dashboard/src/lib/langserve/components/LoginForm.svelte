@@ -39,7 +39,12 @@
 			</div>
 		{/if}
 
-		<form onsubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
+		<form
+			onsubmit={(e) => {
+				e.preventDefault();
+				handleSubmit();
+			}}
+		>
 			<div class="form-group">
 				<label for="server-url">Server URL</label>
 				<input

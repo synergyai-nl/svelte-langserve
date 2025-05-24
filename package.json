@@ -12,7 +12,7 @@
     "build": "nx run-many -t build",
     "dev": "nx run-many -t dev",
     "clean": "pnpm -r --filter='@svelte-langserve/*' clean",
-    "typecheck": "pnpm -r --filter='@svelte-langserve/*' typecheck",
+    "typecheck": "nx run-many -t check",
     "lint": "nx run-many -t lint",
     "lint:root": "eslint .",
     "test": "nx run-many -t test",
