@@ -1,16 +1,19 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import type { Snippet } from 'svelte';
 
 	interface Props {
 		fallback?: string;
 		showDetails?: boolean;
 		onError?: ((error: Error) => void) | undefined;
+		children?: Snippet<[{ safeExecute: (fn: () => unknown, defaultValue: unknown) => unknown }]>;
 	}
 
 	let {
 		fallback = 'An error occurred. Please try again.',
 		showDetails = false,
-		onError = undefined
+		onError = undefined,
+		children
 	}: Props = $props();
 
 	let hasError = $state(false);
@@ -71,8 +74,6 @@
 		}
 	});
 
-	// Export the safeExecute function for use by child components
-	export { safeExecute };
 </script>
 
 {#if hasError}
@@ -130,7 +131,7 @@
 		</div>
 	</div>
 {:else}
-	<slot {safeExecute} />
+	{@render children?.({ safeExecute })}
 {/if}
 
 <style>
