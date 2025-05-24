@@ -57,8 +57,7 @@
       "cd examples/langserve-backend && uv run pyright"
     ],
     "packages/**/*.{js,ts}": [
-      "pnpm lint:root",
-      "pnpm typecheck"
+      "nx run-many -t lint,check --output-style=stream"
     ]
   },
   "keywords": [

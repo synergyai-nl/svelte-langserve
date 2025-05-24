@@ -4,6 +4,8 @@
 
 A **monorepo** containing reusable packages and examples for building SvelteKit dashboards that interact with LangServe backends. Features real-time chat, Socket.IO integration, and production-ready Docker deployment.
 
+<!-- Test commit hooks -->
+
 ## ✨ Features
 
 ### 📦 Consolidated Package
