@@ -117,10 +117,36 @@ jobs:
       - name: Run tests
         run: uv run pytest
 
+  quality:
+    name: Quality Checks (Nx)
+    runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.frontend == 'true' || needs.changes.outputs.root == 'true'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run all quality checks
+        run: nx run-many -t lint,check,test --output-style=stream --parallel=3
+
   e2e:
     name: End-to-End Tests
     runs-on: ubuntu-latest
-    needs: [changes, frontend, backend]
+    needs: [changes, frontend, backend, quality]
     if: always() && (needs.changes.outputs.frontend == 'true' || needs.changes.outputs.backend == 'true' || needs.changes.outputs.root == 'true')
     defaults:
       run:
