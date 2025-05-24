@@ -20,7 +20,7 @@
   let selectedEndpoints: string[] = [];
   let activeConversationId: string | null = null;
   let config = { temperature: 0.7, streaming: true };
-  let isConnected = false;
+  let _isConnected = false;
   let isLoading = false;
 
   // Get active conversation
@@ -59,8 +59,12 @@
         conversationId: activeConversation.id
       };
       
-      activeConversation.messages = [...activeConversation.messages, userMessage];
-      conversations = conversations; // Trigger reactivity
+      // Update conversation messages
+      const updatedConversation = {
+        ...activeConversation,
+        messages: [...activeConversation.messages, userMessage]
+      };
+      conversations = conversations.map(c => c.id === updatedConversation.id ? updatedConversation : c);
       
       // Simulate AI response
       isLoading = true;
@@ -73,8 +77,12 @@
             timestamp: new Date(),
             conversationId: activeConversation.id
           };
-          activeConversation.messages = [...activeConversation.messages, aiMessage];
-          conversations = conversations; // Trigger reactivity
+          // Update conversation messages
+          const updatedConversation = {
+            ...activeConversation,
+            messages: [...activeConversation.messages, aiMessage]
+          };
+          conversations = conversations.map(c => c.id === updatedConversation.id ? updatedConversation : c);
         }
         isLoading = false;
       }, 1000);

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Message, Conversation } from '@svelte-langserve/types';
+  import type { Conversation } from '@svelte-langserve/types';
   import ChatMessage from './ChatMessage.svelte';
 
   export let sendMessage: (content: string) => void;
