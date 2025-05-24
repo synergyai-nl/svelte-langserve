@@ -41,6 +41,11 @@
     "pnpm": ">=8"
   },
   "packageManager": "pnpm@8.15.0",
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
+  },
   "lint-staged": {
     "examples/dashboard/**/*.{js,ts,svelte}": [
       "cd examples/dashboard && pnpm format",
