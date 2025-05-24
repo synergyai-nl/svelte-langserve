@@ -64,7 +64,7 @@ describe('ChatInterface', () => {
 		vi.clearAllMocks();
 
 		// Reset mock data to default state
-		langserveStore.activeConversation.set({
+		(langserveStore.activeConversation as any).set({
 			id: 'conversation-123',
 			participants: {
 				agents: [
@@ -78,12 +78,12 @@ describe('ChatInterface', () => {
 			]
 		});
 
-		langserveStore.hasStreamingMessages.set(false);
+		(langserveStore.hasStreamingMessages as any).set(false);
 	});
 
 	it('renders welcome message when no active conversation', () => {
 		// Mock no active conversation
-		langserveStore.activeConversation.set(null);
+		(langserveStore.activeConversation as any).set(null);
 
 		render(ChatInterface, {
 			props: { sendMessage: mockSendMessage }
@@ -108,7 +108,7 @@ describe('ChatInterface', () => {
 	});
 
 	it('shows streaming indicator when messages are streaming', () => {
-		langserveStore.hasStreamingMessages.set(true);
+		(langserveStore.hasStreamingMessages as any).set(true);
 
 		render(ChatInterface, {
 			props: { sendMessage: mockSendMessage }
@@ -221,7 +221,7 @@ describe('ChatInterface', () => {
 	});
 
 	it('shows load more button when pagination has more messages', () => {
-		langserveStore.getMessagePagination.mockReturnValue({
+		(langserveStore.getMessagePagination as any).mockReturnValue({
 			currentPage: 1,
 			messagesPerPage: 50,
 			totalMessages: 100,
@@ -238,7 +238,7 @@ describe('ChatInterface', () => {
 	it('loads more messages when load more button is clicked', async () => {
 		const user = userEvent.setup();
 
-		langserveStore.getMessagePagination.mockReturnValue({
+		(langserveStore.getMessagePagination as any).mockReturnValue({
 			currentPage: 1,
 			messagesPerPage: 50,
 			totalMessages: 100,
@@ -258,7 +258,7 @@ describe('ChatInterface', () => {
 	it('shows loading state when loading more messages', async () => {
 		const user = userEvent.setup();
 
-		langserveStore.getMessagePagination.mockReturnValue({
+		(langserveStore.getMessagePagination as any).mockReturnValue({
 			currentPage: 1,
 			messagesPerPage: 50,
 			totalMessages: 100,
@@ -280,7 +280,7 @@ describe('ChatInterface', () => {
 
 	it('dispatches create event when create conversation button is clicked', async () => {
 		const user = userEvent.setup();
-		langserveStore.activeConversation.set(null);
+		(langserveStore.activeConversation as any).set(null);
 
 		const mockCreateEvent = vi.fn();
 		render(ChatInterface, {
@@ -297,7 +297,7 @@ describe('ChatInterface', () => {
 	});
 
 	it('shows no messages state when conversation has no messages', () => {
-		langserveStore.getDisplayMessages.mockReturnValue([]);
+		(langserveStore.getDisplayMessages as any).mockReturnValue([]);
 
 		render(ChatInterface, {
 			props: { sendMessage: mockSendMessage }

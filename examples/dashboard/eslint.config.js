@@ -32,5 +32,11 @@ export default ts.config(
 				svelteConfig
 			}
 		}
+	},
+	{
+		files: ['**/*.test.ts', '**/*.spec.ts', '**/*.test.js', '**/*.spec.js'],
+		rules: {
+			'@typescript-eslint/no-explicit-any': 'off'
+		}
 	}
 );

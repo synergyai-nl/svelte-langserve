@@ -45,7 +45,7 @@ describe('EndpointSelector', () => {
 		vi.clearAllMocks();
 
 		// Reset mock data to default state
-		langserveStore.availableEndpoints.set([
+		(langserveStore.availableEndpoints as any).set([
 			{
 				id: 'endpoint-1',
 				name: 'Chatbot',
@@ -60,7 +60,7 @@ describe('EndpointSelector', () => {
 			}
 		]);
 
-		langserveStore.endpointHealth.set(
+		(langserveStore.endpointHealth as any).set(
 			new Map([
 				['endpoint-1', true],
 				['endpoint-2', false]
@@ -85,7 +85,7 @@ describe('EndpointSelector', () => {
 
 	it('renders no endpoints message when list is empty', () => {
 		// Mock empty endpoints
-		langserveStore.availableEndpoints.set([]);
+		(langserveStore.availableEndpoints as any).set([]);
 
 		render(EndpointSelector);
 
@@ -177,7 +177,7 @@ describe('EndpointSelector', () => {
 
 	it('handles unknown endpoint health status', () => {
 		// Mock endpoint with unknown health
-		langserveStore.endpointHealth.set(new Map());
+		(langserveStore.endpointHealth as any).set(new Map());
 
 		render(EndpointSelector);
 

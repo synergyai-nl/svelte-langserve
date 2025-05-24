@@ -45,7 +45,7 @@ describe('ConversationList', () => {
 		vi.clearAllMocks();
 
 		// Reset mock data to default state
-		langserveStore.conversations.set([
+		(langserveStore.conversations as any).set([
 			{
 				id: 'conversation-123',
 				participants: {
@@ -68,7 +68,7 @@ describe('ConversationList', () => {
 			}
 		]);
 
-		langserveStore.activeConversationId.set('conversation-123');
+		(langserveStore.activeConversationId as any).set('conversation-123');
 	});
 
 	it('renders conversation list title', () => {
@@ -126,7 +126,7 @@ describe('ConversationList', () => {
 
 	it('shows empty state when no conversations exist', () => {
 		// Mock empty conversations
-		langserveStore.conversations.set([]);
+		(langserveStore.conversations as any).set([]);
 
 		render(ConversationList);
 
@@ -159,7 +159,7 @@ describe('ConversationList', () => {
 
 	it('renders with different active conversation correctly', () => {
 		// Set active conversation before rendering
-		langserveStore.activeConversationId.set('conversation-456');
+		(langserveStore.activeConversationId as any).set('conversation-456');
 
 		render(ConversationList);
 
@@ -170,7 +170,7 @@ describe('ConversationList', () => {
 
 	it('renders with different conversations correctly', () => {
 		// Set different conversations before rendering
-		langserveStore.conversations.set([
+		(langserveStore.conversations as any).set([
 			{
 				id: 'conversation-789',
 				participants: {

@@ -8,7 +8,7 @@
 	} from '../stores/langserve';
 	import ChatMessage from './ChatMessage.svelte';
 	import { slide } from 'svelte/transition';
-	import { chatLogger, performanceLogger } from '../../utils/logger';
+	import { logger, chatLogger } from '../../utils/logger';
 
 	interface Props {
 		sendMessage: (content: string) => void;
@@ -37,13 +37,18 @@
 					messageLength: messageInput.trim().length
 				});
 
-				performanceLogger.time('message-send');
+				logger.time('message-send');
 				sendMessage(messageInput.trim());
 				messageInput = '';
-				performanceLogger.timeEnd('message-send');
+				logger.timeEnd('message-send');
 			}
 		} catch (error) {
-			chatLogger.error('Error sending message', { error: error.message }, error);
+			const errorMessage = error instanceof Error ? error.message : String(error);
+			chatLogger.error(
+				'Error sending message',
+				{ error: errorMessage },
+				error instanceof Error ? error : undefined
+			);
 		}
 	}
 
@@ -76,11 +81,16 @@
 		});
 
 		try {
-			performanceLogger.time('load-more-messages');
+			logger.time('load-more-messages');
 			await loadMoreMessages($activeConversation.id);
-			performanceLogger.timeEnd('load-more-messages');
+			logger.timeEnd('load-more-messages');
 		} catch (error) {
-			chatLogger.error('Error loading more messages', { error: error.message }, error);
+			const errorMessage = error instanceof Error ? error.message : String(error);
+			chatLogger.error(
+				'Error loading more messages',
+				{ error: errorMessage },
+				error instanceof Error ? error : undefined
+			);
 		} finally {
 			isLoadingMore = false;
 		}

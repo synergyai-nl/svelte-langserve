@@ -9,7 +9,7 @@ let io: Server;
 
 // LangServe Client Manager
 class LangServeClientManager {
-	private clients: Map<string, RemoteRunnable> = new Map();
+	private clients: Map<string, RemoteRunnable<unknown, unknown, unknown>> = new Map();
 	private endpoints: Map<string, LangServeEndpoint> = new Map();
 
 	constructor(private config: Record<string, unknown>) {
@@ -17,7 +17,8 @@ class LangServeClientManager {
 	}
 
 	private initializeClients() {
-		for (const endpoint of this.config.endpoints) {
+		const endpoints = this.config.endpoints as LangServeEndpoint[];
+		for (const endpoint of endpoints) {
 			try {
 				const client = new RemoteRunnable({
 					url: endpoint.url,
@@ -214,7 +215,8 @@ class LangServeSocketIOServer {
 
 	constructor(server: unknown, langserveConfig: Record<string, unknown>) {
 		if (!io) {
-			io = new Server(server, {
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			io = new Server(server as any, {
 				cors: {
 					origin: '*',
 					methods: ['GET', 'POST']
@@ -255,7 +257,8 @@ class LangServeSocketIOServer {
 						schemas
 					});
 				} catch (error) {
-					socket.emit('error', { message: error.message });
+					const errorMessage = error instanceof Error ? error.message : String(error);
+					socket.emit('error', { message: errorMessage });
 				}
 			});
 
@@ -271,7 +274,7 @@ class LangServeSocketIOServer {
 					socket.emit('endpoint_test_result', {
 						endpoint_id: data.endpoint_id,
 						healthy: false,
-						error: error.message
+						error: error instanceof Error ? error.message : String(error)
 					});
 				}
 			});

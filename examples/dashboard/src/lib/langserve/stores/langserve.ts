@@ -1,7 +1,7 @@
 import { io, Socket } from 'socket.io-client';
 import type { LangServeEndpoint, Conversation, ChatMessage, MessageChunk } from '../types';
 import { writable, derived, get } from 'svelte/store';
-import { logger, socketLogger, streamingLogger, performanceLogger } from '../../utils/logger';
+import { logger, socketLogger, streamingLogger } from '../../utils/logger';
 
 // Store types
 interface LangServeState {
@@ -110,7 +110,7 @@ const createLangServeStore = () => {
 			serverUrl,
 			userId: userId.substring(0, 8) + '...'
 		});
-		performanceLogger.time('connection-establish');
+		logger.time('connection-establish');
 
 		update((state) => {
 			// Clean up existing socket if there is one
@@ -139,7 +139,7 @@ const createLangServeStore = () => {
 			// Connection events
 			newSocket.on('connect', () => {
 				socketLogger.info('Socket connected successfully');
-				performanceLogger.timeEnd('connection-establish');
+				logger.timeEnd('connection-establish');
 
 				update((s) => {
 					s.connected = true;
