@@ -73,7 +73,6 @@
 			return defaultValue;
 		}
 	});
-
 </script>
 
 {#if hasError}

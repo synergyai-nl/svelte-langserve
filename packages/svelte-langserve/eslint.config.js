@@ -5,7 +5,7 @@ import ts from 'typescript-eslint';
 import eslintPluginSvelte from 'eslint-plugin-svelte';
 import globals from 'globals';
 
-const gitignorePath = fileURLToPath(new URL('../../../.gitignore', import.meta.url));
+const gitignorePath = fileURLToPath(new URL('../../.gitignore', import.meta.url));
 
 export default ts.config(
 	includeIgnoreFile(gitignorePath),

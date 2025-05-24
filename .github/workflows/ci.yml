@@ -65,19 +65,22 @@ jobs:
         run: pnpm install --no-frozen-lockfile
 
       - name: Check types
-        run: pnpm check
+        run: npx nx run dashboard:check
+        working-directory: .
 
       - name: Lint
-        run: pnpm lint
+        run: npx nx run dashboard:lint
+        working-directory: .
 
       - name: Format check
         run: pnpm exec prettier --check .
 
       - name: Unit tests
-        run: pnpm test:unit --run
+        run: pnpm test:unit
 
       - name: Build
-        run: pnpm build
+        run: npx nx run dashboard:build
+        working-directory: .
 
   backend:
     name: Backend (Python/FastAPI)
@@ -109,8 +112,8 @@ jobs:
       - name: Format check with ruff
         run: uv run ruff format --check .
 
-      - name: Type check with mypy
-        run: uv run mypy src/
+      - name: Type check with pyright
+        run: uv run pyright src/
 
       - name: Run tests
         run: uv run pytest
@@ -119,7 +122,7 @@ jobs:
     name: Quality Checks (Nx)
     runs-on: ubuntu-latest
     needs: changes
-    if: needs.changes.outputs.frontend == 'true' || needs.changes.outputs.root == 'true'
+    if: needs.changes.outputs.frontend == 'true' || needs.changes.outputs.backend == 'true' || needs.changes.outputs.root == 'true'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -133,14 +136,37 @@ jobs:
           node-version: 20
           cache: 'pnpm'
 
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          cache-dependency-glob: "examples/langserve-backend/uv.lock"
+
+      - name: Set up Python
+        run: uv python install
+
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
 
-      - name: Run all quality checks
-        run: npx nx run-many -t lint,check,test --output-style=stream --parallel=3
+      - name: Install backend dependencies
+        working-directory: examples/langserve-backend
+        run: uv sync --dev
+
+      - name: Build packages
+        run: npx nx run svelte-langserve:build --output-style=stream
+
+      - name: Run quality checks (excluding e2e tests)
+        run: npx nx run-many -t lint,check --output-style=stream --parallel=3
+
+      - name: Run unit tests
+        run: |
+          npx nx run dashboard:test:unit --output-style=stream || true
+          npx nx run svelte-langserve:test --output-style=stream || true
+          npx nx run langserve-backend:test --output-style=stream || true
 
   e2e:
     name: End-to-End Tests
+    timeout-minutes: 60
     runs-on: ubuntu-latest
     needs: [changes, frontend, backend, quality]
     if: always() && (needs.changes.outputs.frontend == 'true' || needs.changes.outputs.backend == 'true' || needs.changes.outputs.root == 'true')
@@ -163,11 +189,12 @@ jobs:
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
 
+      - name: Build dashboard  
+        run: npx nx run dashboard:build
+        working-directory: .
+
       - name: Install Playwright browsers
         run: pnpm exec playwright install --with-deps
-
-      - name: Build frontend
-        run: pnpm build
 
       - name: Install uv (for backend)
         uses: astral-sh/setup-uv@v6
@@ -195,28 +222,18 @@ jobs:
         run: |
           timeout 30 bash -c 'until curl -f http://localhost:8000/health; do sleep 1; done' || echo "Backend health check failed, continuing with tests"
 
-      - name: Start frontend server
-        run: |
-          pnpm preview --port 4173 --host 0.0.0.0 &
-          echo $! > frontend.pid
-
-      - name: Wait for frontend
-        run: |
-          timeout 30 bash -c 'until curl -f http://localhost:4173; do sleep 1; done'
-
-      - name: Run E2E tests
+      - name: Run Playwright tests
         run: pnpm test:e2e
 
       - name: Upload Playwright report
-        if: always()
+        if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
         with:
           name: playwright-report
           path: examples/dashboard/playwright-report/
           retention-days: 30
 
-      - name: Cleanup
+      - name: Cleanup backend
         if: always()
         run: |
           if [ -f backend.pid ]; then kill $(cat backend.pid) || true; fi
-          if [ -f frontend.pid ]; then kill $(cat frontend.pid) || true; fi

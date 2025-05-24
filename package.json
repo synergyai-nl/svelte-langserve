@@ -57,7 +57,8 @@
       "cd examples/langserve-backend && uv run pyright"
     ],
     "packages/**/*.{js,ts}": [
-      "nx run-many -t lint,check --output-style=stream"
+      "nx run svelte-langserve:lint",
+      "nx run svelte-langserve:check"
     ]
   },
   "keywords": [

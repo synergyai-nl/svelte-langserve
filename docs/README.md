@@ -19,6 +19,7 @@ Welcome to the comprehensive documentation for Svelte LangServe - a complete sol
 ### 📖 [Guides](./guides/)
 - **[Flowbite Theme System](./guides/themes.md)** - Complete theming guide with Flowbite
 - **[Authentication](./guides/authentication.md)** - JWT security and user management
+- **[Internationalization](./guides/internationalization.md)** - Multi-language support with Paraglide
 - **[Deployment](./guides/deployment.md)** - Docker production deployment
 - **[Performance](./guides/performance.md)** - Optimization and best practices
 
