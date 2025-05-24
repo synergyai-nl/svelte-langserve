@@ -14,7 +14,7 @@
     config?: ThemeConfig;
     variant?: 'primary' | 'dark' | 'compact' | 'mobile';
     override?: ThemeOverride;
-    children: any;
+    children: unknown;
   } = $props();
   
   // Validate and create safe theme
@@ -35,7 +35,7 @@
   });
   
   // Create and set theme context
-  let themeContext = $derived(() => 
+  let _themeContext = $derived(() => 
     createThemeContext(finalTheme, config, variant, override)
   );
 </script>

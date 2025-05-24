@@ -1,6 +1,5 @@
 <script lang="ts">
   import type { Conversation } from '../types.js';
-  import ChatMessage from './ChatMessage.svelte';
   import { useTheme } from '../themes/utils.js';
 
   let { 
