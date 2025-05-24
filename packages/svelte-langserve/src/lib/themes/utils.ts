@@ -70,7 +70,7 @@ export function createThemeContext(
  * Merge multiple theme overrides
  */
 export function mergeThemeOverrides(...overrides: (ThemeOverride | undefined)[]): ThemeOverride {
-  return overrides.reduce((merged, override) => {
+  return overrides.reduce<ThemeOverride>((merged, override) => {
     if (override) {
       return { ...merged, ...override };
     }
