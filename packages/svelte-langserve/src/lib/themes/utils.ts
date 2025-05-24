@@ -132,6 +132,10 @@ export function getResponsiveClasses(
  * Validate theme object has required properties
  */
 export function validateTheme(theme: Partial<ChatTheme>): theme is ChatTheme {
+  if (!theme || typeof theme !== 'object') {
+    return false;
+  }
+  
   const requiredKeys: (keyof ChatTheme)[] = [
     'container',
     'chatArea',
