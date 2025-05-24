@@ -76,7 +76,7 @@ jobs:
         run: pnpm exec prettier --check .
 
       - name: Unit tests
-        run: pnpm test:unit --run
+        run: pnpm test:unit
 
       - name: Build
         run: npx nx run dashboard:build
