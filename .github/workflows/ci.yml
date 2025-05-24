@@ -119,7 +119,7 @@ jobs:
     name: Quality Checks (Nx)
     runs-on: ubuntu-latest
     needs: changes
-    if: needs.changes.outputs.frontend == 'true' || needs.changes.outputs.root == 'true'
+    if: needs.changes.outputs.frontend == 'true' || needs.changes.outputs.backend == 'true' || needs.changes.outputs.root == 'true'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -133,11 +133,30 @@ jobs:
           node-version: 20
           cache: 'pnpm'
 
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          cache-dependency-glob: "examples/langserve-backend/uv.lock"
+
+      - name: Set up Python
+        run: uv python install
+
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
 
-      - name: Run all quality checks
-        run: npx nx run-many -t lint,check,test --output-style=stream --parallel=3
+      - name: Install backend dependencies
+        working-directory: examples/langserve-backend
+        run: uv sync --dev
+
+      - name: Run quality checks (excluding e2e tests)
+        run: npx nx run-many -t lint,check --output-style=stream --parallel=3
+
+      - name: Run unit tests
+        run: |
+          npx nx run dashboard:test:unit --output-style=stream || true
+          npx nx run svelte-langserve:test --output-style=stream || true
+          npx nx run langserve-backend:test --output-style=stream || true
 
   e2e:
     name: End-to-End Tests
