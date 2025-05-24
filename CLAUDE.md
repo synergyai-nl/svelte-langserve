@@ -100,6 +100,19 @@ docker-compose down
 docker-compose down -v
 ```
 
+### Nx Development Commands
+
+```bash
+# Run tests across all projects with detailed output (recommended for Claude)
+nx run-many --target=test --output-style=stream
+
+# Run linting and type checking
+nx run-many --target=lint,check --output-style=stream
+
+# Run all quality checks
+nx run-many --target=test,lint,check --output-style=stream --parallel=3
+```
+
 ### Environment Setup
 
 ```bash
