@@ -31,6 +31,7 @@ pnpm dev
 ```
 
 Visit:
+
 - `http://localhost:5173` - Main dashboard
 - `http://localhost:5173/flowbite` - Flowbite theme demo
 
@@ -80,21 +81,22 @@ This project includes a complete Flowbite theme integration:
 5. **Theme System**: Seamless integration with LangServe theming
 
 Example usage:
+
 ```svelte
 <script>
-  import { Button, Card, Alert } from 'flowbite-svelte';
-  import { CheckCircleSolid } from 'flowbite-svelte-icons';
+	import { Button, Card, Alert } from 'flowbite-svelte';
+	import { CheckCircleSolid } from 'flowbite-svelte-icons';
 </script>
 
 <Alert>
-  {#snippet icon()}<CheckCircleSolid class="h-4 w-4" />{/snippet}
-  Success message with icon
+	{#snippet icon()}<CheckCircleSolid class="h-4 w-4" />{/snippet}
+	Success message with icon
 </Alert>
 
 <Card>
-  <h3>Card Title</h3>
-  <p>Card content with Flowbite styling</p>
-  <Button color="blue">Action Button</Button>
+	<h3>Card Title</h3>
+	<p>Card content with Flowbite styling</p>
+	<Button color="blue">Action Button</Button>
 </Card>
 ```
 
