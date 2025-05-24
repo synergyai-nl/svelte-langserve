@@ -1,5 +1,5 @@
 import { writable, derived } from 'svelte/store';
-import { browser } from '$app/environment';
+import { BROWSER } from 'esm-env';
 
 interface AuthState {
 	isAuthenticated: boolean;
@@ -25,7 +25,7 @@ function createAuthStore() {
 	const { subscribe, set, update } = writable<AuthState>(initialState);
 
 	// Load token from localStorage on initialization
-	if (browser) {
+	if (BROWSER) {
 		const savedToken = localStorage.getItem('auth_token');
 		const savedUser = localStorage.getItem('auth_user');
 
@@ -87,7 +87,7 @@ function createAuthStore() {
 			const user = await userResponse.json();
 
 			// Save to localStorage
-			if (browser) {
+			if (BROWSER) {
 				localStorage.setItem('auth_token', accessToken);
 				localStorage.setItem('auth_user', JSON.stringify(user));
 			}
@@ -115,7 +115,7 @@ function createAuthStore() {
 
 	const logout = () => {
 		// Clear localStorage
-		if (browser) {
+		if (BROWSER) {
 			localStorage.removeItem('auth_token');
 			localStorage.removeItem('auth_user');
 		}

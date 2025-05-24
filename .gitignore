@@ -37,3 +37,7 @@ __pycache__/
 # Testing
 .pytest_cache/
 test-results/
+
+# Temporary directories
+fix_tests/
+flowbite-theme/

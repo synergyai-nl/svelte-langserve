@@ -24,8 +24,8 @@
     <div class="space-y-1">
       {#each conversations as conv (conv.id)}
         <div
-          on:click={() => onSelect(conv.id)}
-          on:keydown={(e) => e.key === 'Enter' && onSelect(conv.id)}
+          onclick={() => onSelect(conv.id)}
+          onkeydown={(e) => e.key === 'Enter' && onSelect(conv.id)}
           class={activeConversationId === conv.id ? theme.conversationItemActive : theme.conversationItem}
           tabindex="0"
           role="button"

@@ -33,7 +33,7 @@
         max="1"
         step="0.1"
         bind:value={temperature}
-        on:change={updateConfig}
+        onchange={updateConfig}
         class={theme.configSlider}
       />
       <span class="text-sm ml-2">{temperature}</span>
@@ -45,7 +45,7 @@
       <input
         type="checkbox"
         bind:checked={streaming}
-        on:change={updateConfig}
+        onchange={updateConfig}
         class="mr-2"
       />
       <span>Enable Streaming</span>

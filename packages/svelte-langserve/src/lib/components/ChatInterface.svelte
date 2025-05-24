@@ -17,7 +17,7 @@
   const theme = useTheme();
   
   let messageInput = $state('');
-  let chatContainer: HTMLDivElement;
+  let chatContainer = $state<HTMLDivElement>();
   
   function handleSendMessage() {
     if (messageInput.trim() && conversation) {
@@ -37,7 +37,7 @@
   function scrollToBottom() {
     if (chatContainer) {
       setTimeout(() => {
-        chatContainer.scrollTop = chatContainer.scrollHeight;
+        chatContainer!.scrollTop = chatContainer!.scrollHeight;
       }, 0);
     }
   }
@@ -122,11 +122,11 @@
           class={theme.inputField}
           rows="2"
           bind:value={messageInput}
-          on:keydown={handleKeyPress}
+          onkeydown={handleKeyPress}
           placeholder="Type a message..."
         ></textarea>
         <button
-          on:click={handleSendMessage}
+          onclick={handleSendMessage}
           disabled={!messageInput.trim() || isLoading}
           class={!messageInput.trim() || isLoading ? theme.sendButtonDisabled : theme.sendButton}
         >
@@ -140,7 +140,7 @@
     <div class={theme.emptyStateTitle}>Welcome to LangServe Frontend</div>
     <div class={theme.emptyStateDescription}>Select endpoints and create a conversation to get started.</div>
     <button
-      on:click={oncreate}
+      onclick={oncreate}
       class={theme.emptyStateAction}
     >
       Create New Conversation

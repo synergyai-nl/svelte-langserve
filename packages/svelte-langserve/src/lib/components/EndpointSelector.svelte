@@ -34,7 +34,7 @@
   <div class="flex justify-between items-center mb-2">
     <h3 class={theme.endpointSelectorLabel}>Available Endpoints</h3>
     <button 
-      on:click={() => showEndpointDetails = !showEndpointDetails}
+      onclick={() => showEndpointDetails = !showEndpointDetails}
       class={theme.configButton}
     >
       {showEndpointDetails ? 'Hide' : 'Show'} Details
@@ -51,7 +51,7 @@
             <input
               type="checkbox"
               checked={selectedEndpoints.includes(endpoint.id)}
-              on:change={(e) => toggleEndpoint(endpoint.id, e.currentTarget.checked)}
+              onchange={(e) => toggleEndpoint(endpoint.id, e.currentTarget.checked)}
               class="mt-1 mr-3"
             />
             <div class="flex-1">
@@ -70,13 +70,13 @@
           </label>
           <div class="mt-2 flex space-x-2">
             <button
-              on:click={() => onTest(endpoint.id)}
+              onclick={() => onTest(endpoint.id)}
               class={theme.testEndpointButton}
             >
               Test
             </button>
             <button
-              on:click={() => onGetSchemas(endpoint.id)}
+              onclick={() => onGetSchemas(endpoint.id)}
               class={theme.getSchemasButton}
             >
               Schemas

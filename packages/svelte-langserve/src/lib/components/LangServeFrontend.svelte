@@ -140,7 +140,7 @@
     />
     
     <button
-      on:click={handleCreateConversation}
+      onclick={handleCreateConversation}
       disabled={selectedEndpoints.length === 0}
       class={selectedEndpoints.length > 0 ? theme.createConversationButton : theme.sendButtonDisabled}
     >

@@ -4,7 +4,7 @@
   "description": "Complete Svelte integration for LangServe backends with Socket.IO",
   "type": "module",
   "main": "dist/index.js",
-  "svelte": "dist/index.js",
+  "svelte": "./dist/index.js",
   "types": "dist/index.d.ts",
   "exports": {
     ".": {
@@ -45,11 +45,13 @@
     "test:watch": "vitest"
   },
   "peerDependencies": {
-    "svelte": "^5.0.0",
-    "socket.io-client": "^4.8.0"
+    "@sveltejs/kit": "^2.0.0",
+    "socket.io-client": "^4.8.0",
+    "svelte": "^5.0.0"
   },
   "dependencies": {
-    "@langchain/core": "^0.3.57"
+    "@langchain/core": "^0.3.57",
+    "esm-env": "^1.2.2"
   },
   "devDependencies": {
     "@sveltejs/adapter-auto": "^3.0.0",
