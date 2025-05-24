@@ -19,7 +19,7 @@
 				"cwd": "examples/dashboard"
 			},
 			"outputs": ["{projectRoot}/build"],
-			"dependsOn": ["svelte-langserve:build"]
+			"dependsOn": ["paraglide:compile", "svelte-langserve:build"]
 		},
 		"preview": {
 			"executor": "nx:run-commands",
@@ -29,20 +29,28 @@
 			},
 			"dependsOn": ["build"]
 		},
+		"paraglide:compile": {
+			"executor": "nx:run-commands",
+			"options": {
+				"command": "paraglide-js compile --project ./project.inlang --outdir ./src/lib/paraglide",
+				"cwd": "examples/dashboard"
+			}
+		},
 		"check": {
 			"executor": "nx:run-commands",
 			"options": {
 				"command": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 				"cwd": "examples/dashboard"
 			},
-			"dependsOn": ["svelte-langserve:build"]
+			"dependsOn": ["paraglide:compile", "svelte-langserve:build"]
 		},
 		"lint": {
 			"executor": "nx:run-commands",
 			"options": {
 				"command": "prettier --check . && eslint .",
 				"cwd": "examples/dashboard"
-			}
+			},
+			"dependsOn": ["paraglide:compile"]
 		},
 		"format": {
 			"executor": "nx:run-commands",
