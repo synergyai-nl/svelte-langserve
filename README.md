@@ -1,20 +1,27 @@
-# Claude Dashboard
+# Svelte LangServe
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-A production-ready SvelteKit dashboard for interacting with multiple AI assistants via LangServe backends. Features real-time chat, Socket.IO integration, and Docker deployment support.
+A **monorepo** containing reusable packages and examples for building SvelteKit dashboards that interact with LangServe backends. Features real-time chat, Socket.IO integration, and production-ready Docker deployment.
 
 ## ✨ Features
 
+### 📦 Reusable Packages
+- **@svelte-langserve/core**: Socket.IO client, stores, and connection management
+- **@svelte-langserve/ui**: Pre-built Svelte components for chat interfaces
+- **@svelte-langserve/types**: Shared TypeScript definitions
+- **@svelte-langserve/codegen**: Code generation utilities
+
+### 🚀 Example Application Features
 - **🔐 JWT Authentication**: Secure user authentication with password hashing and token management
-- **Real-time Communication**: WebSocket-based chat with instant message delivery
-- **Multiple AI Assistants**: 5 specialized agents (chatbot, code assistant, data analyst, creative writer, research assistant)
-- **Streaming Support**: Progressive message rendering as AI agents respond
-- **Docker Deployment**: Complete containerized setup with nginx reverse proxy
-- **Modern UI**: Clean, responsive interface built with SvelteKit and TailwindCSS
-- **Internationalization**: Multi-language support with Inlang/Paraglide
-- **Health Monitoring**: Real-time endpoint status and connectivity testing
-- **Mobile Optimized**: Responsive design that works on all devices
+- **⚡ Real-time Communication**: WebSocket-based chat with instant message delivery
+- **🤖 Multiple AI Assistants**: 5 specialized agents (chatbot, code assistant, data analyst, creative writer, research assistant)
+- **📺 Streaming Support**: Progressive message rendering as AI agents respond
+- **🐳 Docker Deployment**: Complete containerized setup with nginx reverse proxy
+- **🎨 Modern UI**: Clean, responsive interface built with SvelteKit and TailwindCSS
+- **🌍 Internationalization**: Multi-language support with Inlang/Paraglide
+- **📊 Health Monitoring**: Real-time endpoint status and connectivity testing
+- **📱 Mobile Optimized**: Responsive design that works on all devices
 
 ## 🚀 Quick Start
 
@@ -61,15 +68,33 @@ pnpm dev
 cd examples/langserve-backend
 uv run serve
 # or
-uv run uvicorn src.claude_dashboard_backend.main:create_app --factory --reload
+uv run uvicorn src.svelte_langserve.main:create_app --factory --reload
 ```
 
 ## 🏗 Project Structure
 
-- **[examples/dashboard](./examples/dashboard)** - SvelteKit frontend with Socket.IO integration
-- **[examples/langserve-backend](./examples/langserve-backend)** - FastAPI backend with 5 specialized AI agents
-- **[nginx/](./nginx/)** - Nginx reverse proxy configuration
-- **[docker-compose.yml](./docker-compose.yml)** - Multi-service Docker deployment
+### Monorepo Layout
+```
+svelte-langserve/
+├── packages/@svelte-langserve/     # 📦 Reusable npm packages
+│   ├── core/                       #    Connection logic & stores
+│   ├── ui/                         #    Svelte components library
+│   ├── types/                      #    Shared TypeScript definitions
+│   └── codegen/                    #    Code generation utilities
+├── examples/                       # 🚀 Example applications  
+│   ├── dashboard/                  #    SvelteKit frontend demo
+│   └── langserve-backend/          #    FastAPI backend demo
+├── nginx/                          # 🌐 Nginx reverse proxy config
+├── docker-compose.yml              # 🐳 Multi-service deployment
+└── nx.json                         # ⚡ Nx monorepo configuration
+```
+
+### Key Directories
+- **[packages/@svelte-langserve](./packages/@svelte-langserve/)** - Reusable libraries for any SvelteKit project
+- **[examples/dashboard](./examples/dashboard)** - Complete SvelteKit frontend example
+- **[examples/langserve-backend](./examples/langserve-backend)** - FastAPI backend with 5 AI agents
+- **[nginx/](./nginx/)** - Production nginx configuration
+- **[docker-compose.yml](./docker-compose.yml)** - Full-stack Docker deployment
 
 ## 🛠 Development
 
@@ -103,13 +128,39 @@ cd examples/langserve-backend
 
 # Development
 uv run serve
-uv run uvicorn src.claude_dashboard_backend.main:create_app --factory --reload
+uv run uvicorn src.svelte_langserve.main:create_app --factory --reload
 
 # Code quality
 uv run ruff check .    # Lint
 uv run ruff format .   # Format
 uv run pytest         # Test
-uv run mypy src/       # Type checking
+uv run pyright         # Type checking
+```
+
+### Package Development
+
+```bash
+# Install all dependencies (run from root)
+pnpm install
+
+# Build all packages
+nx run-many -t build
+
+# Test all packages
+nx run-many -t test
+
+# Lint all packages
+nx run-many -t lint
+
+# Work on specific package
+cd packages/@svelte-langserve/core
+pnpm build
+pnpm test:watch
+
+# Publish packages (when ready)
+pnpm changeset
+pnpm version-packages
+pnpm release
 ```
 
 ### Docker Commands
@@ -203,10 +254,19 @@ For production deployment:
 3. Implement user registration/management
 4. Consider implementing refresh tokens for longer sessions
 
+## 📋 Current Architecture Issues
+
+This project is in active development. See [TODO.md](./TODO.md) for planned improvements:
+
+- **Code duplication**: Examples contain duplicated store logic instead of using packages
+- **Monolithic files**: `hooks.server.ts` (657 lines) needs refactoring into services
+- **Missing abstractions**: Configuration scattered throughout codebase
+- **Package underutilization**: Reusable packages need more functionality
+
 ## 🤝 Contributing
 
-We welcome contributions! Please feel free to submit issues and pull requests.
+We welcome contributions! Please see [TODO.md](./TODO.md) for architectural improvements in progress.
 
 ## 📄 License
 
-MIT © [Claude Dashboard contributors](LICENSE)
+MIT © [Svelte LangServe contributors](LICENSE)

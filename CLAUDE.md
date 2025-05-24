@@ -2,7 +2,26 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Commands
+## Project Structure
+
+This is a monorepo containing:
+- **examples/dashboard**: SvelteKit frontend with Socket.IO integration
+- **examples/langserve-backend**: Python FastAPI backend with LangServe
+- **packages/@svelte-langserve/***: Reusable npm packages for Svelte-LangServe integration
+
+## Essential Commands
+
+### Quick Start (Full Stack)
+```bash
+# Install all dependencies
+pnpm install
+
+# Start backend (in one terminal)
+cd examples/langserve-backend && uv run serve
+
+# Start frontend (in another terminal)  
+cd examples/dashboard && pnpm dev
+```
 
 ### Frontend Development (SvelteKit)
 
@@ -52,18 +71,13 @@ pnpm format
 cd examples/langserve-backend
 uv run serve
 
-# Or run directly
+# Or run directly with proper module path
 cd examples/langserve-backend
 uv run main.py
 
-# Alternative: Manual setup
-cd examples/langserve-backend
-pip install -e .
-python main.py
-
 # Development mode with auto-reload
 cd examples/langserve-backend
-uv run uvicorn src.claude_dashboard_backend.main:create_app --factory --reload --port 8000
+uv run uvicorn src.svelte_langserve.main:create_app --factory --reload --port 8000
 
 # Development tools
 cd examples/langserve-backend
@@ -71,6 +85,29 @@ uv run ruff check .        # Lint code
 uv run ruff format .       # Format code
 uv run pytest             # Run tests
 uv run pyright            # Type checking
+```
+
+### Package Development (Reusable Libraries)
+
+```bash
+# Build all packages
+nx run-many -t build
+
+# Test all packages
+nx run-many -t test
+
+# Lint all packages
+nx run-many -t lint
+
+# Work on specific package
+cd packages/@svelte-langserve/core
+pnpm build
+pnpm test:watch
+
+# Publish packages (when ready)
+pnpm changeset
+pnpm version-packages
+pnpm release
 ```
 
 ### Docker Deployment
@@ -127,7 +164,21 @@ cp .env.example .env
 
 ## Architecture Overview
 
-This project is a SvelteKit-based dashboard for interacting with LangServe endpoints via Socket.IO, providing a responsive and real-time chat interface for AI assistants.
+This project is a **monorepo** containing a SvelteKit-based dashboard for interacting with LangServe endpoints via Socket.IO, providing a responsive and real-time chat interface for AI assistants.
+
+### Monorepo Structure
+```
+claude-rocks-the-dashboard/
+├── examples/                    # Example applications
+│   ├── dashboard/              # SvelteKit frontend demo
+│   └── langserve-backend/      # FastAPI backend demo
+├── packages/@svelte-langserve/ # Reusable npm packages
+│   ├── core/                   # Connection logic & stores
+│   ├── ui/                     # Svelte components
+│   ├── types/                  # TypeScript definitions
+│   └── codegen/                # Code generation utilities
+└── nx.json                     # Nx monorepo configuration
+```
 
 ### High-Level Architecture
 
@@ -147,31 +198,33 @@ This project is a SvelteKit-based dashboard for interacting with LangServe endpo
 
 ### Key Components
 
-1. **Frontend (SvelteKit)**
+1. **Frontend (SvelteKit) - `examples/dashboard/`**
    - Real-time UI using Socket.IO for WebSocket communication
    - Components for chat interface, endpoint selection, and configuration
    - Reactive state management using Svelte 5 runes
    - Internationalization with Inlang/Paraglide
+   - **Note:** Currently contains duplicate store logic that should use packages
 
-2. **Socket.IO Integration**
-   - Implemented in `hooks.server.ts` for server-side Socket.IO setup
+2. **Socket.IO Integration - `examples/dashboard/src/hooks.server.ts`**
    - Handles real-time messaging between clients and AI agents
    - Manages conversation state, streaming responses, and agent coordination
+   - **Architecture Issue:** 657-line monolithic file needs refactoring (see TODO.md)
 
-3. **LangServe Backend**
-   - Implements multiple AI agents via LangChain and LangServe
+3. **LangServe Backend - `examples/langserve-backend/`**
+   - Implements 5 specialized AI agents via LangChain and LangServe
    - Supports streaming responses for real-time interaction
-   - Provides a REST API for client communication
-   - Includes endpoints for different specialized AI assistants:
-     - General chatbot
-     - Code assistant
-     - Data analyst
-     - Creative writer
-     - Research assistant
+   - FastAPI with JWT authentication
+   - Module path: `src.svelte_langserve.*` (not `src.claude_dashboard_backend.*`)
 
-4. **Core Data Flow**
+4. **Reusable Packages - `packages/@svelte-langserve/`**
+   - **@svelte-langserve/core**: Connection logic and stores
+   - **@svelte-langserve/ui**: Reusable Svelte components
+   - **@svelte-langserve/types**: Shared TypeScript definitions
+   - **Current Issue:** Underutilized - examples should use packages instead of duplicating code
+
+5. **Core Data Flow**
    - Client connects to SvelteKit frontend via Socket.IO
-   - Frontend communicates with LangServe backends
+   - Frontend communicates with LangServe backends  
    - AI responses stream back to clients in real-time
    - Multiple agents can participate in a single conversation
 
