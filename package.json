@@ -55,6 +55,10 @@
       "cd examples/langserve-backend && uv run ruff check --fix",
       "cd examples/langserve-backend && uv run ruff format",
       "cd examples/langserve-backend && uv run pyright"
+    ],
+    "packages/**/*.{js,ts}": [
+      "pnpm lint:root",
+      "pnpm typecheck"
     ]
   },
   "keywords": [
