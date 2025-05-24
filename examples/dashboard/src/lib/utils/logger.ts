@@ -265,7 +265,8 @@ if (typeof window !== 'undefined') {
 		enableDebug: enableDebugLogging,
 		enableProduction: enableProductionLogging,
 		setLevel: (level: string) => logger.setLogLevel(LogLevel[level as keyof typeof LogLevel]),
-		getLogs: (filter?: { level?: LogLevel; context?: string; limit?: number }) => logger.getLogs(filter),
+		getLogs: (filter?: { level?: LogLevel; context?: string; limit?: number }) =>
+			logger.getLogs(filter),
 		clearLogs: () => logger.clearLogs()
 	};
 }
