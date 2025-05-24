@@ -1,5 +1,5 @@
 <script lang="ts">
-	import LangServeFrontend from '$lib/langserve/components/LangServeFrontend.svelte';
+	import { LangServeFrontend } from 'svelte-langserve';
 	import { browser } from '$app/environment';
 
 	// Generate a random user ID for demo purposes
@@ -29,7 +29,6 @@
 				<LangServeFrontend
 					{userId}
 					serverUrl={import.meta.env.VITE_LANGSERVE_SERVER_URL || 'http://localhost:3000'}
-					backendUrl={import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000'}
 				/>
 			{:else}
 				<div class="flex h-full items-center justify-center">

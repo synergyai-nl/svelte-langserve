@@ -1,13 +1,16 @@
-// Export types
-export * from './types';
+// Re-export everything from the consolidated package
+export * from 'svelte-langserve';
 
-// Export stores
-export * from './stores/langserve';
+// Re-export local components that aren't in the package yet
+export { default as ErrorBoundary } from './components/ErrorBoundary.svelte';
+export { default as LoginForm } from './components/LoginForm.svelte';
 
-// Export components
-export { default as LangServeFrontend } from './components/LangServeFrontend.svelte';
-export { default as ChatInterface } from './components/ChatInterface.svelte';
-export { default as ChatMessage } from './components/ChatMessage.svelte';
-export { default as ConversationList } from './components/ConversationList.svelte';
-export { default as ConfigPanel } from './components/ConfigPanel.svelte';
-export { default as EndpointSelector } from './components/EndpointSelector.svelte';
+// Re-export auth store with renamed exports to avoid conflicts
+export {
+	authStore,
+	isAuthenticated as isAuth,
+	currentUser as user,
+	authLoading as loading,
+	authError as error,
+	accessToken as token
+} from './stores/auth';
