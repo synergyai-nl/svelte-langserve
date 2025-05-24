@@ -32,31 +32,50 @@ Key Files:
 
 ## Phase 1: Critical Foundation (Simplicity & Duplication)
 
-### 1.1 Consolidate Duplicate Store Implementations
-**Priority: 🔥🔥🔥 Critical**
-**Impact: Eliminates ~650 lines of duplicated code**
+### 1.1 Consolidate Packages AND Duplicate Store Implementations  
+**Priority: 🔥🔥🔥 Critical** (UPDATED)
+**Impact: Eliminates ~650 lines of duplicated code + package overhead**
 
 **Current Problem:**
-- Two separate LangServe store implementations:
+- **4 separate packages** with minimal functionality (46 files, 1774 lines total)
+- **Duplicate store implementations:**
   - `examples/dashboard/src/lib/langserve/stores/langserve.ts` (657 lines)
   - `packages/@svelte-langserve/core/src/lib/stores/langserve.ts` (19 lines)
 
-**Actions:**
-1. **Analyze the feature gap** between the two implementations
-2. **Enhance the package version** with missing features from the example version
-3. **Update example to use package version**:
-   ```typescript
-   // examples/dashboard/src/lib/langserve/stores/langserve.ts
-   export { langserveStore, connect, disconnect } from '@svelte-langserve/core/stores';
+**Combined Solution:**
+1. **Create single package** `packages/svelte-langserve/`
+2. **Merge all 4 packages** into unified structure:
    ```
-4. **Delete the old implementation** from examples
-5. **Update all imports** in the example application
-6. **Test thoroughly** to ensure no functionality is lost
+   packages/svelte-langserve/
+   ├── src/lib/
+   │   ├── stores/          # Full-featured stores from examples
+   │   ├── components/      # All UI components  
+   │   ├── client/          # Socket.IO connection logic
+   │   └── index.ts         # Export everything
+   ├── types.ts             # Use @langchain/core types directly (no codegen!)
+   └── package.json         # Includes @langchain/core dependency
+   ```
+3. **Use LangChain types for 1:1 mapping**:
+   ```typescript
+   import type { BaseMessage, RunnableConfig } from '@langchain/core';
+   
+   // Socket.IO types use LangChain types directly
+   export interface SocketMessage {
+     message: BaseMessage;  // Same types as Python backend
+     config?: RunnableConfig;
+   }
+   ```
+4. **Update example to use new package**:
+   ```typescript
+   export * from 'svelte-langserve/stores';
+   ```
+5. **Delete old packages** and codegen complexity
 
-**Files to modify:**
-- `packages/@svelte-langserve/core/src/lib/stores/langserve.ts`
-- `examples/dashboard/src/lib/langserve/stores/langserve.ts`
-- All files importing the old store
+**Benefits:**
+- ✅ **Eliminates code duplication**
+- ✅ **Removes package maintenance overhead** 
+- ✅ **Simpler for users** - one dependency
+- ✅ **Single source of truth**
 
 ### 1.2 Extract Socket.IO Logic from hooks.server.ts
 **Priority: 🔥🔥🔥 Critical**
@@ -272,34 +291,50 @@ Key Files:
 3. **Replace scattered environment access**
 4. **Create environment-specific config files**
 
-### 2.2 Simplify Package Structure
-**Priority: 🔥 Medium**
-**Impact: Clear separation of concerns**
+### 2.2 Consolidate Into Single Package
+**Priority: 🔥🔥 High** (UPDATED)
+**Impact: Massive simplification, reduced maintenance overhead**
 
-**Current Structure:**
+**Current Problem:**
 ```
 packages/@svelte-langserve/
-├── core/      # Minimal implementation
-├── ui/        # UI components
-├── types/     # Type definitions  
-└── codegen/   # Code generation (unclear purpose)
+├── core/      # 19 lines - tiny wrapper
+├── ui/        # 6 components
+├── types/     # 68 lines - basic definitions  
+└── codegen/   # unclear purpose, probably unnecessary
 ```
+**Total: 46 files, ~1774 lines across 4 packages = massive overhead**
 
 **Target Structure:**
 ```
-packages/@svelte-langserve/
-├── core/      # Connection logic + stores + client management
-├── ui/        # Pure UI components only
-├── types/     # Shared TypeScript definitions
-└── config/    # Configuration management (new)
+packages/svelte-langserve/     # Single package
+├── src/
+│   ├── lib/
+│   │   ├── client/           # Connection & Socket.IO logic
+│   │   ├── stores/           # Svelte stores & state management
+│   │   ├── components/       # All UI components
+│   │   └── index.ts          # Main exports
+│   └── types.ts              # All TypeScript definitions
+├── package.json              # Single package.json
+└── README.md
 ```
 
 **Actions:**
-1. **Consolidate functionality into @svelte-langserve/core**
-2. **Move all non-UI logic out of @svelte-langserve/ui**
-3. **Create @svelte-langserve/config package**
-4. **Evaluate if @svelte-langserve/codegen is needed**
-5. **Update package.json dependencies**
+1. **Create new `packages/svelte-langserve/` directory**
+2. **Merge all functionality from 4 packages into one**
+3. **Consolidate package.json dependencies** 
+4. **Update import paths** in examples to use single package
+5. **Remove old package directories**
+6. **Simplify build/test/publish workflows**
+7. **Update documentation** to reflect single package approach
+
+**Benefits:**
+- ✅ **90% less maintenance overhead**
+- ✅ **Simpler for users** - one npm install  
+- ✅ **Easier publishing** - single package to maintain
+- ✅ **Better cohesion** - everything works together
+- ✅ **Faster builds** - no cross-package dependencies
+- ✅ **No codegen needed** - use LangChain types directly for 1:1 mapping
 
 ### 2.3 Improve Error Handling Patterns
 **Priority: 🔥 Medium**
