@@ -14,30 +14,24 @@
     config?: ThemeConfig;
     variant?: 'primary' | 'dark' | 'compact' | 'mobile';
     override?: ThemeOverride;
-    children: unknown;
+    children: import('svelte').Snippet;
   } = $props();
   
-  // Validate and create safe theme
-  let safeTheme = $derived(() => {
+  // Create and update theme context reactively
+  $effect(() => {
+    // Validate and create safe theme
+    let safeTheme: ChatTheme;
     if (!validateTheme(theme)) {
       console.warn('Invalid theme provided, falling back to default theme with overrides');
-      return createSafeTheme(theme);
+      safeTheme = createSafeTheme(theme);
+    } else {
+      safeTheme = theme;
     }
-    return theme;
+    
+    // Apply overrides if provided
+    const finalTheme = override ? { ...safeTheme, ...override } : safeTheme;
+    createThemeContext(finalTheme, config, variant, override);
   });
-  
-  // Apply overrides if provided
-  let finalTheme = $derived(() => {
-    if (override) {
-      return { ...safeTheme, ...override };
-    }
-    return safeTheme;
-  });
-  
-  // Create and set theme context
-  let _themeContext = $derived(() => 
-    createThemeContext(finalTheme, config, variant, override)
-  );
 </script>
 
 {@render children()}
