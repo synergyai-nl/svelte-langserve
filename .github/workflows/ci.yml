@@ -65,10 +65,10 @@ jobs:
         run: pnpm install --no-frozen-lockfile
 
       - name: Check types
-        run: pnpm check
+        run: cd ../.. && npx nx run dashboard:check
 
       - name: Lint
-        run: pnpm lint
+        run: cd ../.. && npx nx run dashboard:lint
 
       - name: Format check
         run: pnpm exec prettier --check .
@@ -77,7 +77,7 @@ jobs:
         run: pnpm test:unit --run
 
       - name: Build
-        run: pnpm build
+        run: cd ../.. && npx nx run dashboard:build
 
   backend:
     name: Backend (Python/FastAPI)
