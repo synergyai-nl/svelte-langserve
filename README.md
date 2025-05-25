@@ -1,270 +1,375 @@
 # Svelte LangServe
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Svelte](https://img.shields.io/badge/Svelte-5.0-orange.svg)](https://svelte.dev/)
+[![Flowbite](https://img.shields.io/badge/Flowbite-2.0-blue.svg)](https://flowbite.com/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue.svg)](https://www.typescriptlang.org/)
 
-A **monorepo** containing reusable packages and examples for building SvelteKit dashboards that interact with LangServe backends. Features real-time chat, Socket.IO integration, and production-ready Docker deployment.
+> **Build beautiful AI chat applications with SvelteKit, Flowbite UI, and LangServe in minutes, not months.**
 
-<!-- Test commit hooks -->
+A complete, production-ready framework for creating real-time AI chat applications with professional Flowbite components, streaming responses, and enterprise-grade deployment capabilities.
 
-## ✨ Features
+## 🎨 **Beautiful by Default with Flowbite**
 
-### 📦 Consolidated Package
-- **svelte-langserve**: Complete Svelte integration for LangServe with Socket.IO, UI components, stores, and LangChain-compatible types
+Experience the power of professional design systems with our integrated Flowbite theme:
 
-### 🚀 Example Application Features
-- **🔐 JWT Authentication**: Secure user authentication with password hashing and token management
-- **⚡ Real-time Communication**: WebSocket-based chat with instant message delivery
-- **🤖 Multiple AI Assistants**: 5 specialized agents (chatbot, code assistant, data analyst, creative writer, research assistant)
-- **📺 Streaming Support**: Progressive message rendering as AI agents respond
-- **🐳 Docker Deployment**: Complete containerized setup with nginx reverse proxy
-- **🎨 Modern UI**: Clean, responsive interface built with SvelteKit and TailwindCSS
-- **🌍 Internationalization**: Multi-language support with Inlang/Paraglide
-- **📊 Health Monitoring**: Real-time endpoint status and connectivity testing
-- **📱 Mobile Optimized**: Responsive design that works on all devices
+- 🎯 **50+ Pre-built Components** - Buttons, cards, modals, forms ready to use
+- 🌙 **Dark/Light Mode** - Automatic theme switching with user preferences  
+- 📱 **Mobile-First Design** - Responsive components that work everywhere
+- ♿ **Accessibility Built-in** - WCAG compliant out of the box
+- 🎨 **Customizable Themes** - Easy branding and styling system
 
-## 🚀 Quick Start
+```svelte
+<!-- Beautiful AI chat in one component -->
+<script>
+  import { LangServeFrontend } from 'svelte-langserve';
+</script>
 
-### Prerequisites
+<LangServeFrontend 
+  userId="user123" 
+  theme="flowbite"
+  darkMode={true}
+/>
+```
 
-- Docker and Docker Compose
-- API keys for OpenAI, Anthropic (and optionally Tavily)
+## ✨ **Enterprise Features**
 
-### Docker Deployment (Recommended)
+### 🤖 **Multi-Agent AI System**
+- **5 Specialized Agents**: Chatbot, Code Assistant, Data Analyst, Creative Writer, Research Assistant
+- **Multiple AI Providers**: OpenAI GPT-4, Anthropic Claude, with easy extensibility
+- **Streaming Responses**: Real-time token-by-token response rendering
+- **Tool Integration**: Web search, code execution, data analysis capabilities
+
+### 🔐 **Production Security**
+- **JWT Authentication**: Secure token-based auth with role-based access control
+- **Rate Limiting**: Built-in protection against abuse and spam
+- **Input Validation**: Comprehensive sanitization and validation
+- **Security Headers**: CORS, CSP, and other security best practices
+
+### ⚡ **Real-time Communication**
+- **Socket.IO Integration**: WebSocket-based real-time messaging
+- **Conversation Management**: Create, manage, and switch between multiple chats
+- **Message History**: Persistent conversation storage with pagination
+- **Connection Resilience**: Automatic reconnection and error handling
+
+### 🐳 **Deployment Ready**
+- **Docker Compose**: One-command deployment with all services
+- **Production Config**: Nginx, SSL, monitoring, and health checks
+- **Cloud Ready**: AWS, GCP, Azure deployment examples
+- **CI/CD Pipelines**: GitHub Actions workflows included
+
+## 🚀 **Quick Start**
+
+### Option 1: Docker (Recommended)
+
+Get everything running in under 2 minutes:
 
 ```bash
-# Clone the repository
-git clone <repository-url>
-cd claude-rocks-the-dashboard
+# 1. Clone and setup
+git clone https://github.com/synergyai-nl/svelte-langserve.git
+cd svelte-langserve
 
-# Setup environment variables
+# 2. Configure environment
 cp .env.example .env
-# Edit .env with your API keys
+# Edit .env with your API keys:
+# OPENAI_API_KEY=your-key-here
+# ANTHROPIC_API_KEY=your-key-here
 
-# Start all services
+# 3. Launch everything
 docker-compose up -d
 
-# View the dashboard
+# 4. Open your browser
 open http://localhost:3000
-
-# Login with demo credentials
-# Username: demo or admin
-# Password: secret
 ```
 
-### Development Setup
+**Demo credentials:** `demo` / `secret`
 
-#### Frontend Development
+### Option 2: Development Setup
 
-```bash
-cd examples/dashboard
-pnpm install
-pnpm dev
-```
-
-#### Backend Development
+For customization and development:
 
 ```bash
+# Backend (Terminal 1)
 cd examples/langserve-backend
 uv run serve
-# or
-uv run uvicorn src.svelte_langserve.main:create_app --factory --reload
-```
 
-## 🏗 Project Structure
-
-### Monorepo Layout
-```
-svelte-langserve/
-├── packages/svelte-langserve/      # 📦 Consolidated npm package
-│   ├── stores/                     #    Socket.IO & state management
-│   ├── components/                 #    Svelte UI components
-│   ├── client/                     #    LangServe client adapters
-│   └── types.ts                    #    LangChain-compatible types
-├── examples/                       # 🚀 Example applications  
-│   ├── dashboard/                  #    SvelteKit frontend demo
-│   └── langserve-backend/          #    FastAPI backend demo
-├── nginx/                          # 🌐 Nginx reverse proxy config
-├── docker-compose.yml              # 🐳 Multi-service deployment
-└── nx.json                         # ⚡ Nx monorepo configuration
-```
-
-### Key Directories
-- **[packages/svelte-langserve](./packages/svelte-langserve/)** - Consolidated library for any SvelteKit project
-- **[examples/dashboard](./examples/dashboard)** - Complete SvelteKit frontend example
-- **[examples/langserve-backend](./examples/langserve-backend)** - FastAPI backend with 5 AI agents
-- **[nginx/](./nginx/)** - Production nginx configuration
-- **[docker-compose.yml](./docker-compose.yml)** - Full-stack Docker deployment
-
-## 🛠 Development
-
-### Frontend Commands
-
-```bash
+# Frontend (Terminal 2)  
 cd examples/dashboard
+pnpm install && pnpm dev
 
-# Development
-pnpm install
-pnpm dev
-
-# Testing
-pnpm test
-pnpm test:e2e
-
-# Build
-pnpm build
-pnpm preview
-
-# Code quality
-pnpm check     # Type checking
-pnpm lint      # ESLint
-pnpm format    # Prettier
+# Visit http://localhost:5173
 ```
 
-### Backend Commands
+## 📖 **Comprehensive Documentation**
 
-```bash
-cd examples/langserve-backend
+Our worldclass documentation covers everything from 5-minute quickstart to enterprise deployment:
 
-# Development
-uv run serve
-uv run uvicorn src.svelte_langserve.main:create_app --factory --reload
+### 🚀 **[Getting Started](./docs/getting-started/)**
+- **[Quick Start](./docs/getting-started/quick-start.md)** - Docker + development setup in 5 minutes
+- **[Complete Tutorial](./docs/getting-started/tutorial.md)** - Build your first AI app in 30 minutes
 
-# Code quality
-uv run ruff check .    # Lint
-uv run ruff format .   # Format
-uv run pytest         # Test
-uv run pyright         # Type checking
-```
+### 📖 **[Guides](./docs/guides/)**
+- **[Flowbite Theme System](./docs/guides/themes.md)** - Customize UI with professional components
+- **[Authentication & Security](./docs/guides/authentication.md)** - JWT, RBAC, and security best practices
+- **[Production Deployment](./docs/guides/deployment.md)** - Docker, Kubernetes, cloud platforms
 
-### Package Development
+### 📋 **[API Reference](./docs/reference/)**
+- **[Component Library](./docs/reference/components.md)** - Complete Svelte component documentation
+- **[Socket.IO Events](./docs/reference/api/socket-events.md)** - Real-time event reference
+- **[Store APIs](./docs/reference/api/stores.md)** - State management and reactive patterns
 
-```bash
-# Install all dependencies (run from root)
-pnpm install
+### 🔧 **[Advanced](./docs/advanced/)**
+- **[Architecture Deep Dive](./docs/advanced/architecture.md)** - System design and patterns
+- **[Troubleshooting Guide](./docs/advanced/troubleshooting.md)** - Debug and fix common issues
 
-# Build consolidated package
-cd packages/svelte-langserve
-pnpm build
+## 🏗️ **Architecture Overview**
 
-# Test consolidated package
-cd packages/svelte-langserve
-pnpm test
-
-cd packages/svelte-langserve
-pnpm lint
-
-# Run all quality checks
-nx run-many -t test,lint,check
-
-# Publish package (when ready)
-cd packages/svelte-langserve
-npm publish
-```
-
-### Docker Commands
-
-```bash
-# Start services
-docker-compose up -d
-
-# View logs
-docker-compose logs -f
-docker-compose logs -f svelte-frontend
-docker-compose logs -f langserve-backend
-
-# Rebuild services
-docker-compose up -d --build
-
-# Stop services
-docker-compose down
-```
-
-## 📖 Architecture
+Built with modern, scalable architecture patterns:
 
 ```
 ┌─────────────────┐    WebSocket    ┌─────────────────┐    HTTP/Streaming    ┌─────────────────┐
-│   Browser/Web   │ ◄─────────────► │   SvelteKit     │ ◄──────────────────► │   LangServe     │
-│     Client      │                 │    Frontend     │                      │    Backend      │
+│   Browser       │ ◄─────────────► │   SvelteKit     │ ◄──────────────────► │   FastAPI       │
+│   (Flowbite UI) │                 │   Frontend      │                      │   LangServe     │
 └─────────────────┘                 └─────────────────┘                      └─────────────────┘
                                             │                                         │
                                             ▼                                         ▼
                                     ┌─────────────────┐                      ┌─────────────────┐
-                                    │    Socket.IO    │                      │   5 AI Agents   │
+                                    │    Socket.IO    │                      │   AI Agents     │
                                     │     Server      │                      │   OpenAI/Claude │
                                     └─────────────────┘                      └─────────────────┘
 ```
 
-## 🤖 Available AI Agents
+### **Modern Tech Stack**
+- **Frontend**: SvelteKit 2.0 + Svelte 5 + TypeScript + Tailwind CSS v4
+- **UI Components**: Flowbite Svelte with comprehensive theme system
+- **Backend**: FastAPI + LangServe + LangChain + Socket.IO
+- **AI Integration**: OpenAI GPT-4, Anthropic Claude, extensible agent system
+- **Database**: PostgreSQL with async connection pooling
+- **Deployment**: Docker Compose + Nginx + SSL + monitoring
 
-1. **General Chatbot** - Conversational AI for general questions and discussions
-2. **Code Assistant** - Specialized in programming, debugging, and technical help
-3. **Data Analyst** - Expert in data analysis, visualization, and insights
-4. **Creative Writer** - Storytelling, creative writing, and content generation
-5. **Research Assistant** - Information gathering and research with web search capabilities
+## 🎯 **Use Cases**
 
-## 🌍 Environment Variables
+Perfect for building:
 
-Required API keys (add to `.env`):
+- **🤖 AI Chat Applications** - Customer support, personal assistants
+- **💻 Code Assistant Tools** - Developer productivity, code review
+- **📊 Data Analysis Platforms** - Business intelligence, reporting  
+- **✍️ Content Creation** - Writing assistants, creative tools
+- **🔍 Research Applications** - Information gathering, analysis
+- **🏢 Enterprise Chatbots** - Internal tools, knowledge management
 
-```bash
-# Required
-OPENAI_API_KEY=your-openai-api-key-here
-ANTHROPIC_API_KEY=your-anthropic-api-key-here
+## 📦 **Package Structure**
 
-# Optional (for research agent)
-TAVILY_API_KEY=your-tavily-api-key-here
-
-# Authentication (change in production)
-SECRET_KEY=your-secret-key-change-in-production
-ACCESS_TOKEN_EXPIRE_MINUTES=30
+### **Monorepo Organization**
+```
+svelte-langserve/
+├── packages/
+│   └── svelte-langserve/           # 📦 Complete library package
+│       ├── components/             #    Flowbite UI components
+│       ├── stores/                 #    Socket.IO & state management  
+│       ├── themes/                 #    Flowbite theme system
+│       └── types.ts                #    LangChain-compatible types
+├── examples/
+│   ├── dashboard/                  # 🎨 SvelteKit frontend example
+│   └── langserve-backend/          # 🚀 FastAPI backend example
+├── docs/                           # 📚 Comprehensive documentation
+├── nginx/                          # 🌐 Production nginx config
+└── docker-compose.yml              # 🐳 Full-stack deployment
 ```
 
-## 🔐 Authentication
+### **Key Features by Package**
 
-The application uses JWT-based authentication to secure API access:
+**📦 `svelte-langserve` Package:**
+- Complete Svelte integration for LangServe
+- Socket.IO client with automatic reconnection
+- Flowbite theme system with dark mode
+- TypeScript definitions for LangChain compatibility
+- Reactive stores for real-time state management
 
-### Demo Credentials
+**🎨 Frontend Example:**
+- Professional Flowbite UI components
+- Real-time chat with streaming responses
+- Multi-conversation management
+- User authentication and authorization
+- Internationalization with Inlang/Paraglide
 
-For development and testing:
-- **Username**: `demo` or `admin`
-- **Password**: `secret`
+**🚀 Backend Example:**
+- 5 specialized AI agent implementations
+- FastAPI with LangServe integration
+- JWT authentication with RBAC
+- Socket.IO server for real-time communication
+- Production-ready logging and monitoring
 
-### Authentication Flow
+## 🌟 **Flowbite Integration Highlights**
 
-1. **Login**: POST to `/token` with username/password
-2. **Access**: Include JWT token in `Authorization: Bearer <token>` header
-3. **User Info**: GET `/users/me` to retrieve current user details
-4. **Protected Routes**: All LangServe endpoints require authentication
+### **Professional Design System**
+```svelte
+<!-- Automatic Flowbite theming -->
+<LangServeFrontend userId="user123" theme="flowbite" />
 
-### Security Features
+<!-- Custom theme variants -->
+<ThemeProvider theme={flowbiteTheme} variant="dark">
+  <ChatInterface />
+</ThemeProvider>
 
-- Password hashing with bcrypt
-- JWT token expiration (30 minutes default)
-- Secure token storage in browser localStorage
-- Automatic logout on token expiration
+<!-- Runtime theme customization -->
+<ThemeProvider theme={customTheme} override={brandColors}>
+  <LangServeFrontend userId="user123" />
+</ThemeProvider>
+```
 
-### Production Setup
+### **Component Examples**
+- **Chat Interface**: Professional message bubbles with avatars
+- **Sidebar Navigation**: Collapsible conversation list with search
+- **Settings Panel**: Form controls with validation and feedback
+- **Loading States**: Skeleton screens and progress indicators
+- **Error Handling**: Toast notifications and error boundaries
 
-For production deployment:
+### **Responsive Design**
+- **Desktop**: Full-featured layout with sidebars and panels
+- **Tablet**: Adaptive layout with collapsible navigation
+- **Mobile**: Touch-optimized interface with bottom navigation
 
-1. Change the `SECRET_KEY` environment variable
-2. Replace demo users with a proper user database
-3. Implement user registration/management
-4. Consider implementing refresh tokens for longer sessions
+## 🚀 **Getting Started Paths**
 
-## 📋 Current Architecture Issues
+Choose your journey:
 
-This project is in active development. See [TODO.md](./TODO.md) for planned improvements:
+| **I want to...** | **Start here** | **Time needed** |
+|-------------------|----------------|-----------------|
+| **Try it quickly** | [Quick Start](./docs/getting-started/quick-start.md) | 5 minutes |
+| **Learn step-by-step** | [Complete Tutorial](./docs/getting-started/tutorial.md) | 30 minutes |  
+| **Customize the UI** | [Flowbite Theme Guide](./docs/guides/themes.md) | 15 minutes |
+| **Deploy to production** | [Deployment Guide](./docs/guides/deployment.md) | 1 hour |
+| **Understand the architecture** | [Architecture Deep Dive](./docs/advanced/architecture.md) | 20 minutes |
 
-- **Code duplication**: Examples contain duplicated store logic instead of using packages
-- **Monolithic files**: `hooks.server.ts` (657 lines) needs refactoring into services
-- **Missing abstractions**: Configuration scattered throughout codebase
-- **Package underutilization**: Reusable packages need more functionality
+## 💡 **Live Examples**
 
-## 🤝 Contributing
+Explore these demo routes in the example app:
 
-We welcome contributions! Please see [TODO.md](./TODO.md) for architectural improvements in progress.
+- **`/`** - Main dashboard with Flowbite components
+- **`/flowbite`** - Flowbite theme showcase
+- **`/demo/paraglide`** - Internationalization demo
+- **`/api/health`** - Backend health check endpoint
 
-## 📄 License
+## 🛠️ **Development**
 
-MIT © [Svelte LangServe contributors](LICENSE)
+### **Quick Development Setup**
+```bash
+# Install all dependencies (monorepo)
+pnpm install
+
+# Start backend
+cd examples/langserve-backend && uv run serve
+
+# Start frontend (new terminal)
+cd examples/dashboard && pnpm dev
+
+# Visit http://localhost:5173
+```
+
+### **Package Development**
+```bash
+# Build library package
+cd packages/svelte-langserve && pnpm build
+
+# Run all tests
+nx run-many -t test
+
+# Lint and type check
+nx run-many -t lint,check
+```
+
+### **Quality Assurance**
+```bash
+# Run all quality checks
+nx run-many -t test,lint,check --output-style=stream
+
+# Frontend-specific
+cd examples/dashboard
+pnpm test        # Unit tests
+pnpm test:e2e    # End-to-end tests
+pnpm check       # TypeScript check
+pnpm lint        # ESLint
+pnpm format      # Prettier
+
+# Backend-specific  
+cd examples/langserve-backend
+uv run pytest           # Unit tests
+uv run ruff check .     # Lint
+uv run ruff format .    # Format
+uv run pyright          # Type check
+```
+
+## 🐳 **Production Deployment**
+
+### **Docker Compose (Recommended)**
+```bash
+# Production deployment
+cp .env.example .env  # Configure with real API keys
+docker-compose -f docker-compose.prod.yml up -d
+
+# Includes:
+# - Nginx reverse proxy with SSL
+# - PostgreSQL database
+# - Redis for session storage  
+# - Prometheus + Grafana monitoring
+```
+
+### **Cloud Platforms**
+- **AWS**: ECS + RDS deployment example
+- **Google Cloud**: Cloud Run + Cloud SQL example  
+- **Vercel**: Frontend deployment with serverless backend
+- **Kubernetes**: Complete K8s manifests with ingress
+
+See the [Deployment Guide](./docs/guides/deployment.md) for detailed instructions.
+
+## 🔒 **Security & Authentication**
+
+- **JWT Tokens**: Secure authentication with configurable expiration
+- **Role-Based Access**: User, moderator, and admin permission levels
+- **Rate Limiting**: API protection against abuse and spam
+- **Input Validation**: Comprehensive sanitization with Pydantic
+- **Security Headers**: CORS, CSP, and other security best practices
+- **SSL/TLS**: Production-ready HTTPS configuration
+
+## 📊 **Monitoring & Observability**
+
+- **Health Checks**: Comprehensive endpoint monitoring
+- **Structured Logging**: JSON logs with correlation IDs
+- **Metrics Collection**: Prometheus metrics for all services
+- **Error Tracking**: Sentry integration for error monitoring
+- **Performance Monitoring**: Response time and throughput tracking
+
+## 🤝 **Contributing**
+
+We welcome contributions! See our [Contributing Guide](./docs/contributing/) for:
+
+- **Development Setup**: Local environment configuration
+- **Code Standards**: TypeScript, ESLint, and formatting rules
+- **Testing Guidelines**: Unit, integration, and E2E testing
+- **Pull Request Process**: Review and merge workflow
+
+## 📄 **License**
+
+MIT © [Svelte LangServe Contributors](LICENSE)
+
+## 🆘 **Support**
+
+- 📖 **Documentation**: [docs/](./docs/) - Complete guides and API reference
+- 🐛 **Issues**: [GitHub Issues](https://github.com/synergyai-nl/svelte-langserve/issues) - Bug reports and feature requests
+- 💬 **Discussions**: [GitHub Discussions](https://github.com/synergyai-nl/svelte-langserve/discussions) - Questions and community
+- 🔧 **Troubleshooting**: [Troubleshooting Guide](./docs/advanced/troubleshooting.md) - Debug common issues
+
+## 🎉 **What's Next?**
+
+Ready to build amazing AI applications? **[Start with our 5-minute Quick Start Guide →](./docs/getting-started/quick-start.md)**
+
+---
+
+<div align="center">
+
+**Built with ❤️ using SvelteKit, Flowbite, and LangServe**
+
+[Documentation](./docs/) • [Quick Start](./docs/getting-started/quick-start.md) • [Live Demo](http://localhost:3000) • [GitHub](https://github.com/synergyai-nl/svelte-langserve)
+
+</div>
