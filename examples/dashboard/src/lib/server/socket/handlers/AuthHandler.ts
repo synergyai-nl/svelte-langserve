@@ -58,8 +58,9 @@ export class AuthHandler implements SocketHandler {
 				available_assistants: availableAssistants
 			});
 
-			console.log(`User authenticated successfully: ${userId.substring(0, 8)}... (${availableAssistants.length} assistants available)`);
-
+			console.log(
+				`User authenticated successfully: ${userId.substring(0, 8)}... (${availableAssistants.length} assistants available)`
+			);
 		} catch (error) {
 			console.error(`Authentication error for user ${userId}:`, error);
 			throw error;
@@ -113,10 +114,10 @@ export class AuthHandler implements SocketHandler {
 	 * Get statistics about authenticated users
 	 */
 	getStats(): { authenticatedUsers: number; userIds: string[] } {
-		const userIds = Array.from(this.authenticatedUsers.values()).map(auth => auth.userId);
+		const userIds = Array.from(this.authenticatedUsers.values()).map((auth) => auth.userId);
 		return {
 			authenticatedUsers: this.authenticatedUsers.size,
-			userIds: userIds.map(id => id.substring(0, 8) + '...')
+			userIds: userIds.map((id) => id.substring(0, 8) + '...')
 		};
 	}
 

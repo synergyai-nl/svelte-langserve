@@ -31,7 +31,9 @@ export class StreamingManager {
 	startStreaming(messageId: string, threadId: string, assistantId: string): void {
 		// Check for too many concurrent streaming messages
 		if (this.streamingMessages.size >= this.MAX_STREAMING_MESSAGES) {
-			console.warn(`Maximum concurrent streaming messages reached (${this.MAX_STREAMING_MESSAGES}), cleaning up oldest`);
+			console.warn(
+				`Maximum concurrent streaming messages reached (${this.MAX_STREAMING_MESSAGES}), cleaning up oldest`
+			);
 			this.cleanupOldestMessage();
 		}
 
@@ -55,7 +57,9 @@ export class StreamingManager {
 
 		this.streamingTimeouts.set(messageId, timeout);
 
-		console.log(`Started streaming for message ${messageId.substring(0, 8)}... (assistant: ${assistantId})`);
+		console.log(
+			`Started streaming for message ${messageId.substring(0, 8)}... (assistant: ${assistantId})`
+		);
 	}
 
 	/**
@@ -64,7 +68,9 @@ export class StreamingManager {
 	addContent(messageId: string, content: string): string | null {
 		const streamingMessage = this.streamingMessages.get(messageId);
 		if (!streamingMessage) {
-			console.warn(`Attempted to add content to unknown streaming message: ${messageId.substring(0, 8)}...`);
+			console.warn(
+				`Attempted to add content to unknown streaming message: ${messageId.substring(0, 8)}...`
+			);
 			return null;
 		}
 
@@ -93,14 +99,18 @@ export class StreamingManager {
 	completeStreaming(messageId: string): string | null {
 		const streamingMessage = this.streamingMessages.get(messageId);
 		if (!streamingMessage) {
-			console.warn(`Attempted to complete unknown streaming message: ${messageId.substring(0, 8)}...`);
+			console.warn(
+				`Attempted to complete unknown streaming message: ${messageId.substring(0, 8)}...`
+			);
 			return null;
 		}
 
 		const finalContent = streamingMessage.content;
 		this.cleanupStreamingMessage(messageId);
 
-		console.log(`Completed streaming for message ${messageId.substring(0, 8)}... (length: ${finalContent.length})`);
+		console.log(
+			`Completed streaming for message ${messageId.substring(0, 8)}... (length: ${finalContent.length})`
+		);
 		return finalContent;
 	}
 
@@ -123,8 +133,7 @@ export class StreamingManager {
 	 * Get all streaming messages for a thread
 	 */
 	getStreamingMessagesForThread(threadId: string): StreamingMessage[] {
-		return Array.from(this.streamingMessages.values())
-			.filter(msg => msg.threadId === threadId);
+		return Array.from(this.streamingMessages.values()).filter((msg) => msg.threadId === threadId);
 	}
 
 	/**
@@ -214,7 +223,7 @@ export class StreamingManager {
 
 		if (staleMessages.length > 0) {
 			console.log(`Cleaning up ${staleMessages.length} stale streaming messages`);
-			staleMessages.forEach(messageId => this.cleanupStreamingMessage(messageId));
+			staleMessages.forEach((messageId) => this.cleanupStreamingMessage(messageId));
 		}
 	}
 
@@ -228,7 +237,7 @@ export class StreamingManager {
 	} {
 		const messages = Array.from(this.streamingMessages.values());
 		const totalLength = messages.reduce((sum, msg) => sum + msg.content.length, 0);
-		
+
 		return {
 			activeStreams: messages.length,
 			totalMemoryUsage: totalLength * 2, // Rough estimate (2 bytes per character for UTF-16)

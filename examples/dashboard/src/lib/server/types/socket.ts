@@ -10,7 +10,11 @@ export interface SocketEvents {
 	authenticated: (data: { user_id: string; available_assistants: LangGraphAssistant[] }) => void;
 
 	// Thread/Conversation events
-	create_thread: (data: { assistant_ids: string[]; initial_message?: string; config?: Record<string, any> }) => void;
+	create_thread: (data: {
+		assistant_ids: string[];
+		initial_message?: string;
+		config?: Record<string, any>;
+	}) => void;
 	thread_created: (thread: ThreadInfo) => void;
 	join_thread: (data: { thread_id: string }) => void;
 	thread_joined: (thread: ThreadInfo) => void;
@@ -18,14 +22,26 @@ export interface SocketEvents {
 	threads_list: (threads: ThreadInfo[]) => void;
 
 	// Message events
-	send_message: (data: { thread_id: string; content: string; config?: Record<string, any> }) => void;
+	send_message: (data: {
+		thread_id: string;
+		content: string;
+		config?: Record<string, any>;
+	}) => void;
 	message_received: (message: ChatMessage) => void;
 
 	// Streaming events
-	assistant_response_start: (data: { message_id: string; assistant_id: string; assistant_name: string }) => void;
+	assistant_response_start: (data: {
+		message_id: string;
+		assistant_id: string;
+		assistant_name: string;
+	}) => void;
 	message_chunk: (chunk: MessageChunk) => void;
 	assistant_response_complete: (message: ChatMessage) => void;
-	assistant_response_error: (error: { message_id: string; assistant_id: string; error: string }) => void;
+	assistant_response_error: (error: {
+		message_id: string;
+		assistant_id: string;
+		error: string;
+	}) => void;
 
 	// Assistant management events
 	test_assistant: (data: { assistant_id: string }) => void;

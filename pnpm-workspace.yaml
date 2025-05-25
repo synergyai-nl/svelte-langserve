@@ -1,4 +1,4 @@
 packages:
   - "packages/@svelte-langserve/*"
-  - "packages/svelte-langserve"
+  - "packages/svelte-langgraph"
   - "examples/*"

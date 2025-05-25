@@ -11,6 +11,16 @@ export type { RunnableConfig } from '@langchain/core/runnables';
 import type { BaseMessage } from '@langchain/core/messages';
 import type { RunnableConfig } from '@langchain/core/runnables';
 
+export interface LangGraphAssistant {
+  id: string;
+  name: string;
+  assistantId: string;
+  description?: string;
+  type: 'chatbot' | 'code-assistant' | 'data-analyst' | 'creative-writer' | 'research-assistant';
+  config?: RunnableConfig;
+}
+
+// Legacy type for backward compatibility
 export interface LangServeEndpoint {
   id: string;
   name: string;
@@ -28,7 +38,7 @@ export interface Conversation {
   updatedAt: string;
   participants: {
     users: string[];
-    agents: LangServeEndpoint[];
+    assistants: LangGraphAssistant[];
   };
   status: 'active' | 'completed' | 'error';
   metadata?: Record<string, unknown>;
@@ -54,7 +64,7 @@ export interface Message {
   timestamp: Date;
   metadata?: {
     streaming?: boolean;
-    endpoint_name?: string;
+    assistant_name?: string;
   };
 }
 
@@ -74,7 +84,7 @@ export interface SocketEvents {
   // Client to server
   'authenticate': (data: { user_id: string; token?: string }) => void;
   'create_conversation': (data: { 
-    endpoint_ids: string[]; 
+    assistant_ids: string[]; 
     initial_message?: string; 
     config?: RunnableConfig;
   }) => void;
@@ -83,42 +93,42 @@ export interface SocketEvents {
     content: string; 
     config?: RunnableConfig;
   }) => void;
-  'test_endpoint': (data: { endpoint_id: string }) => void;
-  'get_endpoint_schemas': (data: { endpoint_id: string }) => void;
+  'test_assistant': (data: { assistant_id: string }) => void;
+  'get_assistant_schemas': (data: { assistant_id: string }) => void;
   'join_conversation': (data: { conversation_id: string }) => void;
   'list_conversations': () => void;
   'get_conversation_history': (data: { conversation_id: string }) => void;
   
   // Server to client  
-  'authenticated': (data: { user_id: string; available_endpoints: LangServeEndpoint[] }) => void;
+  'authenticated': (data: { user_id: string; available_assistants: LangGraphAssistant[] }) => void;
   'message_received': (message: ChatMessage) => void;
   'message_chunk': (chunk: MessageChunk) => void;
   'conversation_created': (conversation: Conversation) => void;
   'conversation_joined': (conversation: Conversation) => void;
   'conversations_list': (conversations: Conversation[]) => void;
   'conversation_history': (data: { conversation_id: string; messages: ChatMessage[] }) => void;
-  'agent_response_start': (data: { 
+  'assistant_response_start': (data: { 
     message_id: string; 
-    endpoint_id: string; 
-    endpoint_name: string;
+    assistant_id: string; 
+    assistant_name: string;
     conversation_id: string;
   }) => void;
-  'agent_response_complete': (message: ChatMessage) => void;
-  'agent_response_error': (data: { 
+  'assistant_response_complete': (message: ChatMessage) => void;
+  'assistant_response_error': (data: { 
     message_id: string; 
-    endpoint_id: string; 
+    assistant_id: string; 
     error: string;
   }) => void;
-  'endpoint_schemas': (data: { endpoint_id: string; schemas: unknown }) => void;
-  'endpoint_test_result': (data: { 
-    endpoint_id: string; 
+  'assistant_schemas': (data: { assistant_id: string; schemas: unknown }) => void;
+  'assistant_test_result': (data: { 
+    assistant_id: string; 
     healthy: boolean; 
     error?: string;
   }) => void;
   'error': (error: { message: string }) => void;
-  'agent_error': (error: { 
-    endpoint_id: string; 
-    endpoint_name: string; 
+  'assistant_error': (error: { 
+    assistant_id: string; 
+    assistant_name: string; 
     error: string;
     conversation_id: string;
   }) => void;
@@ -133,6 +143,20 @@ export interface MessageChunk {
   conversation_id: string;
 }
 
+export interface LangGraphAppConfig {
+  assistants: LangGraphAssistant[];
+  socketUrl: string;
+  apiUrl: string;
+  apiKey?: string;
+  defaultAssistant?: string;
+  streamingConfig?: {
+    timeout: number;
+    maxConcurrent: number;
+    cleanupInterval: number;
+  };
+}
+
+// Legacy config for backward compatibility
 export interface LangServeConfig {
   endpoints: LangServeEndpoint[];
   socketUrl: string;
@@ -161,6 +185,13 @@ export interface AuthState {
 }
 
 // Error types
+export interface LangGraphError {
+  message: string;
+  code?: string;
+  details?: Record<string, unknown>;
+}
+
+// Legacy error type for backward compatibility
 export interface LangServeError {
   message: string;
   code?: string;

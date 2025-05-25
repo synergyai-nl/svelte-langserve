@@ -53,7 +53,7 @@
         updatedAt: new Date().toISOString(),
         participants: {
           users: [userId],
-          agents: []
+          assistants: []
         },
         status: 'active'
       };

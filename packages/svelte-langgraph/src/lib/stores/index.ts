@@ -1,3 +1,3 @@
 // Re-export all store functionality
-export * from './langserve.js';
+export * from './langgraph.js';
 export * from './auth.js';

@@ -1,10 +1,10 @@
 // LangGraph client manager for Socket.IO integration
 
-import type { 
-	LangGraphAssistant, 
-	AssistantInvocationRequest, 
+import type {
+	LangGraphAssistant,
+	AssistantInvocationRequest,
 	AssistantInvocationResponse,
-	AssistantHealth 
+	AssistantHealth
 } from '../types/langgraph.js';
 
 export class LangGraphManager {
@@ -40,21 +40,23 @@ export class LangGraphManager {
 			}
 
 			const assistantsData = await response.json();
-			
+
 			// Transform the response to our interface
-			const assistants: LangGraphAssistant[] = Object.entries(assistantsData).map(([id, metadata]: [string, any]) => ({
-				id,
-				name: metadata.name,
-				description: metadata.description,
-				type: metadata.type || 'chat',
-				supports_streaming: metadata.supports_streaming || false,
-				supports_persistence: metadata.supports_persistence || false,
-				has_tools: metadata.has_tools || false,
-			}));
+			const assistants: LangGraphAssistant[] = Object.entries(assistantsData).map(
+				([id, metadata]: [string, any]) => ({
+					id,
+					name: metadata.name,
+					description: metadata.description,
+					type: metadata.type || 'chat',
+					supports_streaming: metadata.supports_streaming || false,
+					supports_persistence: metadata.supports_persistence || false,
+					has_tools: metadata.has_tools || false
+				})
+			);
 
 			// Update internal cache
 			this.assistants.clear();
-			assistants.forEach(assistant => {
+			assistants.forEach((assistant) => {
 				this.assistants.set(assistant.id, assistant);
 			});
 
@@ -69,7 +71,7 @@ export class LangGraphManager {
 	 * Invoke an assistant with a message
 	 */
 	async invokeAssistant(
-		assistantId: string, 
+		assistantId: string,
 		request: AssistantInvocationRequest,
 		authToken?: string
 	): Promise<AssistantInvocationResponse> {
@@ -102,7 +104,10 @@ export class LangGraphManager {
 	/**
 	 * Get assistant information
 	 */
-	async getAssistantInfo(assistantId: string, authToken?: string): Promise<LangGraphAssistant | null> {
+	async getAssistantInfo(
+		assistantId: string,
+		authToken?: string
+	): Promise<LangGraphAssistant | null> {
 		try {
 			// Check cache first
 			const cached = this.assistants.get(assistantId);
@@ -135,7 +140,7 @@ export class LangGraphManager {
 				type: assistantData.type || 'chat',
 				supports_streaming: assistantData.supports_streaming || false,
 				supports_persistence: assistantData.supports_persistence || false,
-				has_tools: assistantData.has_tools || false,
+				has_tools: assistantData.has_tools || false
 			};
 
 			// Update cache
@@ -196,14 +201,13 @@ export class LangGraphManager {
 	 * Check health of all assistants
 	 */
 	async checkAllAssistantsHealth(authToken?: string): Promise<Map<string, AssistantHealth>> {
-		const healthPromises = Array.from(this.assistants.keys()).map(assistantId =>
-			this.checkAssistantHealth(assistantId, authToken)
-				.then(health => ({ assistantId, health }))
+		const healthPromises = Array.from(this.assistants.keys()).map((assistantId) =>
+			this.checkAssistantHealth(assistantId, authToken).then((health) => ({ assistantId, health }))
 		);
 
 		const results = await Promise.allSettled(healthPromises);
-		
-		results.forEach(result => {
+
+		results.forEach((result) => {
 			if (result.status === 'fulfilled') {
 				this.healthStatus.set(result.value.assistantId, result.value.health);
 			}

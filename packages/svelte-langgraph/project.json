@@ -1,14 +1,14 @@
 {
-	"name": "svelte-langserve",
+	"name": "svelte-langgraph",
 	"$schema": "../../node_modules/nx/schemas/project-schema.json",
 	"projectType": "library",
-	"sourceRoot": "packages/svelte-langserve/src",
+	"sourceRoot": "packages/svelte-langgraph/src",
 	"targets": {
 		"build": {
 			"executor": "nx:run-commands",
 			"options": {
 				"command": "svelte-package",
-				"cwd": "packages/svelte-langserve"
+				"cwd": "packages/svelte-langgraph"
 			},
 			"outputs": ["{projectRoot}/dist"]
 		},
@@ -16,42 +16,42 @@
 			"executor": "nx:run-commands",
 			"options": {
 				"command": "svelte-package --watch",
-				"cwd": "packages/svelte-langserve"
+				"cwd": "packages/svelte-langgraph"
 			}
 		},
 		"check": {
 			"executor": "nx:run-commands",
 			"options": {
 				"command": "svelte-check --tsconfig ./tsconfig.json",
-				"cwd": "packages/svelte-langserve"
+				"cwd": "packages/svelte-langgraph"
 			}
 		},
 		"lint": {
 			"executor": "nx:run-commands",
 			"options": {
 				"command": "eslint .",
-				"cwd": "packages/svelte-langserve"
+				"cwd": "packages/svelte-langgraph"
 			}
 		},
 		"test": {
 			"executor": "nx:run-commands",
 			"options": {
 				"command": "vitest run",
-				"cwd": "packages/svelte-langserve"
+				"cwd": "packages/svelte-langgraph"
 			}
 		},
 		"test:watch": {
 			"executor": "nx:run-commands",
 			"options": {
 				"command": "vitest",
-				"cwd": "packages/svelte-langserve"
+				"cwd": "packages/svelte-langgraph"
 			}
 		},
 		"clean": {
 			"executor": "nx:run-commands",
 			"options": {
 				"command": "rm -rf dist",
-				"cwd": "packages/svelte-langserve"
+				"cwd": "packages/svelte-langgraph"
 			}
 		}
 	}

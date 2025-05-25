@@ -1,5 +1,5 @@
 // Re-export everything from the consolidated package
-export * from 'svelte-langserve';
+export * from 'svelte-langgraph';
 
 // Re-export local components that aren't in the package yet
 export { default as ErrorBoundary } from './components/ErrorBoundary.svelte';

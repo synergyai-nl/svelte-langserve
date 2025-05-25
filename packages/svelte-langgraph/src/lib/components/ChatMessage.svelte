@@ -9,7 +9,7 @@
   {message.metadata?.streaming ? 'border-l-4 border-blue-400' : ''}"
 >
   <div class="font-semibold mb-1">
-    {message.role === 'user' ? 'You' : message.metadata?.endpoint_name || message.id}
+    {message.role === 'user' ? 'You' : message.metadata?.assistant_name || message.id}
     {#if message.metadata?.streaming}
       <span class="text-blue-500 text-sm italic ml-1">(streaming...)</span>
     {/if}

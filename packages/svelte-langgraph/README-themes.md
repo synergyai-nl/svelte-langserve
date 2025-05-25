@@ -1,6 +1,6 @@
 # Theme System Documentation
 
-The svelte-langserve package now supports a comprehensive theme system that allows you to customize the visual appearance of all components while maintaining full functionality.
+The svelte-langgraph package now supports a comprehensive theme system that allows you to customize the visual appearance of all components while maintaining full functionality.
 
 ## Quick Start
 
@@ -8,7 +8,7 @@ The svelte-langserve package now supports a comprehensive theme system that allo
 
 ```svelte
 <script>
-  import { LangServeFrontend } from 'svelte-langserve';
+  import { LangServeFrontend } from 'svelte-langgraph';
 </script>
 
 <!-- Uses default theme automatically -->

@@ -1,7 +1,7 @@
 {
-  "name": "svelte-langserve",
+  "name": "svelte-langgraph",
   "version": "0.1.0",
-  "description": "Complete Svelte integration for LangServe backends with Socket.IO",
+  "description": "Complete Svelte integration for LangGraph backends with Socket.IO",
   "type": "module",
   "main": "dist/index.js",
   "svelte": "./dist/index.js",
@@ -51,6 +51,7 @@
   },
   "dependencies": {
     "@langchain/core": "^0.3.57",
+    "@langchain/langgraph": "^0.2.39",
     "esm-env": "^1.2.2"
   },
   "devDependencies": {
@@ -75,7 +76,7 @@
   },
   "keywords": [
     "svelte",
-    "langserve",
+    "langgraph",
     "langchain",
     "ai",
     "chat",

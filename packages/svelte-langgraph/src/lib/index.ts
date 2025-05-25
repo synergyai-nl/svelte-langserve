@@ -10,7 +10,7 @@ export { default as ChatMessage } from './components/ChatMessage.svelte';
 export { default as ConfigPanel } from './components/ConfigPanel.svelte';
 export { default as ConversationList } from './components/ConversationList.svelte';
 export { default as EndpointSelector } from './components/EndpointSelector.svelte';
-export { default as LangServeFrontend } from './components/LangServeFrontend.svelte';
+export { default as LangGraphFrontend } from './components/LangGraphFrontend.svelte';
 export { default as ThemeProvider } from './components/ThemeProvider.svelte';
 
 // Re-export commonly used LangChain types for convenience

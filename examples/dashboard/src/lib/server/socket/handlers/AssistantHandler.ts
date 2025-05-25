@@ -140,7 +140,9 @@ export class AssistantHandler implements SocketHandler {
 			});
 		}
 
-		const healthyCount = Array.from(healthResults.values()).filter(h => h.status === 'healthy').length;
+		const healthyCount = Array.from(healthResults.values()).filter(
+			(h) => h.status === 'healthy'
+		).length;
 		console.log(`Tested all assistants: ${healthyCount}/${healthResults.size} healthy`);
 	}
 
@@ -149,7 +151,7 @@ export class AssistantHandler implements SocketHandler {
 
 		try {
 			const assistants = await this.langGraphManager.fetchAvailableAssistants();
-			
+
 			// Also refresh health status
 			const authToken = this.authHandler.getAuthToken(socket);
 			await this.langGraphManager.checkAllAssistantsHealth(authToken);
@@ -180,12 +182,13 @@ export class AssistantHandler implements SocketHandler {
 	} {
 		const assistants = this.langGraphManager.getAssistants();
 		const healthStatus = this.langGraphManager.getHealthStatus();
-		
-		const healthyCount = Array.from(healthStatus.values())
-			.filter(h => h.status === 'healthy').length;
+
+		const healthyCount = Array.from(healthStatus.values()).filter(
+			(h) => h.status === 'healthy'
+		).length;
 
 		const lastChecks = Array.from(healthStatus.values())
-			.map(h => h.last_check)
+			.map((h) => h.last_check)
 			.filter(Boolean)
 			.sort()
 			.reverse();

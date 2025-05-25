@@ -11,7 +11,7 @@ export class SocketServer {
 	private io: Server;
 	private langGraphManager: LangGraphManager;
 	private streamingManager: StreamingManager;
-	
+
 	// Handlers
 	private authHandler: AuthHandler;
 	private assistantHandler: AssistantHandler;
@@ -22,15 +22,12 @@ export class SocketServer {
 	private connectionCount: number = 0;
 	private totalConnections: number = 0;
 
-	constructor(
-		httpServer: any,
-		langGraphServerUrl: string = 'http://localhost:8000'
-	) {
+	constructor(httpServer: any, langGraphServerUrl: string = 'http://localhost:8000') {
 		// Initialize Socket.IO server
 		this.io = new Server(httpServer, {
 			cors: {
-				origin: "*", // Configure appropriately for production
-				methods: ["GET", "POST"]
+				origin: '*', // Configure appropriately for production
+				methods: ['GET', 'POST']
 			},
 			path: '/api/socket.io/'
 		});
@@ -96,7 +93,9 @@ export class SocketServer {
 		// Handle disconnection
 		socket.on('disconnect', (reason: string) => {
 			this.connectionCount--;
-			console.log(`Socket disconnected: ${socket.id} (reason: ${reason}, remaining: ${this.connectionCount})`);
+			console.log(
+				`Socket disconnected: ${socket.id} (reason: ${reason}, remaining: ${this.connectionCount})`
+			);
 		});
 
 		// Connect handlers
@@ -249,15 +248,16 @@ export class SocketServer {
 
 		// Check streaming manager
 		const streamingStats = this.streamingManager.getStats();
-		if (streamingStats.activeStreams > 50) { // Arbitrary threshold
+		if (streamingStats.activeStreams > 50) {
+			// Arbitrary threshold
 			details.streamingManager = 'unhealthy';
 		}
 
 		// Determine overall status
 		const statusValues = [details.socketServer, details.langGraphManager, details.streamingManager];
-		const unhealthyCount = statusValues.filter(s => s === 'unhealthy').length;
+		const unhealthyCount = statusValues.filter((s) => s === 'unhealthy').length;
 		let status: 'healthy' | 'degraded' | 'unhealthy';
-		
+
 		if (unhealthyCount === 0) {
 			status = 'healthy';
 		} else if (unhealthyCount < 2) {

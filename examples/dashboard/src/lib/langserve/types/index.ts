@@ -1,5 +1,5 @@
 // Use types from consolidated package instead of duplicate definitions
-export * from 'svelte-langserve/types';
+export * from 'svelte-langgraph/types';
 
 // Re-export commonly used LangChain types for convenience
 export type { BaseMessage, HumanMessage, AIMessage, SystemMessage } from '@langchain/core/messages';

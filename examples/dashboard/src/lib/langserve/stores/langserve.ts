@@ -1,18 +1,18 @@
 // Use consolidated package instead of duplicate implementation
-export * from 'svelte-langserve/stores';
+export * from 'svelte-langgraph/stores';
 
 // Re-export specific functions for backward compatibility
 export {
-	langserveStore,
+	langgraphStore as langserveStore,
 	connect,
 	disconnect,
 	createConversation,
 	sendMessage,
 	loadConversations,
 	setActiveConversationId,
-	testEndpoint,
-	getEndpointSchemas,
-	testAllEndpoints,
+	testAssistant as testEndpoint,
+	getAssistantSchemas as getEndpointSchemas,
+	testAllAssistants as testAllEndpoints,
 	joinConversation,
 	getConversationHistory,
 	updateMessagePagination,
@@ -21,14 +21,14 @@ export {
 	connected,
 	authenticated,
 	connectionError,
-	availableEndpoints,
+	availableAssistants as availableEndpoints,
 	conversations,
 	activeConversationId,
 	streamingMessages,
 	hasStreamingMessages,
-	endpointHealth,
+	assistantHealth as endpointHealth,
 	activeConversation,
 	// Helper functions
 	getDisplayMessages,
 	getMessagePagination
-} from 'svelte-langserve/stores';
+} from 'svelte-langgraph/stores';

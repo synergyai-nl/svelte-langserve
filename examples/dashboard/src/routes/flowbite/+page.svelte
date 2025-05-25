@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { LangServeFrontend, ThemeProvider, flowbiteTheme } from 'svelte-langserve';
+	import { LangGraphFrontend, ThemeProvider, flowbiteTheme } from 'svelte-langgraph';
 	import { Button, Card, Badge, Alert } from 'flowbite-svelte';
 	import { CheckCircleSolid } from 'flowbite-svelte-icons';
 
@@ -7,10 +7,10 @@
 </script>
 
 <svelte:head>
-	<title>Flowbite Theme Demo - LangServe Frontend</title>
+	<title>Flowbite Theme Demo - LangGraph Frontend</title>
 	<meta
 		name="description"
-		content="Demonstration of LangServe Frontend with Flowbite theme integration"
+		content="Demonstration of LangGraph Frontend with Flowbite theme integration"
 	/>
 </svelte:head>
 
@@ -19,7 +19,7 @@
 		<div class="mb-8 text-center">
 			<h1 class="mb-4 text-4xl font-bold text-gray-900 dark:text-white">Flowbite Theme Demo</h1>
 			<p class="mx-auto max-w-2xl text-lg text-gray-600 dark:text-gray-400">
-				Experience the LangServe Frontend with beautiful Flowbite components. This demo showcases
+				Experience the LangGraph Frontend with beautiful Flowbite components. This demo showcases
 				how the theme system enables seamless integration with different UI frameworks while
 				maintaining all core functionality.
 			</p>
@@ -30,7 +30,7 @@
 			style="height: 600px;"
 		>
 			<ThemeProvider theme={flowbiteTheme}>
-				<LangServeFrontend {userId} />
+				<LangGraphFrontend {userId} />
 			</ThemeProvider>
 		</div>
 
@@ -89,7 +89,7 @@
 							class="rounded bg-blue-100 px-2 py-1 dark:bg-blue-800">ThemeProvider</code
 						>
 						wrapper around the standard
-						<code class="rounded bg-blue-100 px-2 py-1 dark:bg-blue-800">LangServeFrontend</code> component.
+						<code class="rounded bg-blue-100 px-2 py-1 dark:bg-blue-800">LangGraphFrontend</code> component.
 						All core LLM functionality remains unchanged.
 					</p>
 				</Card>

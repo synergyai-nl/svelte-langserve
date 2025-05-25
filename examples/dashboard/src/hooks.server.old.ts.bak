@@ -462,7 +462,7 @@ class LangServeSocketIOServer {
 			id: conversationId,
 			participants: {
 				users: [userId],
-				agents: selectedEndpoints
+				assistants: selectedEndpoints
 			},
 			messages: [],
 			status: 'active',
@@ -501,7 +501,7 @@ class LangServeSocketIOServer {
 		io.to(conversationId).emit('message_received', userMessage);
 
 		// Process with each LangServe endpoint
-		for (const endpoint of conversation.participants.agents) {
+		for (const endpoint of conversation.participants.assistants) {
 			try {
 				if (config?.streaming !== false) {
 					await this.streamAgentResponse(conversation, endpoint, config);

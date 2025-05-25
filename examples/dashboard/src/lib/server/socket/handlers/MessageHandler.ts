@@ -15,66 +15,73 @@ export class MessageHandler implements SocketHandler {
 
 	handleConnection(socket: Socket): void {
 		// Send message to assistant
-		socket.on('send_message', async (data: {
+		socket.on(
+			'send_message',
+			async (data: {
+				thread_id: string;
+				content: string;
+				assistant_id?: string;
+				config?: Record<string, any>;
+			}) => {
+				if (!this.authHandler.isAuthenticated(socket)) {
+					socket.emit('error', { message: 'Authentication required', code: 'AUTH_REQUIRED' });
+					return;
+				}
+
+				try {
+					await this.sendMessage(socket, data);
+				} catch (error) {
+					console.error('Error sending message:', error);
+					socket.emit('error', {
+						message: `Failed to send message: ${error instanceof Error ? error.message : 'Unknown error'}`,
+						code: 'MESSAGE_SEND_FAILED'
+					});
+				}
+			}
+		);
+
+		// Simple assistant invocation (for testing)
+		socket.on(
+			'invoke_assistant',
+			async (data: { assistant_id: string; message: string; config?: Record<string, any> }) => {
+				if (!this.authHandler.isAuthenticated(socket)) {
+					socket.emit('error', { message: 'Authentication required', code: 'AUTH_REQUIRED' });
+					return;
+				}
+
+				try {
+					await this.invokeAssistant(socket, data);
+				} catch (error) {
+					console.error(`Error invoking assistant ${data.assistant_id}:`, error);
+					socket.emit('assistant_error', {
+						assistant_id: data.assistant_id,
+						assistant_name: data.assistant_id,
+						error: error instanceof Error ? error.message : 'Unknown error'
+					});
+				}
+			}
+		);
+	}
+
+	private async sendMessage(
+		socket: Socket,
+		data: {
 			thread_id: string;
 			content: string;
 			assistant_id?: string;
 			config?: Record<string, any>;
-		}) => {
-			if (!this.authHandler.isAuthenticated(socket)) {
-				socket.emit('error', { message: 'Authentication required', code: 'AUTH_REQUIRED' });
-				return;
-			}
-
-			try {
-				await this.sendMessage(socket, data);
-			} catch (error) {
-				console.error('Error sending message:', error);
-				socket.emit('error', {
-					message: `Failed to send message: ${error instanceof Error ? error.message : 'Unknown error'}`,
-					code: 'MESSAGE_SEND_FAILED'
-				});
-			}
-		});
-
-		// Simple assistant invocation (for testing)
-		socket.on('invoke_assistant', async (data: {
-			assistant_id: string;
-			message: string;
-			config?: Record<string, any>;
-		}) => {
-			if (!this.authHandler.isAuthenticated(socket)) {
-				socket.emit('error', { message: 'Authentication required', code: 'AUTH_REQUIRED' });
-				return;
-			}
-
-			try {
-				await this.invokeAssistant(socket, data);
-			} catch (error) {
-				console.error(`Error invoking assistant ${data.assistant_id}:`, error);
-				socket.emit('assistant_error', {
-					assistant_id: data.assistant_id,
-					assistant_name: data.assistant_id,
-					error: error instanceof Error ? error.message : 'Unknown error'
-				});
-			}
-		});
-	}
-
-	private async sendMessage(socket: Socket, data: {
-		thread_id: string;
-		content: string;
-		assistant_id?: string;
-		config?: Record<string, any>;
-	}): Promise<void> {
+		}
+	): Promise<void> {
 		const { thread_id, content, assistant_id, config } = data;
 		const userInfo = this.authHandler.getAuthenticatedUser(socket);
-		
+
 		if (!userInfo) {
 			throw new Error('User not authenticated');
 		}
 
-		console.log(`Sending message to thread ${thread_id.substring(0, 8)}... (assistant: ${assistant_id || 'default'})`);
+		console.log(
+			`Sending message to thread ${thread_id.substring(0, 8)}... (assistant: ${assistant_id || 'default'})`
+		);
 
 		// Create user message
 		const userMessage: ChatMessage = {
@@ -100,14 +107,17 @@ export class MessageHandler implements SocketHandler {
 		}
 	}
 
-	private async invokeAssistant(socket: Socket, data: {
-		assistant_id: string;
-		message: string;
-		config?: Record<string, any>;
-	}): Promise<void> {
+	private async invokeAssistant(
+		socket: Socket,
+		data: {
+			assistant_id: string;
+			message: string;
+			config?: Record<string, any>;
+		}
+	): Promise<void> {
 		const { assistant_id, message, config } = data;
 		const userInfo = this.authHandler.getAuthenticatedUser(socket);
-		
+
 		if (!userInfo) {
 			throw new Error('User not authenticated');
 		}
@@ -127,7 +137,7 @@ export class MessageHandler implements SocketHandler {
 		this.streamingManager.startStreaming(messageId, threadId, assistant_id);
 
 		// Emit start event
-		const assistant = this.langGraphManager.getAssistants().find(a => a.id === assistant_id);
+		const assistant = this.langGraphManager.getAssistants().find((a) => a.id === assistant_id);
 		socket.emit('assistant_response_start', {
 			message_id: messageId,
 			assistant_id,
@@ -163,21 +173,22 @@ export class MessageHandler implements SocketHandler {
 			this.streamingManager.completeStreaming(messageId);
 			socket.emit('assistant_response_complete', aiMessage);
 
-			console.log(`Assistant ${assistant_id} response completed (length: ${response.response.length})`);
-
+			console.log(
+				`Assistant ${assistant_id} response completed (length: ${response.response.length})`
+			);
 		} catch (error) {
 			console.error(`Assistant ${assistant_id} invocation failed:`, error);
-			
+
 			// Clean up streaming
 			this.streamingManager.cleanupStreamingMessage(messageId);
-			
+
 			// Emit error
 			socket.emit('assistant_response_error', {
 				message_id: messageId,
 				assistant_id,
 				error: error instanceof Error ? error.message : 'Unknown error'
 			});
-			
+
 			throw error;
 		}
 	}
@@ -201,7 +212,7 @@ export class MessageHandler implements SocketHandler {
 		this.streamingManager.startStreaming(messageId, threadId, assistantId);
 
 		// Emit start event
-		const assistant = this.langGraphManager.getAssistants().find(a => a.id === assistantId);
+		const assistant = this.langGraphManager.getAssistants().find((a) => a.id === assistantId);
 		socket.emit('assistant_response_start', {
 			message_id: messageId,
 			assistant_id: assistantId,
@@ -237,21 +248,22 @@ export class MessageHandler implements SocketHandler {
 			this.streamingManager.completeStreaming(messageId);
 			socket.emit('assistant_response_complete', aiMessage);
 
-			console.log(`Assistant ${assistantId} response completed for thread ${threadId.substring(0, 8)}...`);
-
+			console.log(
+				`Assistant ${assistantId} response completed for thread ${threadId.substring(0, 8)}...`
+			);
 		} catch (error) {
 			console.error(`Assistant ${assistantId} failed for thread ${threadId}:`, error);
-			
+
 			// Clean up streaming
 			this.streamingManager.cleanupStreamingMessage(messageId);
-			
+
 			// Emit error
 			socket.emit('assistant_response_error', {
 				message_id: messageId,
 				assistant_id: assistantId,
 				error: error instanceof Error ? error.message : 'Unknown error'
 			});
-			
+
 			throw error;
 		}
 	}
@@ -259,7 +271,11 @@ export class MessageHandler implements SocketHandler {
 	/**
 	 * Simulate streaming by breaking response into chunks
 	 */
-	private async simulateStreaming(socket: Socket, messageId: string, fullResponse: string): Promise<void> {
+	private async simulateStreaming(
+		socket: Socket,
+		messageId: string,
+		fullResponse: string
+	): Promise<void> {
 		const words = fullResponse.split(' ');
 		const chunkSize = 3; // Words per chunk
 		let chunkIndex = 0;
@@ -267,13 +283,13 @@ export class MessageHandler implements SocketHandler {
 		for (let i = 0; i < words.length; i += chunkSize) {
 			const chunk = words.slice(i, i + chunkSize).join(' ');
 			const isLastChunk = i + chunkSize >= words.length;
-			
+
 			// Add space if not the last chunk
 			const chunkContent = isLastChunk ? chunk : chunk + ' ';
-			
+
 			// Add to streaming manager
 			this.streamingManager.addContent(messageId, chunkContent);
-			
+
 			// Emit chunk
 			socket.emit('message_chunk', {
 				message_id: messageId,
@@ -284,7 +300,7 @@ export class MessageHandler implements SocketHandler {
 
 			// Small delay to simulate real streaming
 			if (!isLastChunk) {
-				await new Promise(resolve => setTimeout(resolve, 50));
+				await new Promise((resolve) => setTimeout(resolve, 50));
 			}
 		}
 	}
@@ -312,7 +328,7 @@ export class MessageHandler implements SocketHandler {
 		averageResponseTime: number;
 	} {
 		const streamingStats = this.streamingManager.getStats();
-		
+
 		// TODO: Track message processing statistics
 		return {
 			activeStreamingMessages: streamingStats.activeStreams,
