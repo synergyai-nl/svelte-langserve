@@ -7,6 +7,36 @@ import { Server as SocketIOServer } from 'socket.io';
 
 // Custom Vite plugin to add Socket.IO server during development
 const socketIOPlugin = () => {
+	let authToken: string | null = null;
+
+	// Function to get auth token from LangServe backend
+	async function getAuthToken() {
+		if (authToken) return authToken;
+		
+		try {
+			const response = await fetch('http://localhost:8000/token', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/x-www-form-urlencoded',
+				},
+				body: 'username=demo&password=secret'
+			});
+
+			if (response.ok) {
+				const data = await response.json();
+				authToken = data.access_token;
+				console.log('Got LangServe auth token');
+				return authToken;
+			} else {
+				console.error('Failed to get auth token:', response.status);
+				return null;
+			}
+		} catch (error) {
+			console.error('Error getting auth token:', error);
+			return null;
+		}
+	}
+
 	return {
 		name: 'socket-io',
 		configureServer(server) {
@@ -71,11 +101,11 @@ const socketIOPlugin = () => {
 					socket.emit('conversation_created', conversation);
 				});
 
-				// Send message
+				// Send message - integrate with real LangServe backend
 				socket.on('send_message', async (data) => {
 					console.log('Message received:', data.content);
 
-					// Echo back a demo response
+					// Send user message first
 					const userMessage = {
 						id: `msg_${Date.now()}`,
 						type: 'human',
@@ -85,24 +115,88 @@ const socketIOPlugin = () => {
 						timestamp: new Date().toISOString(),
 						conversation_id: data.conversation_id
 					};
-
-					const aiMessage = {
-						id: `msg_${Date.now() + 1}`,
-						type: 'ai',
-						content: `Echo: ${data.content}`,
-						sender_id: 'demo-agent',
-						sender_type: 'agent',
-						timestamp: new Date().toISOString(),
-						conversation_id: data.conversation_id
-					};
-
-					// Send user message first
 					io.to(data.conversation_id).emit('message_received', userMessage);
 
-					// Send AI response after a delay
-					setTimeout(() => {
-						io.to(data.conversation_id).emit('message_received', aiMessage);
-					}, 1000);
+					// Call real LangServe backend
+					try {
+						const token = await getAuthToken();
+						if (!token) {
+							throw new Error('Could not get auth token');
+						}
+
+						const response = await fetch('http://localhost:8000/chatbot/invoke', {
+							method: 'POST',
+							headers: {
+								'Content-Type': 'application/json',
+								'Authorization': `Bearer ${token}`
+							},
+							body: JSON.stringify({
+								input: {
+									messages: [
+										{
+											type: 'human',
+											content: data.content
+										}
+									]
+								}
+							})
+						});
+
+						if (response.ok) {
+							const result = await response.json();
+							console.log('LangServe response:', result);
+
+							// Extract content from LangServe response
+							let content = 'No response from AI';
+							if (result?.output && typeof result.output === 'string') {
+								content = result.output;
+							} else if (result?.output?.content) {
+								content = result.output.content;
+							} else if (result?.content) {
+								content = result.content;
+							} else if (typeof result === 'string') {
+								content = result;
+							}
+
+							const aiMessage = {
+								id: `msg_${Date.now() + 1}`,
+								type: 'ai',
+								content: content,
+								sender_id: 'chatbot',
+								sender_type: 'agent',
+								timestamp: new Date().toISOString(),
+								conversation_id: data.conversation_id
+							};
+
+							io.to(data.conversation_id).emit('message_received', aiMessage);
+						} else {
+							console.error('LangServe request failed:', response.status, response.statusText);
+							// Send error message
+							const errorMessage = {
+								id: `msg_${Date.now() + 1}`,
+								type: 'ai',
+								content: `Error: Failed to get response from LangServe backend (${response.status})`,
+								sender_id: 'system',
+								sender_type: 'agent',
+								timestamp: new Date().toISOString(),
+								conversation_id: data.conversation_id
+							};
+							io.to(data.conversation_id).emit('message_received', errorMessage);
+						}
+					} catch (error) {
+						console.error('Error calling LangServe:', error);
+						// Send error message
+						const errorMessage = {
+							id: `msg_${Date.now() + 1}`,
+							type: 'ai',
+							content: `Error: Could not connect to LangServe backend. Is it running on localhost:8000?`,
+							sender_id: 'system',
+							sender_type: 'agent',
+							timestamp: new Date().toISOString(),
+							conversation_id: data.conversation_id
+						};
+						io.to(data.conversation_id).emit('message_received', errorMessage);
+					}
 				});
 
 				socket.on('disconnect', () => {
