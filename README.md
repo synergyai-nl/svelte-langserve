@@ -1,13 +1,14 @@
-# Svelte LangServe
+# Svelte LangGraph
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Svelte](https://img.shields.io/badge/Svelte-5.0-orange.svg)](https://svelte.dev/)
 [![Flowbite](https://img.shields.io/badge/Flowbite-2.0-blue.svg)](https://flowbite.com/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue.svg)](https://www.typescriptlang.org/)
+[![LangGraph](https://img.shields.io/badge/LangGraph-Server-green.svg)](https://langchain-ai.github.io/langgraph/)
 
-> **Build beautiful AI chat applications with SvelteKit, Flowbite UI, and LangServe in minutes, not months.**
+> **Build beautiful AI chat applications with SvelteKit, Flowbite UI, and LangGraph in minutes, not months.**
 
-A complete, production-ready framework for creating real-time AI chat applications with professional Flowbite components, streaming responses, and enterprise-grade deployment capabilities.
+A complete, production-ready framework for creating real-time AI chat applications with professional Flowbite components, advanced LangGraph assistants, streaming responses, and enterprise-grade deployment capabilities.
 
 ## 🎨 **Beautiful by Default with Flowbite**
 
@@ -22,10 +23,10 @@ Experience the power of professional design systems with our integrated Flowbite
 ```svelte
 <!-- Beautiful AI chat in one component -->
 <script>
-  import { LangServeFrontend } from 'svelte-langserve';
+  import { LangGraphFrontend } from 'svelte-langgraph';
 </script>
 
-<LangServeFrontend 
+<LangGraphFrontend 
   userId="user123" 
   theme="flowbite"
   darkMode={true}
@@ -34,11 +35,14 @@ Experience the power of professional design systems with our integrated Flowbite
 
 ## ✨ **Enterprise Features**
 
-### 🤖 **Multi-Agent AI System**
-- **5 Specialized Agents**: Chatbot, Code Assistant, Data Analyst, Creative Writer, Research Assistant
+### 🤖 **Advanced LangGraph System**
+- **6 Specialized Graphs**: Chatbot, Persistent Chatbot, Code Assistant, Data Analyst, Creative Writer, Research Assistant
+- **Open-Source LangGraph**: Uses standard StateGraph/CompiledGraph - no Platform dependency required
+- **Optional Platform Support**: Can be extended to use LangGraph Platform if desired
+- **Thread-based Conversations**: Stateful conversations with automatic persistence (in-memory or external)
 - **Multiple AI Providers**: OpenAI GPT-4, Anthropic Claude, with easy extensibility
 - **Streaming Responses**: Real-time token-by-token response rendering
-- **Tool Integration**: Web search, code execution, data analysis capabilities
+- **Tool Integration**: Web search, data analysis, and custom tools with intelligent routing
 
 ### 🔐 **Production Security**
 - **JWT Authentication**: Secure token-based auth with role-based access control
@@ -47,14 +51,17 @@ Experience the power of professional design systems with our integrated Flowbite
 - **Security Headers**: CORS, CSP, and other security best practices
 
 ### ⚡ **Real-time Communication**
-- **Socket.IO Integration**: WebSocket-based real-time messaging
-- **Conversation Management**: Create, manage, and switch between multiple chats
-- **Message History**: Persistent conversation storage with pagination
-- **Connection Resilience**: Automatic reconnection and error handling
+- **Modular Socket.IO Architecture**: Clean, maintainable WebSocket implementation
+- **Conversation Management**: Thread-based conversation persistence (configurable backend)
+- **Graph Health Monitoring**: Real-time status tracking for all LangGraph instances
+- **Memory Management**: Advanced streaming with automatic cleanup
+- **Connection Resilience**: Automatic reconnection and graceful error handling
 
 ### 🐳 **Deployment Ready**
-- **Docker Compose**: One-command deployment with all services
-- **Production Config**: Nginx, SSL, monitoring, and health checks
+- **Docker Compose**: One-command deployment with optional Postgres + Redis
+- **Production Config**: Nginx, SSL, monitoring, and comprehensive health checks
+- **Flexible Persistence**: In-memory (default) or PostgreSQL for conversation storage
+- **Optional Task Queue**: Redis support for advanced workflows
 - **Cloud Ready**: AWS, GCP, Azure deployment examples
 - **CI/CD Pipelines**: GitHub Actions workflows included
 
@@ -66,14 +73,15 @@ Get everything running in under 2 minutes:
 
 ```bash
 # 1. Clone and setup
-git clone https://github.com/synergyai-nl/svelte-langserve.git
-cd svelte-langserve
+git clone https://github.com/synergyai-nl/svelte-langgraph.git
+cd svelte-langgraph
 
 # 2. Configure environment
 cp .env.example .env
 # Edit .env with your API keys:
 # OPENAI_API_KEY=your-key-here
 # ANTHROPIC_API_KEY=your-key-here
+# LANGSMITH_API_KEY=your-langsmith-key
 
 # 3. Launch everything
 docker-compose up -d
@@ -89,11 +97,14 @@ open http://localhost:3000
 For customization and development:
 
 ```bash
-# Backend (Terminal 1)
-cd examples/langserve-backend
+# Optional: Infrastructure for persistence (Terminal 1)
+docker-compose up -d postgres redis
+
+# Backend (Terminal 2)
+cd examples/langgraph-backend
 uv run serve
 
-# Frontend (Terminal 2)  
+# Frontend (Terminal 3)  
 cd examples/dashboard
 pnpm install && pnpm dev
 
@@ -129,22 +140,22 @@ Built with modern, scalable architecture patterns:
 ```
 ┌─────────────────┐    WebSocket    ┌─────────────────┐    HTTP/Streaming    ┌─────────────────┐
 │   Browser       │ ◄─────────────► │   SvelteKit     │ ◄──────────────────► │   FastAPI       │
-│   (Flowbite UI) │                 │   Frontend      │                      │   LangServe     │
+│   (Flowbite UI) │                 │   Frontend      │                      │   LangGraph     │
 └─────────────────┘                 └─────────────────┘                      └─────────────────┘
                                             │                                         │
                                             ▼                                         ▼
                                     ┌─────────────────┐                      ┌─────────────────┐
-                                    │    Socket.IO    │                      │   AI Agents     │
-                                    │     Server      │                      │   OpenAI/Claude │
+                                    │    Socket.IO    │                      │ LangGraph Server│
+                                    │     Server      │                      │ + AI Assistants │
                                     └─────────────────┘                      └─────────────────┘
 ```
 
 ### **Modern Tech Stack**
 - **Frontend**: SvelteKit 2.0 + Svelte 5 + TypeScript + Tailwind CSS v4
 - **UI Components**: Flowbite Svelte with comprehensive theme system
-- **Backend**: FastAPI + LangServe + LangChain + Socket.IO
+- **Backend**: FastAPI + LangGraph (open-source) + LangChain + Socket.IO
 - **AI Integration**: OpenAI GPT-4, Anthropic Claude, extensible agent system
-- **Database**: PostgreSQL with async connection pooling
+- **Database**: Optional PostgreSQL + Redis (in-memory by default)
 - **Deployment**: Docker Compose + Nginx + SSL + monitoring
 
 ## 🎯 **Use Cases**
@@ -194,8 +205,8 @@ svelte-langserve/
 - Internationalization with Inlang/Paraglide
 
 **🚀 Backend Example:**
-- 5 specialized AI agent implementations
-- FastAPI with LangServe integration
+- 6 specialized LangGraph StateGraph implementations
+- FastAPI with open-source LangGraph integration
 - JWT authentication with RBAC
 - Socket.IO server for real-time communication
 - Production-ready logging and monitoring
@@ -259,7 +270,7 @@ Explore these demo routes in the example app:
 pnpm install
 
 # Start backend
-cd examples/langserve-backend && uv run serve
+cd examples/langgraph-backend && uv run serve
 
 # Start frontend (new terminal)
 cd examples/dashboard && pnpm dev
@@ -270,7 +281,7 @@ cd examples/dashboard && pnpm dev
 ### **Package Development**
 ```bash
 # Build library package
-cd packages/svelte-langserve && pnpm build
+cd packages/svelte-langgraph && pnpm build
 
 # Run all tests
 nx run-many -t test
@@ -293,7 +304,7 @@ pnpm lint        # ESLint
 pnpm format      # Prettier
 
 # Backend-specific  
-cd examples/langserve-backend
+cd examples/langgraph-backend
 uv run pytest           # Unit tests
 uv run ruff check .     # Lint
 uv run ruff format .    # Format

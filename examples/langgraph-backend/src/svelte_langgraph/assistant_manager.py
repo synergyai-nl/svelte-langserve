@@ -1,4 +1,9 @@
-"""LangGraph assistant management for the application."""
+"""LangGraph compiled graph management for the application.
+
+Note: We use the term "assistants" for user-facing API but these are
+standard LangGraph StateGraphs compiled into CompiledGraph instances.
+This is NOT LangGraph Platform assistants - we use open-source LangGraph only.
+"""
 
 from typing import Dict, Any, Optional
 from langgraph.graph import CompiledGraph
@@ -20,8 +25,12 @@ from .graphs import (
 logger = logging.getLogger(__name__)
 
 
-class AssistantManager:
-    """Manages LangGraph assistants for the application."""
+class GraphManager:
+    """Manages LangGraph compiled graphs (user-facing called 'assistants').
+    
+    This class manages StateGraph instances compiled into CompiledGraph objects.
+    We use open-source LangGraph only - no LangGraph Platform dependency.
+    """
     
     def __init__(self):
         """Initialize the assistant manager."""
