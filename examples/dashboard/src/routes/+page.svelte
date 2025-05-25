@@ -17,7 +17,7 @@
 		assistantHealth,
 		getDisplayMessages,
 		setActiveConversationId
-	} from '$lib/langserve/stores/langserve';
+	} from '$lib/langgraph/stores/langserve';
 	import { Card, Badge, Spinner, Button } from 'flowbite-svelte';
 	import { PaperPlaneSolid, UserSolid, ExclamationCircleSolid } from 'flowbite-svelte-icons';
 
