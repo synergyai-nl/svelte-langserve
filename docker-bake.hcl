@@ -16,7 +16,7 @@ group "default" {
 
 target "langserve-backend" {
   context = "./examples/langserve-backend"
-  dockerfile = "Dockerfile"
+  dockerfile = "./examples/langserve-backend/Dockerfile"
   tags = [
     "${REGISTRY}/${REPO}/langserve-backend:${TAG}",
     "${REGISTRY}/${REPO}/langserve-backend:latest"
@@ -32,7 +32,7 @@ target "langserve-backend" {
 
 target "svelte-frontend" {
   context = "./examples/dashboard"
-  dockerfile = "Dockerfile"
+  dockerfile = "./examples/dashboard/Dockerfile"
   tags = [
     "${REGISTRY}/${REPO}/svelte-frontend:${TAG}",
     "${REGISTRY}/${REPO}/svelte-frontend:latest"
