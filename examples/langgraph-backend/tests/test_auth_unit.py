@@ -3,6 +3,7 @@
 from datetime import timedelta
 
 import pytest
+
 from jose import jwt
 
 from src.svelte_langgraph.auth import (

@@ -3,6 +3,7 @@
 from unittest.mock import MagicMock, patch
 
 import pytest
+
 from fastapi.testclient import TestClient
 
 from src.svelte_langgraph.app import create_app

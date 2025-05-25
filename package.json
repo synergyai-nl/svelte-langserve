@@ -52,7 +52,6 @@
       "cd examples/dashboard && pnpm lint"
     ],
     "examples/langgraph-backend/**/*.py": [
-      "cd examples/langgraph-backend && uv run ruff check --fix --select I",
       "cd examples/langgraph-backend && uv run ruff check --fix",
       "cd examples/langgraph-backend && uv run ruff format",
       "cd examples/langgraph-backend && uv run pyright"
