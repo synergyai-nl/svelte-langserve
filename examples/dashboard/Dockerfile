@@ -18,8 +18,8 @@ RUN npm install -g pnpm && pnpm install --frozen-lockfile
 # Copy dashboard application code
 COPY examples/dashboard ./examples/dashboard/
 
-# Build the svelte-langserve package first
-RUN cd packages/svelte-langserve && pnpm build
+# Build the svelte-langgraph package first
+RUN cd packages/svelte-langgraph && pnpm build
 
 # Set working directory to dashboard
 WORKDIR /app/examples/dashboard
@@ -32,7 +32,7 @@ EXPOSE 3000
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:3000/api/langserve || exit 1
+    CMD curl -f http://localhost:3000/ || exit 1
 
 # Run the application
 CMD ["node", "build"]

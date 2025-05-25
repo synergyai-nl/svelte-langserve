@@ -15,8 +15,8 @@ group "default" {
 }
 
 target "langgraph-backend" {
-  context = "./examples/langgraph-backend"
-  dockerfile = "Dockerfile"
+  context = "."
+  dockerfile = "./examples/langgraph-backend/Dockerfile"
   tags = [
     "${REGISTRY}/${REPO}/langgraph-backend:${TAG}",
     "${REGISTRY}/${REPO}/langgraph-backend:latest"
@@ -31,8 +31,8 @@ target "langgraph-backend" {
 }
 
 target "svelte-frontend" {
-  context = "./examples/dashboard"
-  dockerfile = "Dockerfile"
+  context = "."
+  dockerfile = "./examples/dashboard/Dockerfile"
   tags = [
     "${REGISTRY}/${REPO}/svelte-frontend:${TAG}",
     "${REGISTRY}/${REPO}/svelte-frontend:latest"

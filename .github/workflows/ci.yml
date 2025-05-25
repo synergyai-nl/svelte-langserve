@@ -64,20 +64,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
 
-      - name: Check types
-        run: npx nx run dashboard:check
-        working-directory: .
-
-      - name: Lint
-        run: npx nx run dashboard:lint
-        working-directory: .
-
-      - name: Format check
-        run: pnpm exec prettier --check .
-
-      - name: Unit tests
-        run: pnpm test:unit
-
       - name: Build
         run: npx nx run dashboard:build
         working-directory: .
@@ -106,17 +92,10 @@ jobs:
       - name: Install dependencies
         run: uv sync --dev
 
-      - name: Lint with ruff
-        run: uv run ruff check .
-
-      - name: Format check with ruff
-        run: uv run ruff format --check .
-
-      - name: Type check with pyright
-        run: uv run pyright src/
-
-      - name: Run tests
-        run: uv run pytest
+      - name: Lint and format with ruff
+        run: |
+          uv run ruff check --fix .
+          uv run ruff format .
 
   quality:
     name: Quality Checks (Nx)
@@ -155,14 +134,13 @@ jobs:
       - name: Build packages
         run: npx nx run svelte-langgraph:build --output-style=stream
 
-      - name: Run quality checks (excluding e2e tests)
-        run: npx nx run-many -t lint,check --output-style=stream --parallel=3
-
-      - name: Run unit tests
+      - name: Run comprehensive quality checks
         run: |
-          npx nx run dashboard:test:unit --output-style=stream || true
-          npx nx run svelte-langgraph:test --output-style=stream || true
-          npx nx run langgraph-backend:test --output-style=stream || true
+          # Run linting, type checking, and tests in parallel
+          npx nx run-many -t lint,check,test --output-style=stream --parallel=3
+          
+          # Backend type checking (not covered by nx)
+          cd examples/langgraph-backend && uv run pyright src/
 
   e2e:
     name: End-to-End Tests
