@@ -10,7 +10,7 @@
   ],
   "scripts": {
     "build": "nx run-many -t build",
-    "dev": "nx run-many -t dev --outputStyle=stream",
+    "dev": "nx run-many -t dev",
     "clean": "pnpm -r --filter='@svelte-langserve/*' clean",
     "typecheck": "nx run-many -t check",
     "lint": "nx run-many -t lint",
