@@ -261,7 +261,7 @@ describe('Theme Context', () => {
       expect(context.config).toBe(flowbiteThemeConfig);
       expect(context.variant).toBe('dark');
       expect(context.override).toEqual({ sendButton: 'custom' });
-      expect(setContext).toHaveBeenCalledWith('svelte-langserve-theme', context);
+      expect(setContext).toHaveBeenCalledWith('svelte-langgraph-theme', context);
     });
 
     it('should work with minimal parameters', async () => {

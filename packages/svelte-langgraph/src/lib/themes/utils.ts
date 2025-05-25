@@ -5,7 +5,7 @@ import { defaultTheme, defaultThemeConfig } from './default.js';
 /**
  * Theme context key for Svelte context
  */
-const THEME_CONTEXT_KEY = 'svelte-langserve-theme';
+const THEME_CONTEXT_KEY = 'svelte-langgraph-theme';
 
 /**
  * Get the current theme from Svelte context
