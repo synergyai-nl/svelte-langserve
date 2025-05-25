@@ -64,7 +64,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
 
-      - name: Build
+      - name: Build dashboard (with dependencies)
         run: npx nx run dashboard:build
         working-directory: .
 
