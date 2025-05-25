@@ -74,6 +74,9 @@
 			}
 		},
 		"test": {
+			"dependsOn": ["test:unit"]
+		},
+		"test:all": {
 			"dependsOn": ["test:unit", "test:e2e"]
 		}
 	},
