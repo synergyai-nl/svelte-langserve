@@ -20,7 +20,8 @@ dependencies = [
     "python-jose[cryptography]",
     "passlib[bcrypt]",
     "python-multipart",
-    "duckduckgo-search"
+    "duckduckgo-search",
+    "langgraph-checkpoint-postgres>=2.0.21",
 ]
 
 [dependency-groups]

@@ -6,7 +6,7 @@ from typing import Any, Dict, List, TypedDict
 from langchain_community.tools.tavily_search import TavilySearchResults
 from langchain_core.messages import AIMessage, BaseMessage, ToolMessage
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langgraph import END, StateGraph
+from langgraph.graph import END, StateGraph
 from langgraph.graph import Graph
 
 from ..llm import get_llm

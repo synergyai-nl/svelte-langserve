@@ -1,14 +1,14 @@
 """LangGraph compiled graph management for the application.
 
 Note: We use the term "assistants" for user-facing API but these are
-standard LangGraph StateGraphs compiled into CompiledGraph instances.
+standard LangGraph StateGraphs compiled into Graph instances.
 This is NOT LangGraph Platform assistants - we use open-source LangGraph only.
 """
 
 import logging
 from typing import Any, Dict, Optional
 
-from langgraph.graph import CompiledGraph
+from langgraph.graph import Graph
 
 from .graphs import (
     create_chatbot_graph,
@@ -25,13 +25,13 @@ logger = logging.getLogger(__name__)
 class GraphManager:
     """Manages LangGraph compiled graphs (user-facing called 'assistants').
 
-    This class manages StateGraph instances compiled into CompiledGraph objects.
+    This class manages StateGraph instances compiled into Graph objects.
     We use open-source LangGraph only - no LangGraph Platform dependency.
     """
 
     def __init__(self):
         """Initialize the assistant manager."""
-        self.assistants: Dict[str, CompiledGraph] = {}
+        self.assistants: Dict[str, Graph] = {}
         self.assistant_metadata: Dict[str, Dict[str, Any]] = {}
         self._initialize_assistants()
 
@@ -108,7 +108,7 @@ class GraphManager:
             logger.error(f"Failed to initialize assistants: {e}")
             raise
 
-    def get_assistant(self, assistant_id: str) -> Optional[CompiledGraph]:
+    def get_assistant(self, assistant_id: str) -> Optional[Graph]:
         """Get an assistant by ID.
 
         Args:

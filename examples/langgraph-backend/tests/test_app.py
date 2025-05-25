@@ -20,8 +20,8 @@ class TestAppStartup:
         assert data["status"] == "healthy"
         assert data["version"] == "1.0"
         assert data["auth_required"] is True
-        assert isinstance(data["endpoints"], list)
-        assert len(data["endpoints"]) > 0
+        assert isinstance(data["assistants"], list)
+        assert len(data["assistants"]) > 0
 
     def test_root_endpoint(self, client):
         """Test root endpoint."""
@@ -33,10 +33,10 @@ class TestAppStartup:
         assert "message" in data
         assert "documentation" in data
         assert "health" in data
-        assert "available_agents" in data
+        assert "available_assistants" in data
 
-        # Check that all expected agents are listed
-        agents = data["available_agents"]
+        # Check that all expected assistants are listed
+        assistants = data["available_assistants"]
         expected_agents = [
             "chatbot",
             "chatbot-persistent",
@@ -47,10 +47,10 @@ class TestAppStartup:
         ]
 
         for agent in expected_agents:
-            assert agent in agents
-            assert "path" in agents[agent]
-            assert "description" in agents[agent]
-            assert "playground" in agents[agent]
+            assert agent in assistants
+            assert "name" in assistants[agent]
+            assert "description" in assistants[agent]
+            assert "endpoint" in assistants[agent]
 
     def test_cors_headers(self, client):
         """Test CORS configuration."""
