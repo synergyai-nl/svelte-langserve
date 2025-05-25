@@ -1,11 +1,11 @@
-"""FastAPI application setup and route configuration."""
+"""LangGraph application setup and assistant configuration."""
 
 from datetime import timedelta
+from typing import Dict, Any
 
 from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordRequestForm
-from langserve import add_routes
 
 from .auth import (
     ACCESS_TOKEN_EXPIRE_MINUTES,
@@ -16,14 +16,7 @@ from .auth import (
     fake_users_db,
     get_current_active_user,
 )
-from .chains import (
-    create_chatbot_chain,
-    create_chatbot_chain_with_history,
-    create_code_assistant_chain,
-    create_creative_writer_chain,
-    create_data_analyst_chain,
-    create_research_assistant_chain,
-)
+from .assistant_manager import assistant_manager
 from .config import settings
 
 
@@ -34,9 +27,9 @@ def create_app() -> FastAPI:
         Configured FastAPI application instance
     """
     app = FastAPI(
-        title="LangServe Backend for Socket.IO Frontend",
+        title="LangGraph Backend for Socket.IO Frontend",
         version="1.0",
-        description="Multiple AI agents accessible via LangServe",
+        description="Multiple AI assistants accessible via LangGraph",
     )
 
     # Add CORS middleware
@@ -48,8 +41,8 @@ def create_app() -> FastAPI:
         allow_headers=settings.ALLOW_HEADERS,
     )
 
-    # Setup LangServe routes
-    _setup_routes(app)
+    # Setup assistant routes
+    _setup_assistant_routes(app)
 
     # Add health and info endpoints
     _setup_endpoints(app)
@@ -57,74 +50,84 @@ def create_app() -> FastAPI:
     return app
 
 
-def _setup_routes(app: FastAPI) -> None:
-    """Add all LangServe routes to the FastAPI app."""
-
-    # General Chatbot
-    add_routes(
-        app,
-        create_chatbot_chain(),
-        path="/chatbot",
-        enable_feedback_endpoint=True,
-        enable_public_trace_link_endpoint=True,
-        playground_type="chat",
-        dependencies=[Depends(get_current_active_user)],
-    )
-
-    # General Chatbot with Persistence
-    add_routes(
-        app,
-        create_chatbot_chain_with_history(),
-        path="/chatbot-persistent",
-        enable_feedback_endpoint=True,
-        enable_public_trace_link_endpoint=True,
-        playground_type="chat",
-        dependencies=[Depends(get_current_active_user)],
-    )
-
-    # Code Assistant
-    add_routes(
-        app,
-        create_code_assistant_chain(),
-        path="/code-assistant",
-        enable_feedback_endpoint=True,
-        enable_public_trace_link_endpoint=True,
-        playground_type="chat",
-        dependencies=[Depends(get_current_active_user)],
-    )
-
-    # Data Analyst
-    add_routes(
-        app,
-        create_data_analyst_chain(),
-        path="/data-analyst",
-        enable_feedback_endpoint=True,
-        enable_public_trace_link_endpoint=True,
-        playground_type="chat",
-        dependencies=[Depends(get_current_active_user)],
-    )
-
-    # Creative Writer
-    add_routes(
-        app,
-        create_creative_writer_chain(),
-        path="/creative-writer",
-        enable_feedback_endpoint=True,
-        enable_public_trace_link_endpoint=True,
-        playground_type="chat",
-        dependencies=[Depends(get_current_active_user)],
-    )
-
-    # Research Assistant
-    add_routes(
-        app,
-        create_research_assistant_chain(),
-        path="/research-assistant",
-        enable_feedback_endpoint=True,
-        enable_public_trace_link_endpoint=True,
-        playground_type="chat",
-        dependencies=[Depends(get_current_active_user)],
-    )
+def _setup_assistant_routes(app: FastAPI) -> None:
+    """Set up LangGraph assistant routes."""
+    
+    from fastapi import Request
+    from langchain_core.messages import HumanMessage
+    from pydantic import BaseModel
+    from typing import List, Optional
+    
+    class AssistantRequest(BaseModel):
+        message: str
+        thread_id: Optional[str] = None
+        config: Optional[Dict[str, Any]] = None
+    
+    class AssistantResponse(BaseModel):
+        response: str
+        thread_id: Optional[str] = None
+        metadata: Optional[Dict[str, Any]] = None
+    
+    @app.post("/assistants/{assistant_id}/invoke", response_model=AssistantResponse)
+    async def invoke_assistant(
+        assistant_id: str,
+        request: AssistantRequest,
+        current_user: User = Depends(get_current_active_user)
+    ):
+        """Invoke a LangGraph assistant."""
+        assistant = assistant_manager.get_assistant(assistant_id)
+        if not assistant:
+            raise HTTPException(status_code=404, detail=f"Assistant {assistant_id} not found")
+        
+        try:
+            # Prepare input for the graph
+            input_data = {
+                "messages": [HumanMessage(content=request.message)]
+            }
+            
+            # Invoke the assistant
+            metadata = assistant_manager.get_assistant_metadata(assistant_id) or {}
+            if request.thread_id and metadata.get("supports_persistence"):
+                # Use thread ID for persistent assistants
+                result = await assistant.ainvoke(input_data, config={"thread_id": request.thread_id})
+            else:
+                result = await assistant.ainvoke(input_data)
+            
+            return AssistantResponse(
+                response=result.get("response", ""),
+                thread_id=request.thread_id,
+                metadata={"assistant_id": assistant_id}
+            )
+            
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Assistant invocation failed: {str(e)}")
+    
+    @app.get("/assistants")
+    async def list_assistants(current_user: User = Depends(get_current_active_user)):
+        """List all available assistants."""
+        return assistant_manager.list_assistants()
+    
+    @app.get("/assistants/{assistant_id}")
+    async def get_assistant_info(
+        assistant_id: str, 
+        current_user: User = Depends(get_current_active_user)
+    ):
+        """Get information about a specific assistant."""
+        metadata = assistant_manager.get_assistant_metadata(assistant_id)
+        if not metadata:
+            raise HTTPException(status_code=404, detail=f"Assistant {assistant_id} not found")
+        return metadata
+    
+    @app.get("/assistants/{assistant_id}/health")
+    async def check_assistant_health(
+        assistant_id: str,
+        current_user: User = Depends(get_current_active_user)
+    ):
+        """Check the health of a specific assistant."""
+        health_status = assistant_manager.health_check()
+        if assistant_id not in health_status:
+            raise HTTPException(status_code=404, detail=f"Assistant {assistant_id} not found")
+        return health_status[assistant_id]
 
 
 def _setup_endpoints(app: FastAPI) -> None:
@@ -154,57 +157,48 @@ def _setup_endpoints(app: FastAPI) -> None:
     @app.get("/health")
     async def health_check():
         """Health check endpoint."""
+        assistant_health = assistant_manager.health_check()
+        overall_status = "healthy" if all(
+            status["status"] == "healthy" for status in assistant_health.values()
+        ) else "degraded"
+        
         return {
-            "status": "healthy",
-            "endpoints": [
-                "/chatbot",
-                "/chatbot-persistent",
-                "/code-assistant",
-                "/data-analyst",
-                "/creative-writer",
-                "/research-assistant",
-            ],
+            "status": overall_status,
+            "assistants": list(assistant_health.keys()),
+            "assistant_health": assistant_health,
             "version": "1.0",
             "auth_required": True,
+            "backend_type": "langgraph",
         }
 
     @app.get("/")
     async def root():
         """Root endpoint with API information."""
+        assistants = assistant_manager.list_assistants()
+        
+        # Transform assistant metadata for API response
+        available_assistants = {}
+        for assistant_id, metadata in assistants.items():
+            available_assistants[assistant_id] = {
+                "name": metadata["name"],
+                "description": metadata["description"],
+                "endpoint": f"/assistants/{assistant_id}/invoke",
+                "info_endpoint": f"/assistants/{assistant_id}",
+                "health_endpoint": f"/assistants/{assistant_id}/health",
+                "supports_streaming": metadata.get("supports_streaming", False),
+                "supports_persistence": metadata.get("supports_persistence", False),
+            }
+        
         return {
-            "message": "LangServe Backend for Socket.IO Frontend",
+            "message": "LangGraph Backend for Socket.IO Frontend",
             "documentation": "/docs",
             "health": "/health",
-            "available_agents": {
-                "chatbot": {
-                    "path": "/chatbot",
-                    "description": "General-purpose conversational AI",
-                    "playground": "/chatbot/playground",
-                },
-                "chatbot-persistent": {
-                    "path": "/chatbot-persistent",
-                    "description": "General-purpose conversational AI with memory persistence",
-                    "playground": "/chatbot-persistent/playground",
-                },
-                "code-assistant": {
-                    "path": "/code-assistant",
-                    "description": "Specialized coding and development assistant",
-                    "playground": "/code-assistant/playground",
-                },
-                "data-analyst": {
-                    "path": "/data-analyst",
-                    "description": "Data analysis and research with search tools",
-                    "playground": "/data-analyst/playground",
-                },
-                "creative-writer": {
-                    "path": "/creative-writer",
-                    "description": "Creative writing and storytelling assistant",
-                    "playground": "/creative-writer/playground",
-                },
-                "research-assistant": {
-                    "path": "/research-assistant",
-                    "description": "Research assistant with web search capabilities",
-                    "playground": "/research-assistant/playground",
-                },
+            "backend_type": "langgraph",
+            "available_assistants": available_assistants,
+            "api_endpoints": {
+                "list_assistants": "/assistants",
+                "invoke_assistant": "/assistants/{assistant_id}/invoke",
+                "assistant_info": "/assistants/{assistant_id}",
+                "assistant_health": "/assistants/{assistant_id}/health",
             },
         }
