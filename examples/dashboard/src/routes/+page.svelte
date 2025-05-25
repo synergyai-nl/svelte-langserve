@@ -266,9 +266,11 @@
 											</div>
 											<div class="flex-1">
 												<div class="max-w-lg rounded-lg rounded-tl-none bg-blue-600 p-3 text-white">
-													{typeof message.content === 'string'
-														? message.content
-														: JSON.stringify(message.content)}
+													<div class="whitespace-pre-wrap">
+														{typeof message.content === 'string'
+															? message.content
+															: JSON.stringify(message.content)}
+													</div>
 												</div>
 												<div class="mt-1 text-xs text-gray-500 dark:text-gray-400">
 													{new Date(message.timestamp).toLocaleTimeString()}
@@ -286,12 +288,14 @@
 												<div
 													class="max-w-lg rounded-lg rounded-tl-none bg-gray-100 p-3 text-gray-900 dark:bg-gray-700 dark:text-white"
 												>
-													{typeof message.content === 'string'
-														? message.content
-														: JSON.stringify(message.content)}
-													{#if message.additional_kwargs?.streaming}
-														<span class="ml-1 inline-block h-4 w-2 animate-pulse bg-current"></span>
-													{/if}
+													<div class="whitespace-pre-wrap">
+														{typeof message.content === 'string'
+															? message.content
+															: JSON.stringify(message.content)}
+														{#if message.additional_kwargs?.streaming}
+															<span class="ml-1 inline-block h-4 w-2 animate-pulse bg-current"></span>
+														{/if}
+													</div>
 												</div>
 												<div class="mt-1 text-xs text-gray-500 dark:text-gray-400">
 													{message.additional_kwargs?.endpoint_name || message.sender_id} •

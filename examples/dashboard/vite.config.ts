@@ -124,51 +124,170 @@ const socketIOPlugin = () => {
 							throw new Error('Could not get auth token');
 						}
 
-						const response = await fetch('http://localhost:8000/chatbot/invoke', {
-							method: 'POST',
-							headers: {
-								'Content-Type': 'application/json',
-								'Authorization': `Bearer ${token}`
-							},
-							body: JSON.stringify({
-								input: {
-									messages: [
-										{
-											type: 'human',
-											content: data.content
+						// Use streaming if enabled in config
+						if (data.config?.streaming !== false) {
+							// Use streaming endpoint
+							const response = await fetch('http://localhost:8000/chatbot/stream', {
+								method: 'POST',
+								headers: {
+									'Content-Type': 'application/json',
+									'Authorization': `Bearer ${token}`
+								},
+								body: JSON.stringify({
+									input: {
+										messages: [
+											{
+												type: 'human',
+												content: data.content
+											}
+										]
+									}
+								})
+							});
+
+							if (response.ok && response.body) {
+								const messageId = `msg_${Date.now() + 1}`;
+								let accumulatedContent = '';
+
+								// Emit streaming start event
+								io.to(data.conversation_id).emit('agent_response_start', {
+									message_id: messageId,
+									endpoint_id: 'chatbot',
+									endpoint_name: 'General Chatbot',
+									conversation_id: data.conversation_id
+								});
+
+								const reader = response.body.getReader();
+								const decoder = new TextDecoder();
+
+								try {
+									while (true) {
+										const { done, value } = await reader.read();
+										if (done) break;
+
+										const chunk = decoder.decode(value);
+										const lines = chunk.split('\n');
+
+										let isDataEvent = false;
+										for (const line of lines) {
+											const trimmedLine = line.trim();
+											
+											// Check for event type
+											if (trimmedLine.startsWith('event: data')) {
+												isDataEvent = true;
+												continue;
+											}
+											
+											// Parse data lines when we're in a data event
+											if (isDataEvent && trimmedLine.startsWith('data: ')) {
+												try {
+													const jsonStr = trimmedLine.slice(6);
+													if (!jsonStr || jsonStr === '""') {
+														// Empty data, continue
+														continue;
+													}
+													
+													// Parse the JSON string (it's quoted)
+													const content = JSON.parse(jsonStr);
+													
+													if (content && typeof content === 'string') {
+														accumulatedContent += content;
+														
+														// Emit streaming chunk
+														io.to(data.conversation_id).emit('message_chunk', {
+															message_id: messageId,
+															chunk_id: `chunk_${Date.now()}`,
+															content: content,
+															sender_id: 'chatbot',
+															sender_name: 'General Chatbot',
+															conversation_id: data.conversation_id
+														});
+													}
+												} catch (parseError) {
+													console.error('Error parsing stream chunk:', parseError, 'Line:', trimmedLine);
+												}
+												isDataEvent = false; // Reset after processing data
+											}
+											
+											// Reset flag on empty line (SSE event separator)
+											if (trimmedLine === '') {
+												isDataEvent = false;
+											}
 										}
-									]
+									}
+
+									// Emit final message
+									const finalMessage = {
+										id: messageId,
+										type: 'ai',
+										content: accumulatedContent,
+										sender_id: 'chatbot',
+										sender_type: 'agent',
+										timestamp: new Date().toISOString(),
+										conversation_id: data.conversation_id,
+										additional_kwargs: { endpoint_name: 'General Chatbot' }
+									};
+
+									io.to(data.conversation_id).emit('agent_response_complete', finalMessage);
+								} catch (streamError) {
+									console.error('Streaming error:', streamError);
+									io.to(data.conversation_id).emit('agent_response_error', {
+										message_id: messageId,
+										endpoint_id: 'chatbot',
+										error: streamError.message
+									});
 								}
-							})
-						});
-
-						if (response.ok) {
-							const result = await response.json();
-							console.log('LangServe response:', result);
-
-							// Extract content from LangServe response
-							let content = 'No response from AI';
-							if (result?.output && typeof result.output === 'string') {
-								content = result.output;
-							} else if (result?.output?.content) {
-								content = result.output.content;
-							} else if (result?.content) {
-								content = result.content;
-							} else if (typeof result === 'string') {
-								content = result;
+							} else {
+								throw new Error(`Streaming request failed: ${response.status}`);
 							}
+						} else {
+							// Use non-streaming endpoint
+							const response = await fetch('http://localhost:8000/chatbot/invoke', {
+								method: 'POST',
+								headers: {
+									'Content-Type': 'application/json',
+									'Authorization': `Bearer ${token}`
+								},
+								body: JSON.stringify({
+									input: {
+										messages: [
+											{
+												type: 'human',
+												content: data.content
+											}
+										]
+									}
+								})
+							});
 
-							const aiMessage = {
-								id: `msg_${Date.now() + 1}`,
-								type: 'ai',
-								content: content,
-								sender_id: 'chatbot',
-								sender_type: 'agent',
-								timestamp: new Date().toISOString(),
-								conversation_id: data.conversation_id
-							};
+							if (response.ok) {
+								const result = await response.json();
+								console.log('LangServe response:', result);
 
-							io.to(data.conversation_id).emit('message_received', aiMessage);
+								// Extract content from LangServe response
+								let content = 'No response from AI';
+								if (result?.output && typeof result.output === 'string') {
+									content = result.output;
+								} else if (result?.output?.content) {
+									content = result.output.content;
+								} else if (result?.content) {
+									content = result.content;
+								} else if (typeof result === 'string') {
+									content = result;
+								}
+
+								const aiMessage = {
+									id: `msg_${Date.now() + 1}`,
+									type: 'ai',
+									content: content,
+									sender_id: 'chatbot',
+									sender_type: 'agent',
+									timestamp: new Date().toISOString(),
+									conversation_id: data.conversation_id
+								};
+
+								io.to(data.conversation_id).emit('message_received', aiMessage);
+							}
 						} else {
 							console.error('LangServe request failed:', response.status, response.statusText);
 							// Send error message
