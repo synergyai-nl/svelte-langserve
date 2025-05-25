@@ -13,6 +13,7 @@ dependencies = [
     "langchain-anthropic",
     "langchain-community",
     "langchain",
+    "langchain-postgres",
     "tavily-python",
     "psycopg2-binary",
     "redis",

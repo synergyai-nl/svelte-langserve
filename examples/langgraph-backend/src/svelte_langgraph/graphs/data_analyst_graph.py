@@ -36,7 +36,19 @@ def should_use_tools(state: DataAnalystState) -> str:
         "up-to-date",
     ]
 
-    message_content = last_message.content.lower()
+    # Handle both string and list content types
+    if isinstance(last_message.content, str):
+        message_content = last_message.content.lower()
+    elif isinstance(last_message.content, list):
+        # If content is a list, convert to string and get text content
+        message_content = " ".join(
+            item if isinstance(item, str) else str(item.get("text", ""))
+            for item in last_message.content
+            if isinstance(item, (str, dict))
+        ).lower()
+    else:
+        message_content = str(last_message.content).lower()
+    
     if any(indicator in message_content for indicator in search_indicators):
         return "use_tools"
     else:
