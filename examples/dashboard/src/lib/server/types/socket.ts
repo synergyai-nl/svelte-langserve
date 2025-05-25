@@ -13,7 +13,7 @@ export interface SocketEvents {
 	create_thread: (data: {
 		assistant_ids: string[];
 		initial_message?: string;
-		config?: Record<string, any>;
+		config?: Record<string, unknown>;
 	}) => void;
 	thread_created: (thread: ThreadInfo) => void;
 	join_thread: (data: { thread_id: string }) => void;
@@ -25,7 +25,7 @@ export interface SocketEvents {
 	send_message: (data: {
 		thread_id: string;
 		content: string;
-		config?: Record<string, any>;
+		config?: Record<string, unknown>;
 	}) => void;
 	message_received: (message: ChatMessage) => void;
 
@@ -64,7 +64,7 @@ export interface ChatMessage {
 	timestamp: string;
 	thread_id: string;
 	assistant_id?: string;
-	additional_kwargs?: Record<string, any>;
+	additional_kwargs?: Record<string, unknown>;
 }
 
 export interface MessageChunk {

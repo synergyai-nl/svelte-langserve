@@ -13,7 +13,7 @@ declare global {
 		// interface PageState {}
 		interface Platform {
 			node?: {
-				server?: any;
+				server?: import('http').Server | import('https').Server;
 			};
 		}
 	}

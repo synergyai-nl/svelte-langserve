@@ -42,17 +42,17 @@ export class LangGraphManager {
 			const assistantsData = await response.json();
 
 			// Transform the response to our interface
-			const assistants: LangGraphAssistant[] = Object.entries(assistantsData).map(
-				([id, metadata]: [string, any]) => ({
-					id,
-					name: metadata.name,
-					description: metadata.description,
-					type: metadata.type || 'chat',
-					supports_streaming: metadata.supports_streaming || false,
-					supports_persistence: metadata.supports_persistence || false,
-					has_tools: metadata.has_tools || false
-				})
-			);
+			const assistants: LangGraphAssistant[] = Object.entries(
+				assistantsData as Record<string, Record<string, unknown>>
+			).map(([id, metadata]) => ({
+				id,
+				name: (metadata.name as string) || '',
+				description: (metadata.description as string) || '',
+				type: (metadata.type as string) || 'chat',
+				supports_streaming: Boolean(metadata.supports_streaming),
+				supports_persistence: Boolean(metadata.supports_persistence),
+				has_tools: Boolean(metadata.has_tools)
+			}));
 
 			// Update internal cache
 			this.assistants.clear();

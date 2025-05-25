@@ -22,7 +22,10 @@ export class SocketServer {
 	private connectionCount: number = 0;
 	private totalConnections: number = 0;
 
-	constructor(httpServer: any, langGraphServerUrl: string = 'http://localhost:8000') {
+	constructor(
+		httpServer: import('http').Server | import('https').Server,
+		langGraphServerUrl: string = 'http://localhost:8000'
+	) {
 		// Initialize Socket.IO server
 		this.io = new Server(httpServer, {
 			cors: {
@@ -79,7 +82,7 @@ export class SocketServer {
 	/**
 	 * Handle new socket connection
 	 */
-	private handleConnection(socket: any): void {
+	private handleConnection(socket: import('socket.io').Socket): void {
 		this.connectionCount++;
 		this.totalConnections++;
 
@@ -110,22 +113,16 @@ export class SocketServer {
 	/**
 	 * Add global error handling for socket
 	 */
-	private addGlobalErrorHandling(socket: any): void {
-		// Wrap all event handlers with error handling
-		const originalOn = socket.on.bind(socket);
-		socket.on = (event: string, handler: Function) => {
-			return originalOn(event, async (...args: any[]) => {
-				try {
-					await handler(...args);
-				} catch (error) {
-					console.error(`Unhandled error in ${event} handler:`, error);
-					socket.emit('error', {
-						message: 'Internal server error',
-						code: 'INTERNAL_ERROR'
-					});
-				}
-			});
-		};
+	private addGlobalErrorHandling(socket: import('socket.io').Socket): void {
+		// Add global error handler
+		socket.onAny((event, ...args) => {
+			// Log all events for debugging
+			console.debug(`Socket event: ${event}`, { socketId: socket.id, args });
+		});
+
+		socket.on('error', (error: Error) => {
+			console.error(`Socket error from ${socket.id}:`, error);
+		});
 	}
 
 	/**
@@ -179,7 +176,7 @@ export class SocketServer {
 	/**
 	 * Broadcast message to all authenticated clients
 	 */
-	broadcastToAuthenticated(event: string, data: any): void {
+	broadcastToAuthenticated(event: string, data: unknown): void {
 		this.io.sockets.sockets.forEach((socket) => {
 			if (this.authHandler.isAuthenticated(socket)) {
 				socket.emit(event, data);
@@ -190,8 +187,8 @@ export class SocketServer {
 	/**
 	 * Send message to specific user
 	 */
-	sendToUser(userId: string, event: string, data: any): boolean {
-		for (const [socketId, socket] of this.io.sockets.sockets) {
+	sendToUser(userId: string, event: string, data: unknown): boolean {
+		for (const [, socket] of this.io.sockets.sockets) {
 			const authUser = this.authHandler.getAuthenticatedUser(socket);
 			if (authUser && authUser.userId === userId) {
 				socket.emit(event, data);

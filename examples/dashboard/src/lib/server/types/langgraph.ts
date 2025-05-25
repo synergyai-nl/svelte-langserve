@@ -13,13 +13,13 @@ export interface LangGraphAssistant {
 export interface AssistantInvocationRequest {
 	message: string;
 	thread_id?: string;
-	config?: Record<string, any>;
+	config?: Record<string, unknown>;
 }
 
 export interface AssistantInvocationResponse {
 	response: string;
 	thread_id?: string;
-	metadata?: Record<string, any>;
+	metadata?: Record<string, unknown>;
 }
 
 export interface ThreadInfo {
@@ -28,7 +28,7 @@ export interface ThreadInfo {
 	user_id: string;
 	created_at: string;
 	updated_at: string;
-	metadata?: Record<string, any>;
+	metadata?: Record<string, unknown>;
 }
 
 export interface AssistantHealth {
