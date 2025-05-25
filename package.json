@@ -5,13 +5,13 @@
   "type": "module",
   "private": true,
   "workspaces": [
-    "packages/@svelte-langgraph/*",
+    "packages/*",
     "examples/*"
   ],
   "scripts": {
     "build": "nx run-many -t build",
     "dev": "nx run-many -t dev",
-    "clean": "pnpm -r --filter='@svelte-langgraph/*' clean",
+    "clean": "pnpm -r --filter='svelte-langgraph' clean",
     "typecheck": "nx run-many -t check",
     "lint": "nx run-many -t lint",
     "lint:root": "eslint .",
@@ -52,6 +52,7 @@
       "cd examples/dashboard && pnpm lint"
     ],
     "examples/langgraph-backend/**/*.py": [
+      "cd examples/langgraph-backend && uv run ruff check --fix --select I",
       "cd examples/langgraph-backend && uv run ruff check --fix",
       "cd examples/langgraph-backend && uv run ruff format",
       "cd examples/langgraph-backend && uv run pyright"

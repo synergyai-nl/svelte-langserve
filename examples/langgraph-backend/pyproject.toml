@@ -63,7 +63,11 @@ ignore = ["E501"]
 docstring-code-format = true
 
 [tool.ruff.lint.isort]
-# Enable import sorting within ruff formatter
+# Import sorting configuration
+known-first-party = ["svelte_langgraph"]
+force-single-line = false
+lines-between-types = 1
+lines-after-imports = 2
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

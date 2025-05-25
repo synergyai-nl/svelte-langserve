@@ -1,6 +1,7 @@
 """Memory store configuration for chat persistence."""
 
 import os
+
 from typing import Optional
 
 from langchain_core.chat_history import BaseChatMessageHistory

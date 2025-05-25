@@ -4,8 +4,7 @@ from typing import Any, Dict, List, TypedDict
 
 from langchain_core.messages import AIMessage, BaseMessage
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langgraph.graph import END, StateGraph
-from langgraph.graph import Graph
+from langgraph.graph import END, Graph, StateGraph
 
 from ..llm import get_llm
 

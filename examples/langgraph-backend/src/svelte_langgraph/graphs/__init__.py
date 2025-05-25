@@ -18,6 +18,7 @@ from .research_assistant_graph import (
     create_research_assistant_graph_with_checkpointing,
 )
 
+
 __all__ = [
     "create_chatbot_graph",
     "create_chatbot_graph_with_checkpointing",

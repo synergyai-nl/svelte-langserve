@@ -6,6 +6,7 @@ This is NOT LangGraph Platform assistants - we use open-source LangGraph only.
 """
 
 import logging
+
 from typing import Any, Dict, Optional
 
 from langgraph.graph import Graph
@@ -18,6 +19,7 @@ from .graphs import (
     create_data_analyst_graph,
     create_research_assistant_graph,
 )
+
 
 logger = logging.getLogger(__name__)
 

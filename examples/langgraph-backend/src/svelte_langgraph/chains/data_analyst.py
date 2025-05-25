@@ -1,6 +1,7 @@
 """Data analyst chain implementation with search capabilities."""
 
 import os
+
 from typing import Any, Dict
 
 from langchain.agents import AgentExecutor, create_openai_functions_agent
