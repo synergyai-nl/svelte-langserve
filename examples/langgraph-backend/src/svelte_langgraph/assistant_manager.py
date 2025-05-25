@@ -11,6 +11,10 @@ from .graphs import (
     create_code_assistant_graph_with_checkpointing,
     create_creative_writer_graph,
     create_creative_writer_graph_with_checkpointing,
+    create_data_analyst_graph,
+    create_data_analyst_graph_with_checkpointing,
+    create_research_assistant_graph,
+    create_research_assistant_graph_with_checkpointing,
 )
 
 logger = logging.getLogger(__name__)
@@ -68,9 +72,27 @@ class AssistantManager:
                 "supports_persistence": False,
             }
             
-            # TODO: Add remaining assistants as they are converted
-            # self.assistants["data-analyst"] = create_data_analyst_graph()
-            # self.assistants["research-assistant"] = create_research_assistant_graph()
+            # Data analyst
+            self.assistants["data-analyst"] = create_data_analyst_graph()
+            self.assistant_metadata["data-analyst"] = {
+                "name": "Data Analyst",
+                "description": "Data analysis and research with search tools",
+                "type": "chat",
+                "supports_streaming": True,
+                "supports_persistence": False,
+                "has_tools": True,
+            }
+            
+            # Research assistant
+            self.assistants["research-assistant"] = create_research_assistant_graph()
+            self.assistant_metadata["research-assistant"] = {
+                "name": "Research Assistant",
+                "description": "Research assistant with web search capabilities",
+                "type": "chat",
+                "supports_streaming": True,
+                "supports_persistence": False,
+                "has_tools": True,
+            }
             
             logger.info(f"Initialized {len(self.assistants)} assistants")
             
