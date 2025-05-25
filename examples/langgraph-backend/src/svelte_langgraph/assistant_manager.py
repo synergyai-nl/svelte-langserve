@@ -7,6 +7,10 @@ import logging
 from .graphs import (
     create_chatbot_graph,
     create_chatbot_graph_with_checkpointing,
+    create_code_assistant_graph,
+    create_code_assistant_graph_with_checkpointing,
+    create_creative_writer_graph,
+    create_creative_writer_graph_with_checkpointing,
 )
 
 logger = logging.getLogger(__name__)
@@ -44,10 +48,28 @@ class AssistantManager:
                 "supports_persistence": True,
             }
             
-            # TODO: Add other assistants as they are converted
-            # self.assistants["code-assistant"] = create_code_assistant_graph()
+            # Code assistant
+            self.assistants["code-assistant"] = create_code_assistant_graph()
+            self.assistant_metadata["code-assistant"] = {
+                "name": "Code Assistant",
+                "description": "Specialized coding and development assistant",
+                "type": "chat",
+                "supports_streaming": True,
+                "supports_persistence": False,
+            }
+            
+            # Creative writer
+            self.assistants["creative-writer"] = create_creative_writer_graph()
+            self.assistant_metadata["creative-writer"] = {
+                "name": "Creative Writer",
+                "description": "Creative writing and storytelling assistant",
+                "type": "chat",
+                "supports_streaming": True,
+                "supports_persistence": False,
+            }
+            
+            # TODO: Add remaining assistants as they are converted
             # self.assistants["data-analyst"] = create_data_analyst_graph()
-            # self.assistants["creative-writer"] = create_creative_writer_graph()
             # self.assistants["research-assistant"] = create_research_assistant_graph()
             
             logger.info(f"Initialized {len(self.assistants)} assistants")
