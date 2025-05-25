@@ -1,4 +1,4 @@
-"""Message handling for Socket.IO connections with LangGraph integration."""
+// Message handling for Socket.IO connections with LangGraph integration
 
 import type { Socket } from 'socket.io';
 import type { SocketHandler, ChatMessage } from '../../types/socket.js';

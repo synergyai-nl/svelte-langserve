@@ -1,4 +1,4 @@
-"""Type definitions for LangGraph integration."""
+// Type definitions for LangGraph integration
 
 export interface LangGraphAssistant {
 	id: string;

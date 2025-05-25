@@ -1,4 +1,4 @@
-"""Type definitions for Socket.IO events and handlers."""
+// Type definitions for Socket.IO events and handlers
 
 import type { Socket } from 'socket.io';
 import type { LangGraphAssistant, ThreadInfo } from './langgraph.js';

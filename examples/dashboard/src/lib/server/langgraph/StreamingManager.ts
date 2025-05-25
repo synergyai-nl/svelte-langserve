@@ -1,4 +1,4 @@
-"""Streaming response manager with memory management for LangGraph."""
+// Streaming response manager with memory management for LangGraph
 
 export interface StreamingMessage {
 	id: string;

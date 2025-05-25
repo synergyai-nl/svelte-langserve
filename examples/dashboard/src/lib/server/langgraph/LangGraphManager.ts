@@ -1,4 +1,4 @@
-"""LangGraph client manager for Socket.IO integration."""
+// LangGraph client manager for Socket.IO integration
 
 import type { 
 	LangGraphAssistant, 

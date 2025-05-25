@@ -1,4 +1,4 @@
-"""Assistant management handler for Socket.IO connections."""
+// Assistant management handler for Socket.IO connections
 
 import type { Socket } from 'socket.io';
 import type { SocketHandler } from '../../types/socket.js';

@@ -1,8 +1,8 @@
-"""Main Socket.IO server orchestrator for LangGraph integration."""
+// Main Socket.IO server orchestrator for LangGraph integration
 
 import { Server } from 'socket.io';
-import type { LangGraphManager } from '../langgraph/LangGraphManager.js';
-import type { StreamingManager } from '../langgraph/StreamingManager.js';
+import { LangGraphManager } from '../langgraph/LangGraphManager.js';
+import { StreamingManager } from '../langgraph/StreamingManager.js';
 import { AuthHandler } from './handlers/AuthHandler.js';
 import { AssistantHandler } from './handlers/AssistantHandler.js';
 import { MessageHandler } from './handlers/MessageHandler.js';
@@ -231,9 +231,9 @@ export class SocketServer {
 		};
 	}> {
 		const details = {
-			socketServer: 'healthy' as const,
-			langGraphManager: 'healthy' as const,
-			streamingManager: 'healthy' as const,
+			socketServer: 'healthy' as 'healthy' | 'unhealthy',
+			langGraphManager: 'healthy' as 'healthy' | 'unhealthy',
+			streamingManager: 'healthy' as 'healthy' | 'unhealthy',
 			connections: this.connectionCount
 		};
 
@@ -254,12 +254,13 @@ export class SocketServer {
 		}
 
 		// Determine overall status
-		const unhealthyComponents = Object.values(details).filter(status => status === 'unhealthy').length;
+		const statusValues = [details.socketServer, details.langGraphManager, details.streamingManager];
+		const unhealthyCount = statusValues.filter(s => s === 'unhealthy').length;
 		let status: 'healthy' | 'degraded' | 'unhealthy';
 		
-		if (unhealthyComponents === 0) {
+		if (unhealthyCount === 0) {
 			status = 'healthy';
-		} else if (unhealthyComponents < 2) {
+		} else if (unhealthyCount < 2) {
 			status = 'degraded';
 		} else {
 			status = 'unhealthy';
