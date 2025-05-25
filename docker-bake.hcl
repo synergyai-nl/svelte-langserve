@@ -27,7 +27,7 @@ target "langgraph-backend" {
   cache-to = [
     "type=gha,scope=langgraph-backend,mode=max"
   ]
-  platforms = ["linux/amd64", "linux/arm64"]
+  platforms = ["linux/amd64"]
 }
 
 target "svelte-frontend" {
@@ -43,7 +43,7 @@ target "svelte-frontend" {
   cache-to = [
     "type=gha,scope=svelte-frontend,mode=max"
   ]
-  platforms = ["linux/amd64", "linux/arm64"]
+  platforms = ["linux/amd64"]
 }
 
 group "all" {
