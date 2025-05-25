@@ -21,7 +21,7 @@ export class MessageHandler implements SocketHandler {
 				thread_id: string;
 				content: string;
 				assistant_id?: string;
-				config?: Record<string, any>;
+				config?: Record<string, unknown>;
 			}) => {
 				if (!this.authHandler.isAuthenticated(socket)) {
 					socket.emit('error', { message: 'Authentication required', code: 'AUTH_REQUIRED' });
@@ -43,7 +43,7 @@ export class MessageHandler implements SocketHandler {
 		// Simple assistant invocation (for testing)
 		socket.on(
 			'invoke_assistant',
-			async (data: { assistant_id: string; message: string; config?: Record<string, any> }) => {
+			async (data: { assistant_id: string; message: string; config?: Record<string, unknown> }) => {
 				if (!this.authHandler.isAuthenticated(socket)) {
 					socket.emit('error', { message: 'Authentication required', code: 'AUTH_REQUIRED' });
 					return;
@@ -69,7 +69,7 @@ export class MessageHandler implements SocketHandler {
 			thread_id: string;
 			content: string;
 			assistant_id?: string;
-			config?: Record<string, any>;
+			config?: Record<string, unknown>;
 		}
 	): Promise<void> {
 		const { thread_id, content, assistant_id, config } = data;
@@ -112,7 +112,7 @@ export class MessageHandler implements SocketHandler {
 		data: {
 			assistant_id: string;
 			message: string;
-			config?: Record<string, any>;
+			config?: Record<string, unknown>;
 		}
 	): Promise<void> {
 		const { assistant_id, message, config } = data;
@@ -198,7 +198,7 @@ export class MessageHandler implements SocketHandler {
 		assistantId: string,
 		message: string,
 		threadId: string,
-		config?: Record<string, any>
+		config?: Record<string, unknown>
 	): Promise<void> {
 		// Check if assistant exists
 		if (!this.langGraphManager.hasAssistant(assistantId)) {
