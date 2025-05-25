@@ -64,7 +64,7 @@ print_status $? "Frontend build"
 cd ../..
 
 echo -e "${YELLOW}🐍 Backend checks...${NC}"
-cd examples/langserve-backend
+cd examples/langgraph-backend
 
 # Check if uv is installed
 if ! command -v uv &> /dev/null; then

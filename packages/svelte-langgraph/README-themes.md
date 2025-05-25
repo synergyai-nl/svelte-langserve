@@ -8,18 +8,18 @@ The svelte-langgraph package now supports a comprehensive theme system that allo
 
 ```svelte
 <script>
-  import { LangServeFrontend } from 'svelte-langgraph';
+  import { LangGraphFrontend } from 'svelte-langgraph';
 </script>
 
 <!-- Uses default theme automatically -->
-<LangServeFrontend userId="your-user-id" />
+<LangGraphFrontend userId="your-user-id" />
 ```
 
 ### Using Flowbite Theme
 
 ```svelte
 <script>
-  import { LangServeFrontend, ThemeProvider, flowbiteTheme } from 'svelte-langserve';
+  import { LangGraphFrontend, ThemeProvider, flowbiteTheme } from 'svelte-langgraph';
 </script>
 
 <svelte:head>
@@ -28,7 +28,7 @@ The svelte-langgraph package now supports a comprehensive theme system that allo
 </svelte:head>
 
 <ThemeProvider theme={flowbiteTheme}>
-  <LangServeFrontend userId="your-user-id" />
+  <LangGraphFrontend userId="your-user-id" />
 </ThemeProvider>
 ```
 
@@ -36,7 +36,7 @@ The svelte-langgraph package now supports a comprehensive theme system that allo
 
 ```svelte
 <script>
-  import { LangServeFrontend, ThemeProvider, defaultTheme } from 'svelte-langserve';
+  import { LangGraphFrontend, ThemeProvider, defaultTheme } from 'svelte-langgraph';
   
   const customTheme = {
     ...defaultTheme,
@@ -46,7 +46,7 @@ The svelte-langgraph package now supports a comprehensive theme system that allo
 </script>
 
 <ThemeProvider theme={customTheme}>
-  <LangServeFrontend userId="your-user-id" />
+  <LangGraphFrontend userId="your-user-id" />
 </ThemeProvider>
 ```
 
@@ -58,7 +58,7 @@ The svelte-langgraph package now supports a comprehensive theme system that allo
 - **Usage**: Automatically applied when no theme is specified
 
 ```javascript
-import { defaultTheme } from 'svelte-langserve';
+import { defaultTheme } from 'svelte-langgraph';
 ```
 
 ### 2. Flowbite Theme
@@ -68,7 +68,7 @@ import { defaultTheme } from 'svelte-langserve';
 - **Usage**: Requires Flowbite CSS to be included
 
 ```javascript
-import { flowbiteTheme } from 'svelte-langserve';
+import { flowbiteTheme } from 'svelte-langgraph';
 ```
 
 ### 3. Flowbite Variants
@@ -77,7 +77,7 @@ import { flowbiteTheme } from 'svelte-langserve';
 - **Compact**: Smaller spacing for dense layouts
 
 ```javascript
-import { createFlowbiteTheme } from 'svelte-langserve';
+import { createFlowbiteTheme } from 'svelte-langgraph';
 
 const darkTheme = createFlowbiteTheme('dark');
 const compactTheme = createFlowbiteTheme('compact');
@@ -124,7 +124,7 @@ interface ChatTheme {
 ### Method 1: Extending Existing Themes
 
 ```javascript
-import { defaultTheme } from 'svelte-langserve';
+import { defaultTheme } from 'svelte-langgraph';
 
 const myTheme = {
   ...defaultTheme,
@@ -169,7 +169,7 @@ Use theme variants for different modes:
 
 ```svelte
 <script>
-  import { ThemeProvider, flowbiteThemeVariant } from 'svelte-langserve';
+  import { ThemeProvider, flowbiteThemeVariant } from 'svelte-langgraph';
   
   let isDark = false;
   
@@ -181,7 +181,7 @@ Use theme variants for different modes:
 <button onclick={() => isDark = !isDark}>Toggle Dark Mode</button>
 
 <ThemeProvider theme={currentTheme}>
-  <LangServeFrontend userId="your-user-id" />
+  <LangGraphFrontend userId="your-user-id" />
 </ThemeProvider>
 ```
 
@@ -189,7 +189,7 @@ Use theme variants for different modes:
 
 ```svelte
 <script>
-  import { ThemeProvider, defaultTheme } from 'svelte-langserve';
+  import { ThemeProvider, defaultTheme } from 'svelte-langgraph';
   
   let accentColor = 'blue';
   
@@ -202,7 +202,7 @@ Use theme variants for different modes:
 <input bind:value={accentColor} placeholder="Accent color" />
 
 <ThemeProvider theme={defaultTheme} override={themeOverride}>
-  <LangServeFrontend userId="your-user-id" />
+  <LangGraphFrontend userId="your-user-id" />
 </ThemeProvider>
 ```
 
@@ -214,7 +214,7 @@ If you're using the components without themes, no changes are required:
 
 ```svelte
 <!-- This continues to work exactly as before -->
-<LangServeFrontend userId="your-user-id" />
+<LangGraphFrontend userId="your-user-id" />
 ```
 
 ### Gradual Migration
@@ -247,7 +247,7 @@ You can start using themes gradually:
 ### TypeScript Errors
 ```typescript
 // Properly type your custom theme
-import type { ChatTheme } from 'svelte-langserve';
+import type { ChatTheme } from 'svelte-langgraph';
 
 const myTheme: ChatTheme = {
   // TypeScript will help ensure all properties are included

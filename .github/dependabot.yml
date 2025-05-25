@@ -44,7 +44,7 @@ updates:
 
   # Backend dependencies (pip/uv)
   - package-ecosystem: "pip"
-    directory: "/examples/langserve-backend"
+    directory: "/examples/langgraph-backend"
     schedule:
       interval: "weekly"
       day: "monday" 
@@ -54,7 +54,7 @@ updates:
       langchain-dependencies:
         patterns:
           - "langchain*"
-          - "langserve*"
+          - "langgraph*"
       dev-dependencies:
         patterns:
           - "pytest*"

@@ -1,17 +1,17 @@
 {
-  "name": "svelte-langserve",
+  "name": "svelte-langgraph",
   "version": "0.1.0",
-  "description": "Svelte integration packages for LangServe backends",
+  "description": "Svelte integration packages for LangGraph backends",
   "type": "module",
   "private": true,
   "workspaces": [
-    "packages/@svelte-langserve/*",
+    "packages/@svelte-langgraph/*",
     "examples/*"
   ],
   "scripts": {
     "build": "nx run-many -t build",
     "dev": "nx run-many -t dev",
-    "clean": "pnpm -r --filter='@svelte-langserve/*' clean",
+    "clean": "pnpm -r --filter='@svelte-langgraph/*' clean",
     "typecheck": "nx run-many -t check",
     "lint": "nx run-many -t lint",
     "lint:root": "eslint .",
@@ -51,10 +51,10 @@
       "cd examples/dashboard && pnpm format",
       "cd examples/dashboard && pnpm lint"
     ],
-    "examples/langserve-backend/**/*.py": [
-      "cd examples/langserve-backend && uv run ruff check --fix",
-      "cd examples/langserve-backend && uv run ruff format",
-      "cd examples/langserve-backend && uv run pyright"
+    "examples/langgraph-backend/**/*.py": [
+      "cd examples/langgraph-backend && uv run ruff check --fix",
+      "cd examples/langgraph-backend && uv run ruff format",
+      "cd examples/langgraph-backend && uv run pyright"
     ],
     "packages/**/*.{js,ts}": [
       "nx run svelte-langgraph:lint",
@@ -63,7 +63,7 @@
   },
   "keywords": [
     "svelte",
-    "langserve",
+    "langgraph",
     "langchain",
     "ai",
     "chat",
@@ -71,14 +71,14 @@
     "frontend",
     "ui"
   ],
-  "author": "svelte-langserve contributors",
+  "author": "svelte-langgraph contributors",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-org/svelte-langserve.git"
+    "url": "https://github.com/your-org/svelte-langgraph.git"
   },
   "bugs": {
-    "url": "https://github.com/your-org/svelte-langserve/issues"
+    "url": "https://github.com/your-org/svelte-langgraph/issues"
   },
-  "homepage": "https://github.com/your-org/svelte-langserve#readme"
+  "homepage": "https://github.com/your-org/svelte-langgraph#readme"
 }

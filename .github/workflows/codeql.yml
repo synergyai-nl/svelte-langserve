@@ -59,7 +59,7 @@ jobs:
     - name: Install Python dependencies (for Python analysis)
       if: matrix.language == 'python'
       run: |
-        cd examples/langserve-backend
+        cd examples/langgraph-backend
         uv python install
         uv sync
 

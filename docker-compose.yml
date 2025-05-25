@@ -69,12 +69,12 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=production
-      - PUBLIC_LANGSERVE_CHATBOT_URL=http://langserve-backend:8000/chatbot
-      - PUBLIC_LANGSERVE_CHATBOT_PERSISTENT_URL=http://langserve-backend:8000/chatbot-persistent
-      - PUBLIC_LANGSERVE_CODE_URL=http://langserve-backend:8000/code-assistant
-      - PUBLIC_LANGSERVE_DATA_URL=http://langserve-backend:8000/data-analyst
-      - PUBLIC_LANGSERVE_CREATIVE_URL=http://langserve-backend:8000/creative-writer
-      - PUBLIC_LANGSERVE_RESEARCH_URL=http://langserve-backend:8000/research-assistant
+      - PUBLIC_LANGGRAPH_CHATBOT_URL=http://langgraph-backend:8000/chatbot
+      - PUBLIC_LANGGRAPH_CHATBOT_PERSISTENT_URL=http://langgraph-backend:8000/chatbot-persistent
+      - PUBLIC_LANGGRAPH_CODE_URL=http://langgraph-backend:8000/code-assistant
+      - PUBLIC_LANGGRAPH_DATA_URL=http://langgraph-backend:8000/data-analyst
+      - PUBLIC_LANGGRAPH_CREATIVE_URL=http://langgraph-backend:8000/creative-writer
+      - PUBLIC_LANGGRAPH_RESEARCH_URL=http://langgraph-backend:8000/research-assistant
       - PUBLIC_SOCKET_IO_URL=http://localhost:3000
     depends_on:
       - langgraph-backend

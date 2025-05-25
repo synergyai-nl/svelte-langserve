@@ -1,2 +1,2 @@
-// Export the LangServe module
-export * as langserve from './langserve';
+// Export the LangGraph module
+export * as langgraph from './langgraph';
