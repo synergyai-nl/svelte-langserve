@@ -1,10 +1,10 @@
 {
-    "include": ["src", "*.py"],
-    "exclude": ["**/__pycache__"],
-    "reportMissingImports": true,
-    "reportMissingTypeStubs": false,
-    "reportCallIssue": "warning",
-    "pythonVersion": "3.11",
-    "venvPath": ".",
-    "venv": ".venv"
+  "include": ["src", "*.py"],
+  "exclude": ["**/__pycache__"],
+  "reportMissingImports": true,
+  "reportMissingTypeStubs": false,
+  "reportCallIssue": "warning",
+  "pythonVersion": "3.11",
+  "venvPath": ".",
+  "venv": ".venv"
 }
