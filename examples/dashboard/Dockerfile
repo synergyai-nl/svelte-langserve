@@ -1,4 +1,4 @@
-FROM node:18-alpine
+FROM node:22-alpine
 
 # Install curl for health checks
 RUN apk add --no-cache curl
@@ -24,8 +24,10 @@ RUN cd packages/svelte-langgraph && pnpm build
 # Set working directory to dashboard
 WORKDIR /app/examples/dashboard
 
-# Run paraglide compile, svelte-kit sync and build
-RUN npx @inlang/paraglide-js compile --project ./project.inlang --outdir ./src/lib/paraglide || echo "Paraglide compilation failed, continuing..." && pnpm run prepare && pnpm build
+# Ensure paraglide directory exists and compile with proper environment
+RUN mkdir -p src/lib/paraglide && \
+    NODE_OPTIONS="--max-old-space-size=4096" npx @inlang/paraglide-js compile --project ./project.inlang --outdir ./src/lib/paraglide && \
+    pnpm run prepare && pnpm build
 
 # Expose port
 EXPOSE 3000
