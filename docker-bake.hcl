@@ -46,6 +46,6 @@ target "svelte-frontend" {
   platforms = ["linux/amd64", "linux/arm64"]
 }
 
-target "all" {
+group "all" {
   targets = ["langserve-backend", "svelte-frontend"]
 }
