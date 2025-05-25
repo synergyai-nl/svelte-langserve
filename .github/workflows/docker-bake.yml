@@ -52,13 +52,13 @@ jobs:
           fi
           echo "TAG=$TAG" >> $GITHUB_OUTPUT
 
-      - name: Build and push
+      - name: Build
         uses: docker/bake-action@v4
         with:
           files: |
             ./docker-bake.hcl
           targets: all
-          push: ${{ github.event_name != 'pull_request' }}
+          push: false
         env:
           REGISTRY: ${{ env.REGISTRY }}
           REPO: ${{ env.REPO }}
