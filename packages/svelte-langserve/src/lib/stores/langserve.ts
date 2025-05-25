@@ -131,7 +131,8 @@ const createLangServeStore = () => {
 			// Create new socket
 			const newSocket = io(serverUrl, {
 				autoConnect: false,
-				transports: ['websocket', 'polling']
+				transports: ['websocket', 'polling'],
+				path: '/api/socket.io/'
 			});
 
 			// Set up event handlers
