@@ -48,7 +48,7 @@ def should_use_tools(state: DataAnalystState) -> str:
         ).lower()
     else:
         message_content = str(last_message.content).lower()
-    
+
     if any(indicator in message_content for indicator in search_indicators):
         return "use_tools"
     else:

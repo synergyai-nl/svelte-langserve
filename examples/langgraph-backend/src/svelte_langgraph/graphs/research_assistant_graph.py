@@ -49,7 +49,7 @@ def should_search(state: ResearchAssistantState) -> str:
         ).lower()
     else:
         message_content = str(last_message.content).lower()
-    
+
     if any(indicator in message_content for indicator in search_indicators):
         return "search_and_research"
     else:

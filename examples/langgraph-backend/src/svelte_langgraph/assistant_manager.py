@@ -9,7 +9,6 @@ import logging
 from typing import Any, Dict, Optional
 
 from langgraph.graph import CompiledGraph
-from langgraph.types import StateSnapshot
 
 from .graphs import (
     create_chatbot_graph,
