@@ -216,7 +216,7 @@ claude-rocks-the-dashboard/
    - Implements 5 specialized AI agents via LangChain and LangServe
    - Supports streaming responses for real-time interaction
    - FastAPI with JWT authentication
-   - Module path: `src.svelte_langserve.*` (not `src.claude_dashboard_backend.*`)
+   - Module path: `svelte_langserve.*` (not `src.svelte_langserve.*`)
 
 4. **Reusable Packages - `packages/@svelte-langserve/`**
    - **@svelte-langserve/core**: Connection logic and stores

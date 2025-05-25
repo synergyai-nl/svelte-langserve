@@ -14,7 +14,7 @@
     "dev": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "uv run uvicorn src.claude_dashboard_backend.main:create_app --factory --reload --port 8000",
+        "command": "uv run uvicorn svelte_langserve.main:create_app --factory --reload --port 8000",
         "cwd": "examples/langserve-backend"
       }
     },
@@ -54,5 +54,8 @@
       }
     }
   },
-  "tags": ["type:app", "scope:backend"]
+  "tags": [
+    "type:app",
+    "scope:backend"
+  ]
 }
