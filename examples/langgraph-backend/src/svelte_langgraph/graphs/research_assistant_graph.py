@@ -1,10 +1,11 @@
 """Research assistant graph implementation using LangGraph with search capabilities."""
 
 import os
-from typing import TypedDict, List, Dict, Any
-from langchain_core.messages import BaseMessage, HumanMessage, AIMessage
+from typing import Any, Dict, List, TypedDict
+
+from langchain_core.messages import AIMessage, BaseMessage
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langgraph import StateGraph, END
+from langgraph import END, StateGraph
 from langgraph.graph import Graph
 
 from ..llm import get_llm
@@ -12,6 +13,7 @@ from ..llm import get_llm
 
 class ResearchAssistantState(TypedDict):
     """State for the research assistant graph."""
+
     messages: List[BaseMessage]
     response: str
 
@@ -19,13 +21,22 @@ class ResearchAssistantState(TypedDict):
 def should_search(state: ResearchAssistantState) -> str:
     """Determine if search should be used based on the last message."""
     last_message = state["messages"][-1]
-    
+
     # Check if the message is asking for current information
     search_indicators = [
-        "current", "latest", "recent", "news", "today", "this year", 
-        "search", "find", "look up", "what's happening", "update"
+        "current",
+        "latest",
+        "recent",
+        "news",
+        "today",
+        "this year",
+        "search",
+        "find",
+        "look up",
+        "what's happening",
+        "update",
     ]
-    
+
     message_content = last_message.content.lower()
     if any(indicator in message_content for indicator in search_indicators):
         return "search_and_research"
@@ -35,11 +46,12 @@ def should_search(state: ResearchAssistantState) -> str:
 
 def knowledge_research_node(state: ResearchAssistantState) -> Dict[str, Any]:
     """Research node using knowledge only."""
-    
-    prompt = ChatPromptTemplate.from_messages([
-        (
-            "system",
-            """You are a research assistant with extensive knowledge. You excel at:
+
+    prompt = ChatPromptTemplate.from_messages(
+        [
+            (
+                "system",
+                """You are a research assistant with extensive knowledge. You excel at:
 - Explaining concepts and topics in detail
 - Providing comprehensive background information
 - Suggesting research methodologies
@@ -56,53 +68,52 @@ When providing research assistance:
 
 Note: My information has a knowledge cutoff, so for current events or very recent data,
 I recommend verifying with current sources.
-"""
-        ),
-        MessagesPlaceholder(variable_name="messages"),
-    ])
-    
+""",
+            ),
+            MessagesPlaceholder(variable_name="messages"),
+        ]
+    )
+
     llm = get_llm("openai")
     chain = prompt | llm
-    
+
     result = chain.invoke({"messages": state["messages"]})
-    
-    if hasattr(result, 'content'):
+
+    if hasattr(result, "content"):
         response_content = result.content
     else:
         response_content = str(result)
-    
+
     updated_messages = state["messages"] + [AIMessage(content=response_content)]
-    
-    return {
-        "messages": updated_messages,
-        "response": response_content
-    }
+
+    return {"messages": updated_messages, "response": response_content}
 
 
 def search_and_research_node(state: ResearchAssistantState) -> Dict[str, Any]:
     """Research node with search capabilities."""
-    
+
     # Try to use DuckDuckGo search
     search_results = None
     try:
         from langchain_community.tools import DuckDuckGoSearchRun
-        
+
         search_tool = DuckDuckGoSearchRun()
         query = state["messages"][-1].content
-        
+
         # Perform search
         search_results = search_tool.run(query)
-        
-    except Exception as e:
+
+    except Exception:
         # If search fails, fall back to knowledge-only
         return knowledge_research_node(state)
-    
+
     if search_results:
         # Create response with search results
-        prompt = ChatPromptTemplate.from_messages([
-            (
-                "system",
-                """You are a research assistant with access to current search results. 
+        prompt = ChatPromptTemplate.from_messages(
+            [
+                (
+                    "system",
+                    """You are a research assistant with access to current search results.
 
 Search Results:
 {search_results}
@@ -114,73 +125,72 @@ Instructions:
 - Add context and analysis based on your knowledge
 - If search results are limited, acknowledge this and supplement with your knowledge
 - Suggest additional research directions if relevant
-"""
-            ),
-            MessagesPlaceholder(variable_name="messages"),
-        ])
-        
+""",
+                ),
+                MessagesPlaceholder(variable_name="messages"),
+            ]
+        )
+
         llm = get_llm("openai")
         chain = prompt | llm
-        
-        result = chain.invoke({
-            "search_results": search_results,
-            "messages": state["messages"]
-        })
+
+        result = chain.invoke(
+            {"search_results": search_results, "messages": state["messages"]}
+        )
     else:
         # Fall back to knowledge-only research
         return knowledge_research_node(state)
-    
-    if hasattr(result, 'content'):
+
+    if hasattr(result, "content"):
         response_content = result.content
     else:
         response_content = str(result)
-    
+
     updated_messages = state["messages"] + [AIMessage(content=response_content)]
-    
-    return {
-        "messages": updated_messages,
-        "response": response_content
-    }
+
+    return {"messages": updated_messages, "response": response_content}
 
 
 def create_research_assistant_graph() -> Graph:
     """Create a research assistant graph using LangGraph.
-    
+
     Returns:
         Compiled LangGraph for the research assistant
     """
     workflow = StateGraph(ResearchAssistantState)
-    
+
     # Add nodes
     workflow.add_node("knowledge_research", knowledge_research_node)
     workflow.add_node("search_and_research", search_and_research_node)
-    
+
     # Set conditional entry point
     workflow.set_conditional_entry_point(
         should_search,
         {
             "knowledge_research": "knowledge_research",
-            "search_and_research": "search_and_research"
-        }
+            "search_and_research": "search_and_research",
+        },
     )
-    
+
     # Add edges to END
     workflow.add_edge("knowledge_research", END)
     workflow.add_edge("search_and_research", END)
-    
+
     return workflow.compile()
 
 
 def create_research_assistant_graph_with_checkpointing() -> Graph:
     """Create a research assistant graph with checkpointing for persistence.
-    
+
     Returns:
         Compiled LangGraph with checkpointing enabled
     """
     from langgraph.checkpoint.postgres import PostgresCheckpointer
-    
-    db_url = os.getenv("LANGGRAPH_DB_URL", "postgresql://langgraph:langgraph@localhost:5432/langgraph")
+
+    db_url = os.getenv(
+        "LANGGRAPH_DB_URL", "postgresql://langgraph:langgraph@localhost:5432/langgraph"
+    )
     checkpointer = PostgresCheckpointer.from_conn_string(db_url)
-    
+
     graph = create_research_assistant_graph()
     return graph.with_checkpointer(checkpointer)
