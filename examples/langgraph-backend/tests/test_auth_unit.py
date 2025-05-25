@@ -5,7 +5,7 @@ from datetime import timedelta
 import pytest
 from jose import jwt
 
-from src.svelte_langserve.auth import (
+from src.svelte_langgraph.auth import (
     ALGORITHM,
     SECRET_KEY,
     authenticate_user,

@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from fastapi.testclient import TestClient
 
-from src.svelte_langserve.app import create_app
+from src.svelte_langgraph.app import create_app
 
 
 @pytest.fixture
@@ -19,24 +19,24 @@ def mock_llm():
 @pytest.fixture
 def client(mock_llm):
     """Create a test client for the FastAPI app with mocked dependencies."""
-    with patch("src.svelte_langserve.llm.get_llm", return_value=mock_llm):
+    with patch("src.svelte_langgraph.llm.get_llm", return_value=mock_llm):
         with patch(
-            "src.svelte_langserve.chains.chatbot.get_llm", return_value=mock_llm
+            "src.svelte_langgraph.chains.chatbot.get_llm", return_value=mock_llm
         ):
             with patch(
-                "src.svelte_langserve.chains.code_assistant.get_llm",
+                "src.svelte_langgraph.chains.code_assistant.get_llm",
                 return_value=mock_llm,
             ):
                 with patch(
-                    "src.svelte_langserve.chains.creative_writer.get_llm",
+                    "src.svelte_langgraph.chains.creative_writer.get_llm",
                     return_value=mock_llm,
                 ):
                     with patch(
-                        "src.svelte_langserve.chains.data_analyst.get_llm",
+                        "src.svelte_langgraph.chains.data_analyst.get_llm",
                         return_value=mock_llm,
                     ):
                         with patch(
-                            "src.svelte_langserve.chains.research_assistant.get_llm",
+                            "src.svelte_langgraph.chains.research_assistant.get_llm",
                             return_value=mock_llm,
                         ):
                             app = create_app()
