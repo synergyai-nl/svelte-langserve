@@ -1,56 +1,56 @@
 {
-  "name": "langserve-backend",
+  "name": "langgraph-backend",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "projectType": "application",
-  "sourceRoot": "examples/langserve-backend/src",
+  "sourceRoot": "examples/langgraph-backend/src",
   "targets": {
     "serve": {
       "executor": "nx:run-commands",
       "options": {
         "command": "uv run serve",
-        "cwd": "examples/langserve-backend"
+        "cwd": "examples/langgraph-backend"
       }
     },
     "dev": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "uv run uvicorn src.claude_dashboard_backend.main:create_app --factory --reload --port 8000",
-        "cwd": "examples/langserve-backend"
+        "command": "uv run uvicorn src.svelte_langgraph.main:create_app --factory --reload --port 8000",
+        "cwd": "examples/langgraph-backend"
       }
     },
     "start": {
       "executor": "nx:run-commands",
       "options": {
         "command": "uv run main.py",
-        "cwd": "examples/langserve-backend"
+        "cwd": "examples/langgraph-backend"
       }
     },
     "test": {
       "executor": "nx:run-commands",
       "options": {
         "command": "uv run pytest",
-        "cwd": "examples/langserve-backend"
+        "cwd": "examples/langgraph-backend"
       }
     },
     "lint": {
       "executor": "nx:run-commands",
       "options": {
         "command": "uv run ruff check .",
-        "cwd": "examples/langserve-backend"
+        "cwd": "examples/langgraph-backend"
       }
     },
     "format": {
       "executor": "nx:run-commands",
       "options": {
         "command": "uv run ruff format .",
-        "cwd": "examples/langserve-backend"
+        "cwd": "examples/langgraph-backend"
       }
     },
     "typecheck": {
       "executor": "nx:run-commands",
       "options": {
         "command": "uv run mypy src/",
-        "cwd": "examples/langserve-backend"
+        "cwd": "examples/langgraph-backend"
       }
     }
   },

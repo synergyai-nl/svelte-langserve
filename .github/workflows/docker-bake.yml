@@ -16,7 +16,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  REPO: synergyai-nl/svelte-langserve
+  REPO: synergyai-nl/svelte-langgraph
 
 jobs:
   build:
