@@ -1,18 +1,31 @@
 FROM node:18-alpine
 
+# Install curl for health checks
+RUN apk add --no-cache curl
+
 WORKDIR /app
 
-# Copy package files
-COPY package.json pnpm-lock.yaml* ./
+# Copy workspace package files first
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY packages ./packages/
+
+# Copy dashboard package files
+COPY examples/dashboard/package.json examples/dashboard/pnpm-lock.yaml* ./examples/dashboard/
 
 # Install pnpm and dependencies
-RUN npm install -g pnpm && pnpm install
+RUN npm install -g pnpm && pnpm install --frozen-lockfile
 
-# Copy application code
-COPY . .
+# Copy dashboard application code
+COPY examples/dashboard ./examples/dashboard/
 
-# Build the application
-RUN pnpm build
+# Build the svelte-langserve package first
+RUN cd packages/svelte-langserve && pnpm build
+
+# Set working directory to dashboard
+WORKDIR /app/examples/dashboard
+
+# Run paraglide compile, svelte-kit sync and build
+RUN npx @inlang/paraglide-js compile --project ./project.inlang --outdir ./src/lib/paraglide || echo "Paraglide compilation failed, continuing..." && pnpm run prepare && pnpm build
 
 # Expose port
 EXPOSE 3000

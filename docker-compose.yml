@@ -1,9 +1,7 @@
-version: '3.8'
-
 services:
   # PostgreSQL Database
   postgres:
-    image: postgres:15
+    image: postgres:15-alpine
     environment:
       - POSTGRES_DB=chat_history
       - POSTGRES_USER=postgres
@@ -47,8 +45,8 @@ services:
   # SvelteKit Frontend
   svelte-frontend:
     build:
-      context: ./examples/dashboard
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./examples/dashboard/Dockerfile
     ports:
       - "3000:3000"
     environment:
