@@ -15,4 +15,22 @@ Object.defineProperty(window, 'matchMedia', {
 	}))
 });
 
+// Mock localStorage for testing
+Object.defineProperty(window, 'localStorage', {
+	value: {
+		getItem: vi.fn(),
+		setItem: vi.fn(),
+		removeItem: vi.fn(),
+		clear: vi.fn(),
+	},
+	writable: true,
+});
+
+// Mock environment variables
+vi.mock('$env/dynamic/public', () => ({
+	env: {
+		PUBLIC_SOCKET_IO_URL: 'http://localhost:3000'
+	}
+}));
+
 // add more mocks here if you need them
