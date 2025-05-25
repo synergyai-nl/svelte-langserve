@@ -21,9 +21,9 @@ Object.defineProperty(window, 'localStorage', {
 		getItem: vi.fn(),
 		setItem: vi.fn(),
 		removeItem: vi.fn(),
-		clear: vi.fn(),
+		clear: vi.fn()
 	},
-	writable: true,
+	writable: true
 });
 
 // Mock environment variables
