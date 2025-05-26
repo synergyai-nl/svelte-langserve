@@ -1,54 +1,14 @@
 """Test echo agent for E2E testing without requiring API keys."""
 
-from typing import Any, Dict, List
+from typing import Any, Dict
 
-from langchain_core.language_models.base import BaseLanguageModel
-from langchain_core.messages import BaseMessage, HumanMessage
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.runnables import RunnableLambda
 
 
-class MockEchoLLM(BaseLanguageModel):
-    """Mock LLM that echoes back user input without requiring API keys.
-
-    Perfect for E2E testing the full message flow.
-    """
-
-    def _generate(self, messages: List[BaseMessage], **kwargs: Any) -> Any:
-        """Generate a response by echoing the last human message."""
-        # Find the last human message
-        last_human_message = None
-        for message in reversed(messages):
-            if isinstance(message, HumanMessage):
-                last_human_message = message
-                break
-
-        if last_human_message:
-            # Echo the message with a predictable format
-            echo_response = f"Echo: {last_human_message.content}"
-        else:
-            echo_response = "Echo: No message to echo"
-
-        # Return a simple response structure
-        from langchain_core.generation import Generation
-        from langchain_core.outputs import LLMResult
-
-        generation = Generation(text=echo_response)
-        return LLMResult(generations=[[generation]])
-
-    async def _agenerate(self, messages: List[BaseMessage], **kwargs: Any) -> Any:
-        """Async version of generate."""
-        return self._generate(messages, **kwargs)
-
-    def _llm_type(self) -> str:
-        """Return the type of this LLM."""
-        return "mock_echo"
-
-    @property
-    def _identifying_params(self) -> Dict[str, Any]:
-        """Return identifying parameters."""
-        return {"type": "mock_echo"}
+# Note: MockEchoLLM class removed - it's not needed for the simple echo functionality
+# The echo functionality is implemented directly in the create_echo_agent_chain function
 
 
 def create_echo_agent_chain():
@@ -88,8 +48,11 @@ def create_echo_agent_chain_with_llm():
     """Create echo agent using the mock LLM for consistency with other agents.
 
     Returns:
-        Configured echo agent chain using MockEchoLLM
+        Configured echo agent chain using MockChatOpenAI from testing module
     """
+    # Import here to avoid circular imports
+    from ..testing import create_mock_openai
+
     prompt = ChatPromptTemplate.from_messages(
         [
             (
@@ -100,7 +63,7 @@ def create_echo_agent_chain_with_llm():
         ]
     )
 
-    llm = MockEchoLLM()
+    llm = create_mock_openai()
     chain = prompt | llm | StrOutputParser()
 
     return chain
