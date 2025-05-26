@@ -39,6 +39,20 @@
         "cwd": "examples/langgraph-backend"
       }
     },
+    "serve": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "uv run uvicorn src.svelte_langgraph.app:app --host 0.0.0.0 --port 8000",
+        "cwd": "examples/langgraph-backend"
+      }
+    },
+    "serve:test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "TEST_MODE=true OPENAI_API_KEY=test-key-for-mocking ANTHROPIC_API_KEY=test-key-for-mocking uv run uvicorn src.svelte_langgraph.app:app --host 0.0.0.0 --port 8000",
+        "cwd": "examples/langgraph-backend"
+      }
+    },
     "test:mock-openai": {
       "executor": "nx:run-commands",
       "options": {
