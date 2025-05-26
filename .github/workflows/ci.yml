@@ -106,42 +106,182 @@ jobs:
       - name: Lint and format with ruff
         run: pnpm nx run langgraph-backend:format
 
-  quality:
-    name: Quality Checks (Nx)
+  lint-frontend:
+    name: Lint (Frontend)
     runs-on: ubuntu-latest
     needs: changes
-    if: needs.changes.outputs.frontend == 'true' || needs.changes.outputs.backend == 'true' || needs.changes.outputs.root == 'true'
+    if: needs.changes.outputs.frontend == 'true' || needs.changes.outputs.root == 'true'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
       - name: Install pnpm
         uses: pnpm/action-setup@v4
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+      - name: Lint frontend
+        run: nx run dashboard:lint && nx run svelte-langgraph:lint
 
+  lint-backend:
+    name: Lint (Backend)
+    runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.backend == 'true' || needs.changes.outputs.root == 'true'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
       - name: Install uv
         uses: astral-sh/setup-uv@v6
         with:
           enable-cache: true
           cache-dependency-glob: "examples/langgraph-backend/uv.lock"
-
       - name: Set up Python
         run: uv python install
-
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
-
       - name: Install backend dependencies
         working-directory: examples/langgraph-backend
         run: uv sync --dev
+      - name: Lint backend
+        run: nx run langgraph-backend:lint
 
-      - name: Run unified quality checks (nx handles all dependencies)
-        run: pnpm quality
+  typecheck-frontend:
+    name: Typecheck (Frontend)
+    runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.frontend == 'true' || needs.changes.outputs.root == 'true'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+      - name: Typecheck frontend
+        run: nx run dashboard:typecheck && nx run svelte-langgraph:typecheck
+
+  typecheck-backend:
+    name: Typecheck (Backend)
+    runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.backend == 'true' || needs.changes.outputs.root == 'true'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          cache-dependency-glob: "examples/langgraph-backend/uv.lock"
+      - name: Set up Python
+        run: uv python install
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+      - name: Install backend dependencies
+        working-directory: examples/langgraph-backend
+        run: uv sync --dev
+      - name: Typecheck backend
+        run: nx run langgraph-backend:typecheck
+
+  test-frontend:
+    name: Test (Frontend)
+    runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.frontend == 'true' || needs.changes.outputs.root == 'true'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+      - name: Test frontend
+        run: nx run dashboard:test && nx run svelte-langgraph:test
+
+  test-backend:
+    name: Test (Backend)
+    runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.backend == 'true' || needs.changes.outputs.root == 'true'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          cache-dependency-glob: "examples/langgraph-backend/uv.lock"
+      - name: Set up Python
+        run: uv python install
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+      - name: Install backend dependencies
+        working-directory: examples/langgraph-backend
+        run: uv sync --dev
+      - name: Test backend
+        run: nx run langgraph-backend:test
+
+  # Main consolidated quality check that GitHub branch protection will require
+  quality:
+    name: Quality Gate
+    runs-on: ubuntu-latest
+    needs: [changes, lint-frontend, lint-backend, typecheck-frontend, typecheck-backend, test-frontend, test-backend]
+    if: always() && (needs.changes.outputs.frontend == 'true' || needs.changes.outputs.backend == 'true' || needs.changes.outputs.root == 'true')
+    steps:
+      - name: Check all quality checks passed
+        run: |
+          # Check if any required job failed
+          if [[ "${{ needs.lint-frontend.result }}" == "failure" || 
+                "${{ needs.lint-backend.result }}" == "failure" || 
+                "${{ needs.typecheck-frontend.result }}" == "failure" || 
+                "${{ needs.typecheck-backend.result }}" == "failure" || 
+                "${{ needs.test-frontend.result }}" == "failure" || 
+                "${{ needs.test-backend.result }}" == "failure" ]]; then
+            echo "❌ One or more quality checks failed"
+            echo "Frontend Lint: ${{ needs.lint-frontend.result }}"
+            echo "Backend Lint: ${{ needs.lint-backend.result }}"
+            echo "Frontend Typecheck: ${{ needs.typecheck-frontend.result }}"
+            echo "Backend Typecheck: ${{ needs.typecheck-backend.result }}"
+            echo "Frontend Test: ${{ needs.test-frontend.result }}"
+            echo "Backend Test: ${{ needs.test-backend.result }}"
+            exit 1
+          fi
+          echo "✅ All quality checks passed!"
 
   e2e:
     name: End-to-End Tests
