@@ -135,6 +135,56 @@ def is_test_mode() -> bool:
     ).startswith("test-")
 
 
+class MockChatAnthropic(MockChatOpenAI):
+    """Mock ChatAnthropic implementation for testing.
+
+    Inherits all the mock functionality from MockChatOpenAI but with
+    Anthropic-specific model naming and identifying parameters.
+    """
+
+    model: str = Field(default="claude-3-5-sonnet-mock", description="Model name")
+
+    @property
+    def _llm_type(self) -> str:
+        """Return the type of this LLM."""
+        return "mock-anthropic"
+
+    @property
+    def _identifying_params(self) -> Dict[str, Any]:
+        """Return identifying parameters."""
+        return {
+            "model": self.model,
+            "temperature": self.temperature,
+            "mock": True,
+            "provider": "anthropic",
+        }
+
+    def _generate_mock_response(self, messages: List[BaseMessage]) -> str:
+        """Generate Claude-style mock responses."""
+        if not messages:
+            return "Mock Claude response: No messages provided"
+
+        last_message = messages[-1]
+        user_content = getattr(last_message, "content", "")
+
+        # Provide Claude-style mock responses
+        if "code" in user_content.lower() or "python" in user_content.lower():
+            return f"Mock Claude code response: I'll help you with that code request about '{user_content[:50]}...'"
+        elif "creative" in user_content.lower() or "story" in user_content.lower():
+            return f"Mock Claude creative response: I'd be happy to help with this creative task about '{user_content[:30]}...'"
+        elif "data" in user_content.lower() or "analyze" in user_content.lower():
+            return f"Mock Claude analysis: I can analyze that data request about '{user_content[:40]}...' for you."
+        elif "research" in user_content.lower() or "search" in user_content.lower():
+            return f"Mock Claude research: I'll help research that topic about '{user_content[:40]}...' using my knowledge."
+        else:
+            return f"Mock Claude response: I understand your question about '{user_content[:50]}...'. Here's my helpful response."
+
+
 def create_mock_openai(**kwargs) -> MockChatOpenAI:
     """Create a mock OpenAI chat model with the same interface as ChatOpenAI."""
     return MockChatOpenAI(**kwargs)
+
+
+def create_mock_anthropic(**kwargs) -> MockChatAnthropic:
+    """Create a mock Anthropic chat model with the same interface as ChatAnthropic."""
+    return MockChatAnthropic(**kwargs)

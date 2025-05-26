@@ -7,7 +7,7 @@ from typing import Literal
 from langchain_anthropic import ChatAnthropic
 from langchain_openai import ChatOpenAI
 
-from .testing import create_mock_openai, is_test_mode
+from .testing import create_mock_anthropic, create_mock_openai, is_test_mode
 
 
 logger = logging.getLogger(__name__)
@@ -47,16 +47,19 @@ def get_llm(
             )
     elif model_type == "anthropic":
         if is_test_mode():
-            logger.warning(
-                "🚧 Mock Anthropic not implemented yet, this may fail in test mode"
+            logger.info("🧪 Using mock Anthropic LLM for testing")
+            return create_mock_anthropic(
+                model="claude-3-5-sonnet-mock",
+                temperature=temperature,
             )
-
-        return ChatAnthropic(
-            model_name="claude-3-5-sonnet-20241022",
-            temperature=temperature,
-            max_tokens_to_sample=1024,
-            timeout=60,
-            stop=[],
-        )
+        else:
+            logger.info("🤖 Using real Anthropic LLM")
+            return ChatAnthropic(
+                model_name="claude-3-5-sonnet-20241022",
+                temperature=temperature,
+                max_tokens_to_sample=1024,
+                timeout=60,
+                stop=[],
+            )
     else:
         raise ValueError(f"Unknown model type: {model_type}")
