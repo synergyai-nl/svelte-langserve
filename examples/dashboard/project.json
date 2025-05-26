@@ -78,7 +78,7 @@
 		"test:e2e": {
 			"executor": "@nx/playwright:playwright",
 			"options": {
-				"config": "examples/dashboard/playwright-frontend.config.ts"
+				"config": "examples/dashboard/playwright.config.ts"
 			},
 			"dependsOn": ["build"]
 		},

@@ -31,7 +31,21 @@ export default defineConfig({
 			}
 		}
 	],
-	// For full-stack tests, services should be managed externally
-	// Use the test:e2e:full-stack target or manual service setup
-	webServer: undefined
+	// Automatically start both frontend and backend services
+	webServer: [
+		{
+			command: 'npm run preview',
+			port: 4173,
+			timeout: 120 * 1000,
+			reuseExistingServer: !process.env.CI
+		},
+		{
+			command:
+				'TEST_MODE=true OPENAI_API_KEY=test-key-for-mocking ANTHROPIC_API_KEY=test-key-for-mocking uv run uvicorn src.svelte_langgraph.app:create_app --factory --host 0.0.0.0 --port 8000',
+			port: 8000,
+			timeout: 120 * 1000,
+			reuseExistingServer: !process.env.CI,
+			cwd: '../langgraph-backend'
+		}
+	]
 });
