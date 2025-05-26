@@ -31,22 +31,9 @@ jobs:
       with:
         languages: ${{ matrix.language }}
 
-    - name: Install pnpm (for JavaScript analysis)
+    - name: Setup Node.js and pnpm (for JavaScript analysis)
       if: matrix.language == 'javascript'
-      uses: pnpm/action-setup@v4
-      with:
-        version: 9.15.9
-
-    - name: Setup Node.js (for JavaScript analysis)
-      if: matrix.language == 'javascript'
-      uses: actions/setup-node@v4
-      with:
-        node-version: 22
-        cache: 'pnpm'
-
-    - name: Install dependencies (for JavaScript analysis)
-      if: matrix.language == 'javascript'
-      run: pnpm install --frozen-lockfile
+      uses: ./.github/actions/setup-node-pnpm
 
     - name: Setup Python (for Python analysis)
       if: matrix.language == 'python'
