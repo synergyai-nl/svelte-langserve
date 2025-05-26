@@ -76,20 +76,41 @@
 			"dependsOn": ["paraglide:compile", "svelte-langgraph:build"]
 		},
 		"test:e2e": {
-			"executor": "nx:run-commands",
+			"executor": "@nx/playwright:playwright",
 			"options": {
-				"command": "playwright test",
-				"cwd": "examples/dashboard"
+				"config": "examples/dashboard/playwright-frontend.config.ts"
 			},
-			"dependsOn": ["paraglide:compile", "svelte-langgraph:build"]
+			"dependsOn": ["build"]
+		},
+		"test:e2e:frontend": {
+			"executor": "@nx/playwright:playwright",
+			"options": {
+				"config": "examples/dashboard/playwright-frontend.config.ts"
+			},
+			"dependsOn": ["build"]
 		},
 		"test:e2e:echo": {
-			"executor": "nx:run-commands",
+			"executor": "@nx/playwright:playwright",
 			"options": {
-				"command": "playwright test --grep=\"Echo Agent\"",
-				"cwd": "examples/dashboard"
+				"config": "examples/dashboard/playwright.config.ts",
+				"grep": "Echo Agent"
 			},
-			"dependsOn": ["paraglide:compile", "svelte-langgraph:build"]
+			"dependsOn": ["build"]
+		},
+		"test:e2e:nx": {
+			"executor": "@nx/playwright:playwright",
+			"options": {
+				"config": "examples/dashboard/playwright.config.ts"
+			},
+			"configurations": {
+				"with-server": {
+					"env": {
+						"PLAYWRIGHT_WEB_SERVER_COMMAND": "npx nx preview dashboard",
+						"PLAYWRIGHT_WEB_SERVER_ADDRESS": "http://localhost:4173"
+					}
+				}
+			},
+			"dependsOn": ["build"]
 		},
 		"test:e2e:full-stack": {
 			"executor": "nx:run-commands",
@@ -97,7 +118,15 @@
 				"command": "./scripts/run-e2e-with-services.sh",
 				"cwd": "examples/dashboard"
 			},
-			"dependsOn": ["paraglide:compile", "svelte-langgraph:build"]
+			"dependsOn": ["build"]
+		},
+		"test:services": {
+			"executor": "nx:run-commands",
+			"options": {
+				"command": "node scripts/test-services.js",
+				"cwd": "examples/dashboard"
+			},
+			"dependsOn": ["build"]
 		},
 		"test": {
 			"dependsOn": ["test:unit"]
