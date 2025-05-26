@@ -83,18 +83,21 @@ nx run langgraph-backend:serve  # Backend only
 nx run svelte-langgraph:build   # Package only
 ```
 
-### Pre-commit Requirements
+### Pre-commit Workflow
 
 ```bash
-# ALWAYS run before committing (required)
+# REQUIRED before pushing (comprehensive quality check)
 pnpm quality
 
-# This command runs:
-# - ESLint + Ruff linting
-# - svelte-check + pyright type checking  
-# - vitest + pytest unit tests
-# - Builds all packages with dependency management
-# - Runs in parallel with nx caching for speed
+# This runs automatically on commit (fast pre-commit hooks via husky + lint-staged):
+# ✅ Formatting (prettier + ruff format) 
+# ✅ Linting (eslint + ruff check)
+# 
+# This runs manually before push (comprehensive quality check):
+# ✅ All of the above PLUS
+# ✅ Type checking (svelte-check + pyright)  
+# ✅ Unit tests (vitest + pytest)
+# ✅ Build verification with dependency management
 ```
 
 ### Documentation Development
@@ -428,20 +431,24 @@ FastAPI backend with comprehensive features:
 - **Integration tests**: Real AI provider communication
 - **Performance tests**: Streaming and concurrent users
 
-### Quality Assurance (Required Before Commits)
+### Quality Assurance (Two-Tier System)
 
 ```bash
-# ALWAYS run this before committing changes
+# AUTOMATED on commit (fast): husky + lint-staged
+# ✅ Formatting (prettier + ruff format)
+# ✅ Linting (eslint + ruff check)
+# ⚡ Runs in ~5-10 seconds
+
+# MANUAL before push (comprehensive): 
 pnpm quality
 
-# This single command ensures:
-# ✅ All code is properly linted (ESLint + Ruff)
-# ✅ All types are valid (svelte-check + pyright)  
-# ✅ All tests pass (vitest + pytest)
-# ✅ All projects build successfully
-# ✅ Runs efficiently with nx caching and parallel execution
+# ✅ All of the above PLUS
+# ✅ Type checking (svelte-check + pyright)  
+# ✅ Unit tests (vitest + pytest)
+# ✅ Build verification with dependency management
+# ⚡ Runs efficiently with nx caching and parallel execution
 
-# Optional: Check formatting
+# Manual formatting commands (if needed):
 pnpm format:check               # Verify code formatting
 pnpm format                     # Fix formatting issues
 ```

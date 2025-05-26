@@ -57,12 +57,11 @@
     ],
     "examples/langgraph-backend/**/*.py": [
       "nx run langgraph-backend:format",
-      "nx run langgraph-backend:typecheck"
+      "nx run langgraph-backend:lint"
     ],
     "packages/**/*.{js,ts}": [
       "nx run svelte-langgraph:format",
-      "nx run svelte-langgraph:lint",
-      "nx run svelte-langgraph:check"
+      "nx run svelte-langgraph:lint"
     ]
   },
   "keywords": [
