@@ -86,14 +86,7 @@ def create_chatbot_graph_with_checkpointing() -> CompiledGraph:
     Returns:
         Compiled LangGraph with checkpointing enabled
     """
-    import os
-
-    from langgraph.checkpoint.postgres import PostgresSaver
-
-    # Create checkpointer for persistence
-    db_url = os.getenv(
-        "LANGGRAPH_DB_URL", "postgresql://langgraph:langgraph@localhost:5432/langgraph"
-    )
+    from ..database import create_checkpointer_context
 
     # Create the state graph
     workflow = StateGraph(ChatbotState)
@@ -108,5 +101,5 @@ def create_chatbot_graph_with_checkpointing() -> CompiledGraph:
     workflow.add_edge("chatbot", END)
 
     # Compile the graph with checkpointing
-    with PostgresSaver.from_conn_string(db_url) as checkpointer:
+    with create_checkpointer_context() as checkpointer:
         return workflow.compile(checkpointer=checkpointer)

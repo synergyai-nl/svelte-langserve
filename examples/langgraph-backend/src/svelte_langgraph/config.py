@@ -29,5 +29,13 @@ class Settings:
         os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30")
     )
 
+    # Database Configuration
+    LANGGRAPH_DB_URL: str = os.getenv(
+        "LANGGRAPH_DB_URL", "postgresql://langgraph:langgraph@localhost:5432/langgraph"
+    )
+    USE_IN_MEMORY_DB: bool = os.getenv("USE_IN_MEMORY_DB", "false").lower() == "true"
+    ENVIRONMENT: str = os.getenv("ENVIRONMENT", "development")
+    TESTING: bool = os.getenv("TESTING", "false").lower() == "true"
+
 
 settings = Settings()
