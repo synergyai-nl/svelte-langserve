@@ -31,20 +31,20 @@ export default defineConfig({
 			}
 		}
 	],
-	// Automatically start both frontend and backend services
+	// Automatically start services (or reuse existing ones in CI)
 	webServer: [
 		{
 			command: 'npm run preview',
 			port: 4173,
 			timeout: 120 * 1000,
-			reuseExistingServer: !process.env.CI
+			reuseExistingServer: !!process.env.CI
 		},
 		{
 			command:
 				'TEST_MODE=true OPENAI_API_KEY=test-key-for-mocking ANTHROPIC_API_KEY=test-key-for-mocking uv run uvicorn src.svelte_langgraph.app:create_app --factory --host 0.0.0.0 --port 8000',
 			port: 8000,
 			timeout: 120 * 1000,
-			reuseExistingServer: !process.env.CI,
+			reuseExistingServer: !!process.env.CI,
 			cwd: '../langgraph-backend'
 		}
 	]
