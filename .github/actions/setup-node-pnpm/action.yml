@@ -40,9 +40,7 @@ runs:
       with:
         node-version: 22
         cache: 'pnpm'
-        cache-dependency-path: |
-          pnpm-lock.yaml
-          ${{ inputs.working-directory }}/pnpm-lock.yaml
+        cache-dependency-path: pnpm-lock.yaml
 
     - name: Install dependencies
       if: inputs.install-dependencies == 'true'
