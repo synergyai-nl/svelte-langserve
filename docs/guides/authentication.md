@@ -1,10 +1,10 @@
 # Authentication & Security Guide
 
-Complete guide for implementing secure authentication, authorization, and security best practices in Svelte LangServe applications.
+Complete guide for implementing secure authentication, authorization, and security best practices in Svelte LangGraph applications.
 
 ## 🔐 Authentication Overview
 
-Svelte LangServe uses JWT-based authentication with the following flow:
+Svelte LangGraph uses JWT-based authentication with the following flow:
 
 ```mermaid
 sequenceDiagram
@@ -32,7 +32,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES=60
 ALGORITHM=HS256
 
 # Optional: Database for persistent users
-DATABASE_URL=postgresql://user:pass@localhost:5432/langserve
+DATABASE_URL=postgresql://user:pass@localhost:5432/langgraph
 ```
 
 ### 2. Backend Authentication Setup
@@ -40,7 +40,7 @@ DATABASE_URL=postgresql://user:pass@localhost:5432/langserve
 The backend includes JWT authentication out of the box:
 
 ```python
-# examples/langserve-backend/src/svelte_langserve/auth.py
+# examples/langgraph-backend/src/svelte_langgraph/auth.py
 
 from datetime import datetime, timedelta
 from typing import Optional
@@ -585,12 +585,12 @@ io.on('connection', (socket) => {
 ### Frontend Socket Authentication
 
 ```typescript
-// examples/dashboard/src/lib/stores/langserve.ts
+// examples/dashboard/src/lib/stores/langgraph.ts
 
 import { authStore } from '$lib/auth';
 import { io } from 'socket.io-client';
 
-function createLangServeStore() {
+function createLangGraphStore() {
   // ... existing store code ...
   
   const connect = async (serverUrl: string, userId: string, authToken?: string) => {
@@ -784,8 +784,8 @@ JWT_SETTINGS = {
     "algorithm": "HS256",
     "access_token_expire_minutes": 30,  # Short expiration
     "refresh_token_expire_days": 7,     # Refresh token for longer sessions
-    "issuer": "svelte-langserve",
-    "audience": "langserve-users"
+    "issuer": "svelte-langgraph",
+    "audience": "langgraph-users"
 }
 
 def create_tokens(user_data: dict):
@@ -1116,4 +1116,4 @@ describe('Authentication Flow', () => {
 });
 ```
 
-This authentication guide provides a complete, production-ready security implementation for Svelte LangServe applications with JWT authentication, role-based access control, and comprehensive security monitoring.
+This authentication guide provides a complete, production-ready security implementation for Svelte LangGraph applications with JWT authentication, role-based access control, and comprehensive security monitoring.

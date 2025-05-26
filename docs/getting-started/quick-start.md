@@ -16,8 +16,8 @@ The fastest way to get everything running:
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/synergyai-nl/svelte-langserve.git
-cd svelte-langserve
+git clone https://github.com/synergyai-nl/svelte-langgraph.git
+cd svelte-langgraph
 
 # 2. Setup environment variables
 cp .env.example .env
@@ -48,8 +48,8 @@ For development and customization:
 ### Backend Setup
 
 ```bash
-# 1. Start the LangServe backend
-cd examples/langserve-backend
+# 1. Start the LangGraph backend
+cd examples/langgraph-backend
 
 # 2. Install dependencies and run
 uv run serve
@@ -133,7 +133,7 @@ Quick theme customization:
 
 ```svelte
 <script>
-  import { LangServeFrontend, ThemeProvider, flowbiteTheme } from 'svelte-langserve';
+  import { LangGraphFrontend, ThemeProvider, flowbiteTheme } from 'svelte-langgraph';
   
   const customTheme = {
     ...flowbiteTheme,
@@ -143,7 +143,7 @@ Quick theme customization:
 </script>
 
 <ThemeProvider theme={customTheme}>
-  <LangServeFrontend userId="your-user-id" />
+  <LangGraphFrontend userId="your-user-id" />
 </ThemeProvider>
 ```
 
@@ -158,7 +158,7 @@ python --version  # Should be 3.11+
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
 # Clear cache and retry
-cd examples/langserve-backend
+cd examples/langgraph-backend
 uv cache clean
 uv run serve
 ```
