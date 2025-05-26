@@ -1,13 +1,13 @@
 # Store API Reference
 
-Complete reference for Svelte stores that manage state, Socket.IO connections, and real-time communication in Svelte LangServe.
+Complete reference for Svelte stores that manage state, Socket.IO connections, and real-time communication in Svelte LangGraph.
 
 ## 📦 Store Exports
 
 ```typescript
 import {
   // Main store
-  langServeStore,
+  langGraphStore,
   
   // Derived stores
   connectionStore,
@@ -22,21 +22,21 @@ import {
   joinConversation,
   
   // Types
-  type LangServeState,
+  type LangGraphState,
   type ConnectionStatus
-} from 'svelte-langserve';
+} from 'svelte-langgraph';
 ```
 
 ---
 
-## 🏪 Main Store: `langServeStore`
+## 🏪 Main Store: `langGraphStore`
 
-The central store managing all LangServe state including Socket.IO connection, conversations, and streaming messages.
+The central store managing all LangGraph state including Socket.IO connection, conversations, and streaming messages.
 
 ### State Interface
 
 ```typescript
-interface LangServeState {
+interface LangGraphState {
   // Connection state
   socket: Socket | null;
   connected: boolean;
@@ -44,7 +44,7 @@ interface LangServeState {
   connectionError: string | null;
   
   // Available endpoints and health
-  availableEndpoints: LangServeEndpoint[];
+  availableEndpoints: LangGraphEndpoint[];
   endpointHealth: Map<string, boolean>;
   
   // Conversations
@@ -67,10 +67,10 @@ interface LangServeState {
 ### Usage
 
 ```typescript
-import { langServeStore } from 'svelte-langserve';
+import { langGraphStore } from 'svelte-langgraph';
 
 // Subscribe to full state
-const unsubscribe = langServeStore.subscribe(state => {
+const unsubscribe = langGraphStore.subscribe(state => {
   console.log('Connection status:', state.connected);
   console.log('Active conversation:', state.activeConversationId);
   console.log('Available endpoints:', state.availableEndpoints);
@@ -86,7 +86,7 @@ The store provides methods to update state and trigger side effects:
 
 ```typescript
 // Get store instance with actions
-const store = langServeStore;
+const store = langGraphStore;
 
 // Connect to server
 await store.connect('http://localhost:3000', 'user123', 'jwt-token');
@@ -113,7 +113,7 @@ store.disconnect();
 Reactive store for connection status and Socket.IO state.
 
 ```typescript
-import { connectionStore } from 'svelte-langserve';
+import { connectionStore } from 'svelte-langgraph';
 
 interface ConnectionState {
   connected: boolean;
@@ -139,7 +139,7 @@ $: if ($connectionStore.connected) {
 Manages conversation list with automatic sorting and filtering.
 
 ```typescript
-import { conversationsStore } from 'svelte-langserve';
+import { conversationsStore } from 'svelte-langgraph';
 
 // Reactive conversation list (sorted by most recent)
 $: conversations = $conversationsStore;
@@ -158,7 +158,7 @@ $: recentConversations = conversations.filter(c =>
 Current active conversation with messages and metadata.
 
 ```typescript
-import { activeConversationStore } from 'svelte-langserve';
+import { activeConversationStore } from 'svelte-langgraph';
 
 interface ActiveConversation {
   conversation: Conversation | null;
@@ -179,7 +179,7 @@ $: isLoading = activeConv?.isLoading || false;
 // Load more messages (pagination)
 function loadMoreMessages() {
   if (activeConv?.hasMore && !activeConv.isLoading) {
-    langServeStore.loadMoreMessages();
+    langGraphStore.loadMoreMessages();
   }
 }
 ```
@@ -189,7 +189,7 @@ function loadMoreMessages() {
 Real-time streaming message state.
 
 ```typescript
-import { streamingStore } from 'svelte-langserve';
+import { streamingStore } from 'svelte-langgraph';
 
 interface StreamingState {
   activeStreams: Map<string, {
@@ -220,7 +220,7 @@ $: streamingContent = streaming.activeStreams.get(messageId)?.content || '';
 Establish Socket.IO connection to the server.
 
 ```typescript
-import { connectToServer } from 'svelte-langserve';
+import { connectToServer } from 'svelte-langgraph';
 
 try {
   await connectToServer(
@@ -251,9 +251,9 @@ try {
 Disconnect from the server and clean up state.
 
 ```typescript
-import { langServeStore } from 'svelte-langserve';
+import { langGraphStore } from 'svelte-langgraph';
 
-langServeStore.disconnect();
+langGraphStore.disconnect();
 
 // State after disconnect:
 // - socket: null
@@ -269,7 +269,7 @@ langServeStore.disconnect();
 Send a message to AI agents in a conversation.
 
 ```typescript
-import { sendMessage } from 'svelte-langserve';
+import { sendMessage } from 'svelte-langgraph';
 
 sendMessage(
   'conv123',                    // Conversation ID
@@ -311,9 +311,9 @@ interface MessageMetadata {
 Request a new response for an existing message.
 
 ```typescript
-import { langServeStore } from 'svelte-langserve';
+import { langGraphStore } from 'svelte-langgraph';
 
-langServeStore.regenerateResponse(
+langGraphStore.regenerateResponse(
   'msg_456',              // Message ID to regenerate
   ['chatbot']             // Optional: specific agents
 );
@@ -324,9 +324,9 @@ langServeStore.regenerateResponse(
 Stop ongoing AI response generation.
 
 ```typescript
-import { langServeStore } from 'svelte-langserve';
+import { langGraphStore } from 'svelte-langgraph';
 
-langServeStore.stopGeneration('msg_456');
+langGraphStore.stopGeneration('msg_456');
 ```
 
 ### Conversation Management
@@ -336,7 +336,7 @@ langServeStore.stopGeneration('msg_456');
 Create a new conversation with specified agents.
 
 ```typescript
-import { createConversation } from 'svelte-langserve';
+import { createConversation } from 'svelte-langgraph';
 
 const conversationId = await createConversation(
   ['chatbot', 'code-assistant'], // Agent IDs
@@ -365,7 +365,7 @@ console.log('Created conversation:', conversationId);
 Join an existing conversation.
 
 ```typescript
-import { joinConversation } from 'svelte-langserve';
+import { joinConversation } from 'svelte-langgraph';
 
 await joinConversation('conv123');
 
@@ -380,9 +380,9 @@ await joinConversation('conv123');
 Delete a conversation permanently.
 
 ```typescript
-import { langServeStore } from 'svelte-langserve';
+import { langGraphStore } from 'svelte-langgraph';
 
-await langServeStore.deleteConversation('conv123');
+await langGraphStore.deleteConversation('conv123');
 
 // Side effects:
 // - Conversation removed from server
@@ -395,13 +395,13 @@ await langServeStore.deleteConversation('conv123');
 Load additional message history (pagination).
 
 ```typescript
-import { langServeStore } from 'svelte-langserve';
+import { langGraphStore } from 'svelte-langgraph';
 
 // Load next page for active conversation
-langServeStore.loadMoreMessages();
+langGraphStore.loadMoreMessages();
 
 // Load specific page for specific conversation
-langServeStore.loadMoreMessages('conv123', 2);
+langGraphStore.loadMoreMessages('conv123', 2);
 ```
 
 ### Configuration
@@ -411,9 +411,9 @@ langServeStore.loadMoreMessages('conv123', 2);
 Update AI configuration for a conversation.
 
 ```typescript
-import { langServeStore } from 'svelte-langserve';
+import { langGraphStore } from 'svelte-langgraph';
 
-langServeStore.updateConversationConfig('conv123', {
+langGraphStore.updateConversationConfig('conv123', {
   temperature: 0.9,
   streaming: true,
   maxTokens: 1000,
@@ -426,16 +426,16 @@ langServeStore.updateConversationConfig('conv123', {
 Check health status of AI endpoints.
 
 ```typescript
-import { langServeStore } from 'svelte-langserve';
+import { langGraphStore } from 'svelte-langgraph';
 
 // Check all endpoints
-langServeStore.checkEndpointHealth();
+langGraphStore.checkEndpointHealth();
 
 // Check specific endpoints
-langServeStore.checkEndpointHealth(['chatbot', 'code-assistant']);
+langGraphStore.checkEndpointHealth(['chatbot', 'code-assistant']);
 
 // Access health status
-$: endpointHealth = $langServeStore.endpointHealth;
+$: endpointHealth = $langGraphStore.endpointHealth;
 $: chatbotHealthy = endpointHealth.get('chatbot');
 ```
 
@@ -452,9 +452,9 @@ The store automatically cleans up streaming messages to prevent memory leaks:
 const STREAMING_TIMEOUT = 30000;
 
 // Manual cleanup
-import { langServeStore } from 'svelte-langserve';
+import { langGraphStore } from 'svelte-langgraph';
 
-langServeStore.cleanupStreamingMessage('msg_123');
+langGraphStore.cleanupStreamingMessage('msg_123');
 ```
 
 ### Conversation Auto-sorting
@@ -487,7 +487,7 @@ The store prevents duplicate messages and handles out-of-order chunks:
 
 ```svelte
 <script>
-  import { langServeStore, connectionStore, activeConversationStore } from 'svelte-langserve';
+  import { langGraphStore, connectionStore, activeConversationStore } from 'svelte-langgraph';
   import { onMount, onDestroy } from 'svelte';
   
   let message = '';
@@ -499,12 +499,12 @@ The store prevents duplicate messages and handles out-of-order chunks:
   
   onMount(async () => {
     // Connect on component mount
-    await langServeStore.connect('http://localhost:3000', 'user123');
+    await langGraphStore.connect('http://localhost:3000', 'user123');
   });
   
   function sendMessage() {
     if (message.trim() && activeConv?.conversation) {
-      langServeStore.sendMessage(
+      langGraphStore.sendMessage(
         activeConv.conversation.id,
         message.trim(),
         ['chatbot']
@@ -537,12 +537,12 @@ The store prevents duplicate messages and handles out-of-order chunks:
 
 ```svelte
 <script>
-  import { connectionStore } from 'svelte-langserve';
+  import { connectionStore } from 'svelte-langgraph';
   
   $: connectionError = $connectionStore.error;
   
   function retryConnection() {
-    langServeStore.connect('http://localhost:3000', 'user123');
+    langGraphStore.connect('http://localhost:3000', 'user123');
   }
 </script>
 
@@ -558,7 +558,7 @@ The store prevents duplicate messages and handles out-of-order chunks:
 
 ```svelte
 <script>
-  import { activeConversationStore } from 'svelte-langserve';
+  import { activeConversationStore } from 'svelte-langgraph';
   
   $: activeConv = $activeConversationStore;
   $: hasMore = activeConv?.hasMore || false;
@@ -566,7 +566,7 @@ The store prevents duplicate messages and handles out-of-order chunks:
   
   function loadMore() {
     if (hasMore && !isLoading) {
-      langServeStore.loadMoreMessages();
+      langGraphStore.loadMoreMessages();
     }
   }
 </script>
@@ -591,17 +591,17 @@ The store prevents duplicate messages and handles out-of-order chunks:
 ### Custom Store Extensions
 
 ```typescript
-import { langServeStore } from 'svelte-langserve';
+import { langGraphStore } from 'svelte-langgraph';
 import { derived } from 'svelte/store';
 
 // Create custom derived stores
 export const unreadConversations = derived(
-  langServeStore,
+  langGraphStore,
   ($store) => $store.conversations.filter(c => c.hasUnread)
 );
 
 export const activeAgents = derived(
-  langServeStore,
+  langGraphStore,
   ($store) => {
     const activeConv = $store.conversations.find(c => c.id === $store.activeConversationId);
     return activeConv?.participants.agents || [];
@@ -613,10 +613,10 @@ export const activeAgents = derived(
 
 ```typescript
 // Add logging middleware
-const originalSendMessage = langServeStore.sendMessage;
-langServeStore.sendMessage = (...args) => {
+const originalSendMessage = langGraphStore.sendMessage;
+langGraphStore.sendMessage = (...args) => {
   console.log('Sending message:', args);
-  return originalSendMessage.apply(langServeStore, args);
+  return originalSendMessage.apply(langGraphStore, args);
 };
 ```
 
@@ -643,10 +643,10 @@ export const optimizedMessageStore = derived(
 ### Store State Inspection
 
 ```typescript
-import { langServeStore } from 'svelte-langserve';
+import { langGraphStore } from 'svelte-langgraph';
 
 // Debug current state
-langServeStore.subscribe(state => {
+langGraphStore.subscribe(state => {
   console.log('Store state:', {
     connected: state.connected,
     conversationCount: state.conversations.length,
@@ -661,7 +661,7 @@ langServeStore.subscribe(state => {
 ```typescript
 // Log all Socket.IO events
 if (typeof window !== 'undefined') {
-  const store = langServeStore;
+  const store = langGraphStore;
   const socket = store.socket;
   
   if (socket) {

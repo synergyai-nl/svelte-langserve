@@ -1,6 +1,6 @@
 # Production Deployment Guide
 
-Complete guide for deploying Svelte LangServe to production with Docker, security best practices, and monitoring.
+Complete guide for deploying Svelte LangGraph to production with Docker, security best practices, and monitoring.
 
 ## 🎯 Deployment Options
 
@@ -43,7 +43,7 @@ SECRET_KEY=your-very-secure-production-secret-at-least-32-chars
 ACCESS_TOKEN_EXPIRE_MINUTES=60
 
 # Database (PostgreSQL recommended for production)
-DATABASE_URL=postgresql://langserve:secure_password@postgres:5432/langserve_prod
+DATABASE_URL=postgresql://langgraph:secure_password@postgres:5432/langgraph_prod
 
 # Redis for session storage (optional)
 REDIS_URL=redis://redis:6379/0
@@ -80,7 +80,7 @@ services:
   # Nginx Reverse Proxy with SSL
   nginx:
     image: nginx:alpine
-    container_name: langserve-nginx
+    container_name: langgraph-nginx
     ports:
       - "80:80"
       - "443:443"
@@ -90,10 +90,10 @@ services:
       - /etc/letsencrypt:/etc/letsencrypt:ro
     depends_on:
       - svelte-frontend
-      - langserve-backend
+      - langgraph-backend
     restart: unless-stopped
     networks:
-      - langserve-network
+      - langgraph-network
 
   # SvelteKit Frontend
   svelte-frontend:
@@ -103,7 +103,7 @@ services:
       args:
         - PUBLIC_API_URL=${PUBLIC_API_URL}
         - PUBLIC_SOCKET_URL=${PUBLIC_SOCKET_URL}
-    container_name: langserve-frontend
+    container_name: langgraph-frontend
     environment:
       - NODE_ENV=production
       - PORT=3000
@@ -111,7 +111,7 @@ services:
       - "3000"
     restart: unless-stopped
     networks:
-      - langserve-network
+      - langgraph-network
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
       interval: 30s
@@ -119,11 +119,11 @@ services:
       retries: 3
 
   # FastAPI Backend
-  langserve-backend:
+  langgraph-backend:
     build:
-      context: ./examples/langserve-backend
+      context: ./examples/langgraph-backend
       dockerfile: Dockerfile.prod
-    container_name: langserve-backend
+    container_name: langgraph-backend
     environment:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
@@ -139,7 +139,7 @@ services:
       - redis
     restart: unless-stopped
     networks:
-      - langserve-network
+      - langgraph-network
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
@@ -149,18 +149,18 @@ services:
   # PostgreSQL Database
   postgres:
     image: postgres:15-alpine
-    container_name: langserve-postgres
+    container_name: langgraph-postgres
     environment:
-      - POSTGRES_USER=langserve
+      - POSTGRES_USER=langgraph
       - POSTGRES_PASSWORD=secure_password
-      - POSTGRES_DB=langserve_prod
+      - POSTGRES_DB=langgraph_prod
       - POSTGRES_INITDB_ARGS=--auth-host=scram-sha-256
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init.sql:ro
     restart: unless-stopped
     networks:
-      - langserve-network
+      - langgraph-network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U langserve -d langserve_prod"]
       interval: 30s
@@ -176,7 +176,7 @@ services:
       - redis_data:/data
     restart: unless-stopped
     networks:
-      - langserve-network
+      - langgraph-network
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 30s
@@ -199,7 +199,7 @@ services:
       - '--web.console.templates=/etc/prometheus/consoles'
     restart: unless-stopped
     networks:
-      - langserve-network
+      - langgraph-network
 
   # Grafana Dashboard (optional)
   grafana:
@@ -214,7 +214,7 @@ services:
       - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
     restart: unless-stopped
     networks:
-      - langserve-network
+      - langgraph-network
 
 volumes:
   postgres_data:

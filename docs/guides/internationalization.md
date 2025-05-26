@@ -1,6 +1,6 @@
 # Internationalization (i18n) Guide
 
-This guide covers how to manage translations and internationalization in the Svelte-LangServe project using [Inlang Paraglide](https://inlang.com/m/gerre34r/library-inlang-paraglideJs).
+This guide covers how to manage translations and internationalization in the Svelte-LangGraph project using [Inlang Paraglide](https://inlang.com/m/gerre34r/library-inlang-paraglideJs).
 
 ## Overview
 
@@ -65,10 +65,10 @@ The dashboard project includes automated Paraglide compilation via Nx:
       }
     },
     "check": {
-      "dependsOn": ["paraglide:compile", "svelte-langserve:build"]
+      "dependsOn": ["paraglide:compile", "svelte-langgraph:build"]
     },
     "build": {
-      "dependsOn": ["paraglide:compile", "svelte-langserve:build"] 
+      "dependsOn": ["paraglide:compile", "svelte-langgraph:build"] 
     },
     "lint": {
       "dependsOn": ["paraglide:compile"]
