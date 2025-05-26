@@ -25,12 +25,15 @@ def get_llm(
         return ChatOpenAI(
             model="gpt-4",
             temperature=temperature,
+            timeout=60,
         )
     elif model_type == "anthropic":
         return ChatAnthropic(
-            model="claude-3-5-sonnet-20241022",
+            model_name="claude-3-5-sonnet-20241022",
             temperature=temperature,
-            max_tokens=1024,
+            max_tokens_to_sample=1024,
+            timeout=60,
+            stop=[],
         )
     else:
         raise ValueError(f"Unknown model type: {model_type}")

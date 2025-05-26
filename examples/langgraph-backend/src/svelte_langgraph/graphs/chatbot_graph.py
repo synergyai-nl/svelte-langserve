@@ -4,7 +4,8 @@ from typing import Any, Dict, List, TypedDict
 
 from langchain_core.messages import AIMessage, BaseMessage
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langgraph.graph import END, Graph, StateGraph
+from langgraph.graph import END, StateGraph
+from langgraph.graph.graph import CompiledGraph
 
 from ..llm import get_llm
 
@@ -57,7 +58,7 @@ Be conversational, helpful, and engaging. If you're unsure about something, say 
     return {"messages": updated_messages, "response": response_content}
 
 
-def create_chatbot_graph() -> Graph:
+def create_chatbot_graph() -> CompiledGraph:
     """Create a chatbot graph using LangGraph.
 
     Returns:
@@ -79,7 +80,7 @@ def create_chatbot_graph() -> Graph:
     return workflow.compile()
 
 
-def create_chatbot_graph_with_checkpointing() -> Graph:
+def create_chatbot_graph_with_checkpointing() -> CompiledGraph:
     """Create a chatbot graph with checkpointing for persistence.
 
     Returns:
@@ -93,7 +94,6 @@ def create_chatbot_graph_with_checkpointing() -> Graph:
     db_url = os.getenv(
         "LANGGRAPH_DB_URL", "postgresql://langgraph:langgraph@localhost:5432/langgraph"
     )
-    checkpointer = PostgresSaver.from_conn_string(db_url)
 
     # Create the state graph
     workflow = StateGraph(ChatbotState)
@@ -108,4 +108,5 @@ def create_chatbot_graph_with_checkpointing() -> Graph:
     workflow.add_edge("chatbot", END)
 
     # Compile the graph with checkpointing
-    return workflow.compile(checkpointer=checkpointer)
+    with PostgresSaver.from_conn_string(db_url) as checkpointer:
+        return workflow.compile(checkpointer=checkpointer)

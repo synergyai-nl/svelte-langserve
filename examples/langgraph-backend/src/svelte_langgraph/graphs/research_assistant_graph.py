@@ -6,7 +6,8 @@ from typing import Any, Dict, List, TypedDict
 
 from langchain_core.messages import AIMessage, BaseMessage
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langgraph.graph import END, Graph, StateGraph
+from langgraph.graph import END, StateGraph
+from langgraph.graph.graph import CompiledGraph
 
 from ..llm import get_llm
 
@@ -112,6 +113,16 @@ def search_and_research_node(state: ResearchAssistantState) -> Dict[str, Any]:
         search_tool = DuckDuckGoSearchRun()
         query = state["messages"][-1].content
 
+        # Ensure query is a string for the search tool
+        if isinstance(query, list):
+            query = " ".join(
+                item if isinstance(item, str) else str(item.get("text", ""))
+                for item in query
+                if isinstance(item, (str, dict))
+            )
+        elif not isinstance(query, str):
+            query = str(query)
+
         # Perform search
         search_results = search_tool.run(query)
 
@@ -163,7 +174,7 @@ Instructions:
     return {"messages": updated_messages, "response": response_content}
 
 
-def create_research_assistant_graph() -> Graph:
+def create_research_assistant_graph() -> CompiledGraph:
     """Create a research assistant graph using LangGraph.
 
     Returns:
@@ -191,18 +202,37 @@ def create_research_assistant_graph() -> Graph:
     return workflow.compile()
 
 
-def create_research_assistant_graph_with_checkpointing() -> Graph:
+def create_research_assistant_graph_with_checkpointing() -> CompiledGraph:
     """Create a research assistant graph with checkpointing for persistence.
 
     Returns:
         Compiled LangGraph with checkpointing enabled
     """
-    from langgraph.checkpoint.postgres import PostgresCheckpointer
+    from langgraph.checkpoint.postgres import PostgresSaver
 
     db_url = os.getenv(
         "LANGGRAPH_DB_URL", "postgresql://langgraph:langgraph@localhost:5432/langgraph"
     )
-    checkpointer = PostgresCheckpointer.from_conn_string(db_url)
 
-    graph = create_research_assistant_graph()
-    return graph.with_checkpointer(checkpointer)
+    workflow = StateGraph(ResearchAssistantState)
+
+    # Add nodes
+    workflow.add_node("knowledge_research", knowledge_research_node)
+    workflow.add_node("search_and_research", search_and_research_node)
+
+    # Set conditional entry point
+    workflow.set_conditional_entry_point(
+        should_search,
+        {
+            "knowledge_research": "knowledge_research",
+            "search_and_research": "search_and_research",
+        },
+    )
+
+    # Add edges to END
+    workflow.add_edge("knowledge_research", END)
+    workflow.add_edge("search_and_research", END)
+
+    # Compile the graph with checkpointing
+    with PostgresSaver.from_conn_string(db_url) as checkpointer:
+        return workflow.compile(checkpointer=checkpointer)

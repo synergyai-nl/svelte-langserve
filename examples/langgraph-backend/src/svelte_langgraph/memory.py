@@ -33,8 +33,9 @@ class MemoryStore:
             Chat message history for the session
         """
         return PostgresChatMessageHistory(
-            connection_string=self.connection_string,
+            connection=self.connection_string,
             session_id=session_id,
+            table_name="message_store",
         )
 
     def create_with_history(self, chain, input_messages_key: str = "messages"):

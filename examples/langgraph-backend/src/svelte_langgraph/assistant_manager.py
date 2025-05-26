@@ -9,7 +9,7 @@ import logging
 
 from typing import Any, Dict, Optional
 
-from langgraph.graph import Graph
+from langgraph.graph.graph import CompiledGraph
 
 from .graphs import (
     create_chatbot_graph,
@@ -33,7 +33,7 @@ class GraphManager:
 
     def __init__(self):
         """Initialize the assistant manager."""
-        self.assistants: Dict[str, Graph] = {}
+        self.assistants: Dict[str, CompiledGraph] = {}
         self.assistant_metadata: Dict[str, Dict[str, Any]] = {}
         self._initialize_assistants()
 
@@ -110,7 +110,7 @@ class GraphManager:
             logger.error(f"Failed to initialize assistants: {e}")
             raise
 
-    def get_assistant(self, assistant_id: str) -> Optional[Graph]:
+    def get_assistant(self, assistant_id: str) -> Optional[CompiledGraph]:
         """Get an assistant by ID.
 
         Args:
@@ -150,10 +150,10 @@ class GraphManager:
 
         for assistant_id, graph in self.assistants.items():
             try:
-                # Try to get the graph's schema as a basic health check
+                # Try to access graph properties as a basic health check
                 # This ensures the graph is properly initialized
-                if hasattr(graph, "get_graph"):
-                    graph.get_graph()
+                if hasattr(graph, "nodes"):
+                    _ = graph.nodes
                 health_status[assistant_id] = {"status": "healthy", "error": None}
             except Exception as e:
                 health_status[assistant_id] = {"status": "unhealthy", "error": str(e)}

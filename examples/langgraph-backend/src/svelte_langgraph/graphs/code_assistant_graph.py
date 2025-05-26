@@ -4,7 +4,8 @@ from typing import Any, Dict, List, TypedDict
 
 from langchain_core.messages import AIMessage, BaseMessage
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langgraph.graph import END, Graph, StateGraph
+from langgraph.graph import END, StateGraph
+from langgraph.graph.graph import CompiledGraph
 
 from ..llm import get_llm
 
@@ -63,7 +64,7 @@ When providing code:
     return {"messages": updated_messages, "response": response_content}
 
 
-def create_code_assistant_graph() -> Graph:
+def create_code_assistant_graph() -> CompiledGraph:
     """Create a code assistant graph using LangGraph.
 
     Returns:
@@ -85,7 +86,7 @@ def create_code_assistant_graph() -> Graph:
     return workflow.compile()
 
 
-def create_code_assistant_graph_with_checkpointing() -> Graph:
+def create_code_assistant_graph_with_checkpointing() -> CompiledGraph:
     """Create a code assistant graph with checkpointing for persistence.
 
     Returns:
@@ -93,14 +94,25 @@ def create_code_assistant_graph_with_checkpointing() -> Graph:
     """
     import os
 
-    from langgraph.checkpoint.postgres import PostgresCheckpointer
+    from langgraph.checkpoint.postgres import PostgresSaver
 
     # Create checkpointer for persistence
     db_url = os.getenv(
         "LANGGRAPH_DB_URL", "postgresql://langgraph:langgraph@localhost:5432/langgraph"
     )
-    checkpointer = PostgresCheckpointer.from_conn_string(db_url)
 
-    # Create the graph with checkpointing
-    graph = create_code_assistant_graph()
-    return graph.with_checkpointer(checkpointer)
+    # Create the state graph
+    workflow = StateGraph(CodeAssistantState)
+
+    # Add the code assistant node
+    workflow.add_node("code_assistant", code_assistant_node)
+
+    # Set entry point
+    workflow.set_entry_point("code_assistant")
+
+    # Add edge to END
+    workflow.add_edge("code_assistant", END)
+
+    # Compile the graph with checkpointing
+    with PostgresSaver.from_conn_string(db_url) as checkpointer:
+        return workflow.compile(checkpointer=checkpointer)

@@ -7,7 +7,8 @@ from typing import Any, Dict, List, TypedDict
 from langchain_community.tools.tavily_search import TavilySearchResults
 from langchain_core.messages import AIMessage, BaseMessage, ToolMessage
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langgraph.graph import END, Graph, StateGraph
+from langgraph.graph import END, StateGraph
+from langgraph.graph.graph import CompiledGraph
 
 from ..llm import get_llm
 
@@ -145,7 +146,7 @@ Available tools:
     result = chain.invoke({"messages": state["messages"]})
 
     # Check if the LLM wants to use tools
-    if hasattr(result, "tool_calls") and result.tool_calls:
+    if isinstance(result, AIMessage) and hasattr(result, "tool_calls") and result.tool_calls:
         # Execute tool calls
         tool_messages = []
         for tool_call in result.tool_calls:
@@ -195,7 +196,7 @@ Synthesize the information and provide actionable insights.""",
         return {"messages": updated_messages, "response": response_content}
 
 
-def create_data_analyst_graph() -> Graph:
+def create_data_analyst_graph() -> CompiledGraph:
     """Create a data analyst graph using LangGraph.
 
     Returns:
@@ -219,18 +220,33 @@ def create_data_analyst_graph() -> Graph:
     return workflow.compile()
 
 
-def create_data_analyst_graph_with_checkpointing() -> Graph:
+def create_data_analyst_graph_with_checkpointing() -> CompiledGraph:
     """Create a data analyst graph with checkpointing for persistence.
 
     Returns:
         Compiled LangGraph with checkpointing enabled
     """
-    from langgraph.checkpoint.postgres import PostgresCheckpointer
+    from langgraph.checkpoint.postgres import PostgresSaver
 
     db_url = os.getenv(
         "LANGGRAPH_DB_URL", "postgresql://langgraph:langgraph@localhost:5432/langgraph"
     )
-    checkpointer = PostgresCheckpointer.from_conn_string(db_url)
 
-    graph = create_data_analyst_graph()
-    return graph.with_checkpointer(checkpointer)
+    workflow = StateGraph(DataAnalystState)
+
+    # Add nodes
+    workflow.add_node("analyze_only", data_analyst_node)
+    workflow.add_node("use_tools", data_analyst_with_search_node)
+
+    # Set entry point with conditional logic
+    workflow.set_conditional_entry_point(
+        should_use_tools, {"analyze_only": "analyze_only", "use_tools": "use_tools"}
+    )
+
+    # Add edges to END
+    workflow.add_edge("analyze_only", END)
+    workflow.add_edge("use_tools", END)
+
+    # Compile the graph with checkpointing
+    with PostgresSaver.from_conn_string(db_url) as checkpointer:
+        return workflow.compile(checkpointer=checkpointer)

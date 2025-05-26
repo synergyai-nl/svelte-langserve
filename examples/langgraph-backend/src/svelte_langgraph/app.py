@@ -89,9 +89,9 @@ def _setup_assistant_routes(app: FastAPI) -> None:
             metadata = assistant_manager.get_assistant_metadata(assistant_id) or {}
             if request.thread_id and metadata.get("supports_persistence"):
                 # Use thread ID for persistent assistants
-                result = await assistant.ainvoke(
-                    input_data, config={"thread_id": request.thread_id}
-                )
+                from langchain_core.runnables import RunnableConfig
+                config = RunnableConfig(configurable={"thread_id": request.thread_id})
+                result = await assistant.ainvoke(input_data, config=config)
             else:
                 result = await assistant.ainvoke(input_data)
 
