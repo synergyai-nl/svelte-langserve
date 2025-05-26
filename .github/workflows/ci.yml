@@ -58,11 +58,11 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Build dashboard (nx handles dependencies)
         run: pnpm nx run dashboard:build
@@ -79,7 +79,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install uv
+      - name: Setup UV environment
         uses: astral-sh/setup-uv@v6
         with:
           enable-cache: true
@@ -97,51 +97,257 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: 'pnpm'
 
       - name: Install monorepo dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Lint and format with ruff
         run: pnpm nx run langgraph-backend:format
 
-  quality:
-    name: Quality Checks (Nx)
+  lint-frontend:
+    name: Lint (Frontend)
     runs-on: ubuntu-latest
     needs: changes
-    if: needs.changes.outputs.frontend == 'true' || needs.changes.outputs.backend == 'true' || needs.changes.outputs.root == 'true'
+    if: needs.changes.outputs.frontend == 'true' || needs.changes.outputs.root == 'true'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
       - name: Install pnpm
         uses: pnpm/action-setup@v4
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Lint frontend
+        run: pnpm nx run dashboard:lint
 
-      - name: Install uv
+  lint-backend:
+    name: Lint (Backend)
+    runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.backend == 'true' || needs.changes.outputs.root == 'true'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup UV environment
         uses: astral-sh/setup-uv@v6
         with:
           enable-cache: true
           cache-dependency-glob: "examples/langgraph-backend/uv.lock"
-
       - name: Set up Python
         run: uv python install
-
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
-
+        run: pnpm install --frozen-lockfile
       - name: Install backend dependencies
         working-directory: examples/langgraph-backend
         run: uv sync --dev
+      - name: Lint backend
+        run: pnpm nx run langgraph-backend:lint
 
-      - name: Run unified quality checks (nx handles all dependencies)
-        run: pnpm quality
+  typecheck-frontend:
+    name: Typecheck (Frontend)
+    runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.frontend == 'true' || needs.changes.outputs.root == 'true'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Typecheck frontend
+        run: pnpm nx run dashboard:typecheck
+
+  typecheck-backend:
+    name: Typecheck (Backend)
+    runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.backend == 'true' || needs.changes.outputs.root == 'true'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup UV environment
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          cache-dependency-glob: "examples/langgraph-backend/uv.lock"
+      - name: Set up Python
+        run: uv python install
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Install backend dependencies
+        working-directory: examples/langgraph-backend
+        run: uv sync --dev
+      - name: Typecheck backend
+        run: pnpm nx run langgraph-backend:typecheck
+
+  test-frontend:
+    name: Test (Frontend)
+    runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.frontend == 'true' || needs.changes.outputs.root == 'true'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Test frontend
+        run: pnpm nx run dashboard:test
+
+  test-backend:
+    name: Test (Backend)
+    runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.backend == 'true' || needs.changes.outputs.root == 'true'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup UV environment
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          cache-dependency-glob: "examples/langgraph-backend/uv.lock"
+      - name: Set up Python
+        run: uv python install
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Install backend dependencies
+        working-directory: examples/langgraph-backend
+        run: uv sync --dev
+      - name: Test backend
+        run: pnpm nx run langgraph-backend:test
+
+  lint-package:
+    name: Lint (Package)
+    runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.frontend == 'true' || needs.changes.outputs.root == 'true'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Lint package
+        run: pnpm nx run svelte-langgraph:lint
+
+  typecheck-package:
+    name: Typecheck (Package)
+    runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.frontend == 'true' || needs.changes.outputs.root == 'true'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Typecheck package
+        run: pnpm nx run svelte-langgraph:typecheck
+
+  test-package:
+    name: Test (Package)
+    runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.frontend == 'true' || needs.changes.outputs.root == 'true'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Test package
+        run: pnpm nx run svelte-langgraph:test
+
+  # Main consolidated quality check that GitHub branch protection will require
+  quality:
+    name: Quality Gate
+    runs-on: ubuntu-latest
+    needs: [changes, lint-frontend, lint-backend, lint-package, typecheck-frontend, typecheck-backend, typecheck-package, test-frontend, test-backend, test-package]
+    if: always() && (needs.changes.outputs.frontend == 'true' || needs.changes.outputs.backend == 'true' || needs.changes.outputs.root == 'true')
+    steps:
+      - name: Check all quality checks passed
+        run: |
+          # Check if any required job failed
+          if [[ "${{ needs.lint-frontend.result }}" == "failure" || 
+                "${{ needs.lint-backend.result }}" == "failure" || 
+                "${{ needs.lint-package.result }}" == "failure" || 
+                "${{ needs.typecheck-frontend.result }}" == "failure" || 
+                "${{ needs.typecheck-backend.result }}" == "failure" || 
+                "${{ needs.typecheck-package.result }}" == "failure" || 
+                "${{ needs.test-frontend.result }}" == "failure" || 
+                "${{ needs.test-backend.result }}" == "failure" || 
+                "${{ needs.test-package.result }}" == "failure" ]]; then
+            echo "❌ One or more quality checks failed"
+            echo "Frontend Lint: ${{ needs.lint-frontend.result }}"
+            echo "Backend Lint: ${{ needs.lint-backend.result }}"
+            echo "Package Lint: ${{ needs.lint-package.result }}"
+            echo "Frontend Typecheck: ${{ needs.typecheck-frontend.result }}"
+            echo "Backend Typecheck: ${{ needs.typecheck-backend.result }}"
+            echo "Package Typecheck: ${{ needs.typecheck-package.result }}"
+            echo "Frontend Test: ${{ needs.test-frontend.result }}"
+            echo "Backend Test: ${{ needs.test-backend.result }}"
+            echo "Package Test: ${{ needs.test-package.result }}"
+            exit 1
+          fi
+          echo "✅ All quality checks passed!"
 
   e2e:
     name: End-to-End Tests
@@ -162,11 +368,11 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Build dashboard (nx handles dependencies)
         run: pnpm nx run dashboard:build
