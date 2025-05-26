@@ -7,7 +7,7 @@
     "serve": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "uv run serve",
+        "command": "uv run uvicorn src.svelte_langgraph.app:create_app --factory --host 0.0.0.0 --port 8000",
         "cwd": "examples/langgraph-backend"
       }
     },
@@ -29,6 +29,27 @@
       "executor": "nx:run-commands",
       "options": {
         "command": "uv run pytest",
+        "cwd": "examples/langgraph-backend"
+      }
+    },
+    "test:echo": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "uv run python scripts/test-echo-agent.py",
+        "cwd": "examples/langgraph-backend"
+      }
+    },
+    "serve:test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "TEST_MODE=true OPENAI_API_KEY=test-key-for-mocking ANTHROPIC_API_KEY=test-key-for-mocking uv run uvicorn src.svelte_langgraph.app:create_app --factory --host 0.0.0.0 --port 8000",
+        "cwd": "examples/langgraph-backend"
+      }
+    },
+    "test:mock-openai": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "uv run python scripts/test-mock-openai.py",
         "cwd": "examples/langgraph-backend"
       }
     },

@@ -18,6 +18,7 @@ from .graphs import (
     create_creative_writer_graph,
     create_data_analyst_graph,
     create_research_assistant_graph,
+    create_test_echo_graph,
 )
 
 
@@ -40,6 +41,19 @@ class GraphManager:
     def _initialize_assistants(self) -> None:
         """Initialize all available assistants."""
         try:
+            # Always initialize test-echo agent first (no dependencies)
+            self.assistants["test-echo"] = create_test_echo_graph()
+            self.assistant_metadata["test-echo"] = {
+                "name": "Test Echo Agent",
+                "description": "Test agent that echoes back user input (no API keys required)",
+                "type": "chat",
+                "supports_streaming": True,
+                "supports_persistence": False,
+                "is_test_agent": True,
+            }
+            logger.info("✅ test-echo agent initialized successfully")
+
+            # Try to initialize other assistants (may fail if no API keys)
             # Chatbot assistant
             self.assistants["chatbot"] = create_chatbot_graph()
             self.assistant_metadata["chatbot"] = {
@@ -104,11 +118,18 @@ class GraphManager:
                 "has_tools": True,
             }
 
-            logger.info(f"Initialized {len(self.assistants)} assistants")
+            logger.info(f"Initialized {len(self.assistants)} LLM-based assistants")
 
         except Exception as e:
-            logger.error(f"Failed to initialize assistants: {e}")
-            raise
+            logger.error(f"Failed to initialize some LLM-based assistants: {e}")
+            logger.warning("Continuing with available assistants...")
+
+        # Final count
+        logger.info(f"Total initialized assistants: {len(self.assistants)}")
+
+        # Ensure we have at least the test-echo agent
+        if "test-echo" not in self.assistants:
+            raise RuntimeError("Critical: test-echo agent failed to initialize")
 
     def get_assistant(self, assistant_id: str) -> Optional[CompiledGraph]:
         """Get an assistant by ID.

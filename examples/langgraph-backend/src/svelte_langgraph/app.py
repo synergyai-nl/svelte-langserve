@@ -114,7 +114,6 @@ def _setup_assistant_routes(app: FastAPI) -> None:
 
         message: str = Field(
             ...,
-            min_length=1,
             description="User message to process",
             example="Explain quantum computing in simple terms",
         )
