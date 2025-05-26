@@ -52,8 +52,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node.js and pnpm
-        uses: ./.github/actions/setup-node-pnpm
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
       - name: Build dashboard (nx handles dependencies)
         run: pnpm nx run dashboard:build
@@ -125,8 +134,15 @@ jobs:
           cache-dependency-glob: "examples/langgraph-backend/uv.lock"
       - name: Set up Python
         run: uv python install
-      - name: Setup Node.js and pnpm  
-        uses: ./.github/actions/setup-node-pnpm
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
       - name: Install backend dependencies
         working-directory: examples/langgraph-backend
         run: uv sync --dev
@@ -141,8 +157,15 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Setup Node.js and pnpm
-        uses: ./.github/actions/setup-node-pnpm
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
       - name: Typecheck frontend
         run: pnpm nx run dashboard:typecheck
 
@@ -161,8 +184,15 @@ jobs:
           cache-dependency-glob: "examples/langgraph-backend/uv.lock"
       - name: Set up Python
         run: uv python install
-      - name: Setup Node.js and pnpm  
-        uses: ./.github/actions/setup-node-pnpm
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
       - name: Install backend dependencies
         working-directory: examples/langgraph-backend
         run: uv sync --dev
@@ -177,8 +207,15 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Setup Node.js and pnpm
-        uses: ./.github/actions/setup-node-pnpm
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
       - name: Test frontend
         run: pnpm nx run dashboard:test
 
@@ -197,8 +234,15 @@ jobs:
           cache-dependency-glob: "examples/langgraph-backend/uv.lock"
       - name: Set up Python
         run: uv python install
-      - name: Setup Node.js and pnpm  
-        uses: ./.github/actions/setup-node-pnpm
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
       - name: Install backend dependencies
         working-directory: examples/langgraph-backend
         run: uv sync --dev
@@ -213,8 +257,15 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Setup Node.js and pnpm
-        uses: ./.github/actions/setup-node-pnpm
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
       - name: Lint package
         run: pnpm nx run svelte-langgraph:lint
 
@@ -226,8 +277,15 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Setup Node.js and pnpm
-        uses: ./.github/actions/setup-node-pnpm
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
       - name: Typecheck package
         run: pnpm nx run svelte-langgraph:typecheck
 
@@ -239,8 +297,15 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Setup Node.js and pnpm
-        uses: ./.github/actions/setup-node-pnpm
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
       - name: Test package
         run: pnpm nx run svelte-langgraph:test
 
@@ -290,8 +355,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node.js and pnpm
-        uses: ./.github/actions/setup-node-pnpm
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
       - name: Build dashboard (nx handles dependencies)
         run: pnpm nx run dashboard:build
@@ -318,10 +392,8 @@ jobs:
           uv run uvicorn src.svelte_langgraph.main:create_app --factory --host 0.0.0.0 --port 8000 &
           echo $! > backend.pid
         env:
-          TEST_MODE: true
-          OPENAI_API_KEY: test-key-for-mocking
-          ANTHROPIC_API_KEY: test-key-for-mocking
-          SECRET_KEY: test-secret-key-for-ci
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY || 'test-key' }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY || 'test-key' }}
 
       - name: Wait for backend
         run: |
