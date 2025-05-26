@@ -65,6 +65,15 @@ Experience the power of professional design systems with our integrated Flowbite
 - **Cloud Ready**: AWS, GCP, Azure deployment examples
 - **CI/CD Pipelines**: GitHub Actions workflows included
 
+## 📋 **Requirements**
+
+- **Node.js**: 22.x or later (Current LTS)
+- **pnpm**: 9.x or later
+- **Python**: 3.12+ (for backend)
+- **Docker**: Latest version (recommended for deployment)
+
+> **Note**: Node.js 20 and earlier versions are not supported. This project requires Node.js 22+ for optimal performance and latest ECMAScript features.
+
 ## 🚀 **Quick Start**
 
 ### Option 1: Docker (Recommended)

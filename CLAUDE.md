@@ -189,6 +189,19 @@ PUBLIC_API_URL=http://localhost:8000
 PUBLIC_SOCKET_URL=http://localhost:3000
 ```
 
+## System Requirements
+
+**Node.js Version Support:**
+- **Minimum**: Node.js 22 (Current LTS)
+- **Recommended**: Node.js 22.x or later
+- **Package Manager**: pnpm 9.x or later
+
+**Python Version Support:**
+- **Minimum**: Python 3.12+
+- **Recommended**: Python 3.12.x or later
+
+**Note**: This project requires Node.js 22+ and Python 3.12+ for optimal performance and latest language features. Earlier versions are not supported.
+
 ## Architecture Overview
 
 This project is a **production-ready monorepo** containing a complete AI chat application framework with beautiful Flowbite UI components and comprehensive documentation.
