@@ -263,6 +263,37 @@ socket.emit('get_endpoint_health', {
 });
 ```
 
+#### `test_assistant`
+Test connectivity and basic functionality of a specific assistant.
+
+```typescript
+socket.emit('test_assistant', {
+  assistantId: string;          // ID of assistant to test
+  testMessage?: string;         // Optional test message (defaults to "Hello")
+});
+```
+
+**Response**: `assistant_test_result` event with test results.
+
+**Example:**
+```typescript
+socket.emit('test_assistant', {
+  assistantId: 'chatbot',
+  testMessage: 'Test connectivity'
+});
+```
+
+#### `get_assistant_schemas`
+Retrieve schema information for available assistants.
+
+```typescript
+socket.emit('get_assistant_schemas', {
+  assistantIds?: string[];      // Specific assistants, or all if undefined
+});
+```
+
+**Response**: `assistant_schemas` event with schema definitions.
+
 ### Server → Client Events
 
 #### `config_updated`
@@ -291,6 +322,92 @@ socket.on('endpoint_health_status', (status: {
   };
 }) => {
   // Update endpoint status indicators
+});
+```
+
+#### `assistant_test_result`
+Returns results from assistant connectivity test.
+
+```typescript
+socket.on('assistant_test_result', (result: {
+  assistantId: string;
+  success: boolean;
+  responseTime: number;
+  testMessage: string;
+  response?: string;
+  error?: string;
+  timestamp: number;
+}) => {
+  // Handle test results
+});
+```
+
+#### `assistant_schemas`
+Provides schema information for assistants.
+
+```typescript
+socket.on('assistant_schemas', (schemas: {
+  [assistantId: string]: {
+    inputSchema: object;
+    outputSchema: object;
+    configSchema: object;
+    metadata: {
+      name: string;
+      description: string;
+      version: string;
+    };
+  };
+}) => {
+  // Use schema information for validation
+});
+```
+
+#### `assistant_response_start`
+Indicates an assistant has started processing a request.
+
+```typescript
+socket.on('assistant_response_start', (data: {
+  messageId: string;
+  conversationId: string;
+  assistantId: string;
+  timestamp: number;
+  estimatedDuration?: number;
+}) => {
+  // Show loading state
+});
+```
+
+#### `assistant_response_complete`
+Indicates an assistant has finished processing a request.
+
+```typescript
+socket.on('assistant_response_complete', (data: {
+  messageId: string;
+  conversationId: string;
+  assistantId: string;
+  timestamp: number;
+  duration: number;
+  tokenCount?: number;
+  cost?: number;
+}) => {
+  // Hide loading state, update metrics
+});
+```
+
+#### `assistant_error`
+Reports errors specific to assistant processing.
+
+```typescript
+socket.on('assistant_error', (error: {
+  messageId: string;
+  conversationId: string;
+  assistantId: string;
+  type: 'INVOCATION_ERROR' | 'TIMEOUT' | 'RATE_LIMIT' | 'API_ERROR';
+  message: string;
+  retryable: boolean;
+  timestamp: number;
+}) => {
+  // Handle assistant-specific errors
 });
 ```
 
