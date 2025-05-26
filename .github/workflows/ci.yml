@@ -65,7 +65,7 @@ jobs:
         run: pnpm install --no-frozen-lockfile
 
       - name: Build dashboard (nx handles dependencies)
-        run: nx run dashboard:build
+        run: pnpm nx run dashboard:build
 
   backend:
     name: Backend (Python/FastAPI)
@@ -104,7 +104,7 @@ jobs:
         run: pnpm install --no-frozen-lockfile
 
       - name: Lint and format with ruff
-        run: npx nx run langgraph-backend:format
+        run: pnpm nx run langgraph-backend:format
 
   quality:
     name: Quality Checks (Nx)
@@ -169,7 +169,7 @@ jobs:
         run: pnpm install --no-frozen-lockfile
 
       - name: Build dashboard (nx handles dependencies)
-        run: nx run dashboard:build
+        run: pnpm nx run dashboard:build
 
       - name: Install Playwright browsers
         run: pnpm exec playwright install --with-deps
