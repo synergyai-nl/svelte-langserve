@@ -29,39 +29,29 @@ test.describe('Full Message Flow E2E Tests', () => {
 		// Step 1: Check initial page load
 		await expect(page.locator('h1')).toBeVisible();
 
-		// Step 2: Look for login form or authentication elements
-		// (This may vary based on your actual UI - adjust selectors as needed)
-		const loginButton = page.locator('button:has-text("Login"), input[type="submit"]').first();
-		const usernameInput = page.locator('input[name="username"], input[type="text"]').first();
-		const passwordInput = page.locator('input[name="password"], input[type="password"]').first();
+		// Step 2: Wait for Socket.IO connection and assistants to load
+		// The UI should show available assistants after connection
+		await expect(page.locator('text=Connecting...')).toBeVisible();
 
-		// If login form is present, authenticate
-		if (await usernameInput.isVisible({ timeout: 2000 })) {
-			await usernameInput.fill(TEST_CREDENTIALS.username);
-			await passwordInput.fill(TEST_CREDENTIALS.password);
-			await loginButton.click();
+		// Wait for assistants to load (this may take a moment)
+		// We'll wait for the "Create Conversation" button to become enabled
+		const createConversationButton = page.locator('button:has-text("Create Conversation")');
 
-			// Wait for authentication to complete
-			await page.waitForTimeout(1000);
-		}
+		// Wait up to 15 seconds for assistants to load and button to become enabled
+		await expect(createConversationButton).not.toBeDisabled({ timeout: 15000 });
 
-		// Step 3: Try to find and select test-echo agent if available
-		// This is optional - if we can't find it, the test will still work with default agent
-		try {
-			const agentSelector = page.locator('select').first();
-			if (await agentSelector.isVisible({ timeout: 2000 })) {
-				// Try to select test-echo if available
-				await agentSelector.selectOption('test-echo').catch(() => {
-					console.log('test-echo not found in selector, using default agent');
-				});
-			}
-		} catch {
-			console.log('Agent selector not found, proceeding with default agent');
-		}
+		// Step 3: Create a conversation to enable chat functionality
+		await createConversationButton.click();
 
-		// Step 4: Send a test message
-		const messageInput = page.locator('input[type="text"]:not([name="username"]), textarea').last();
+		// Wait for conversation UI to appear
+		await page.waitForTimeout(2000);
+
+		// Step 4: Now look for message input (should be available after creating conversation)
+		const messageInput = page.locator('input[type="text"], textarea').last();
 		const sendButton = page.locator('button:has-text("Send")').first();
+
+		// Verify the message input is now available
+		await expect(messageInput).toBeVisible({ timeout: 5000 });
 
 		const testMessage = 'Hello test message for E2E validation';
 		await messageInput.fill(testMessage);
@@ -88,9 +78,18 @@ test.describe('Full Message Flow E2E Tests', () => {
 	});
 
 	test('should handle empty messages gracefully', async ({ page }) => {
-		// Try to send an empty message
-		const messageInput = page.locator('input[type="text"]:not([name="username"]), textarea').last();
+		// Step 1: Wait for assistants to load and create conversation
+		const createConversationButton = page.locator('button:has-text("Create Conversation")');
+		await expect(createConversationButton).not.toBeDisabled({ timeout: 15000 });
+		await createConversationButton.click();
+		await page.waitForTimeout(2000);
+
+		// Step 2: Try to send an empty message
+		const messageInput = page.locator('input[type="text"], textarea').last();
 		const sendButton = page.locator('button:has-text("Send")').first();
+
+		// Verify the message input is available
+		await expect(messageInput).toBeVisible({ timeout: 5000 });
 
 		// Clear any existing text and try to send
 		await messageInput.fill('');
@@ -106,9 +105,18 @@ test.describe('Full Message Flow E2E Tests', () => {
 	});
 
 	test('should maintain connection across page refresh', async ({ page }) => {
-		// Send initial message
-		const messageInput = page.locator('input[type="text"]:not([name="username"]), textarea').last();
+		// Step 1: Wait for assistants to load and create conversation
+		const createConversationButton = page.locator('button:has-text("Create Conversation")');
+		await expect(createConversationButton).not.toBeDisabled({ timeout: 15000 });
+		await createConversationButton.click();
+		await page.waitForTimeout(2000);
+
+		// Step 2: Send initial message
+		const messageInput = page.locator('input[type="text"], textarea').last();
 		const sendButton = page.locator('button:has-text("Send")').first();
+
+		// Verify the message input is available
+		await expect(messageInput).toBeVisible({ timeout: 5000 });
 
 		const initialMessage = 'Message before refresh';
 		await messageInput.fill(initialMessage);
@@ -121,10 +129,23 @@ test.describe('Full Message Flow E2E Tests', () => {
 		// Refresh the page
 		await page.reload();
 
+		// After refresh, need to recreate conversation again
+		const createConversationButtonAfterRefresh = page.locator(
+			'button:has-text("Create Conversation")'
+		);
+		await expect(createConversationButtonAfterRefresh).not.toBeDisabled({ timeout: 15000 });
+		await createConversationButtonAfterRefresh.click();
+		await page.waitForTimeout(2000);
+
 		// Send another message after refresh
+		const messageInputAfterRefresh = page.locator('input[type="text"], textarea').last();
+		const sendButtonAfterRefresh = page.locator('button:has-text("Send")').first();
+
+		await expect(messageInputAfterRefresh).toBeVisible({ timeout: 5000 });
+
 		const postRefreshMessage = 'Message after refresh';
-		await messageInput.fill(postRefreshMessage);
-		await sendButton.click();
+		await messageInputAfterRefresh.fill(postRefreshMessage);
+		await sendButtonAfterRefresh.click();
 
 		// Should still work
 		const expectedPostRefreshResponse = `Echo: ${postRefreshMessage}`;
