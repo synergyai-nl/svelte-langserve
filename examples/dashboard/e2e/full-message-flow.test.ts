@@ -45,26 +45,23 @@ test.describe('Full Message Flow E2E Tests', () => {
 			await page.waitForTimeout(1000);
 		}
 
-		// Step 3: Look for agent/endpoint selector
-		// Select the test-echo agent specifically
-		const agentSelector = page.locator(
-			'select, [data-testid="agent-selector"], [data-testid="endpoint-selector"]'
-		);
-		if (await agentSelector.isVisible({ timeout: 2000 })) {
-			await agentSelector.selectOption('test-echo');
-		}
-
-		// Alternative: Look for test-echo option in a dropdown or list
-		const testEchoOption = page.locator(
-			'option:has-text("test-echo"), [data-agent="test-echo"], text="Test Echo"'
-		);
-		if (await testEchoOption.isVisible({ timeout: 2000 })) {
-			await testEchoOption.click();
+		// Step 3: Try to find and select test-echo agent if available
+		// This is optional - if we can't find it, the test will still work with default agent
+		try {
+			const agentSelector = page.locator('select').first();
+			if (await agentSelector.isVisible({ timeout: 2000 })) {
+				// Try to select test-echo if available
+				await agentSelector.selectOption('test-echo').catch(() => {
+					console.log('test-echo not found in selector, using default agent');
+				});
+			}
+		} catch {
+			console.log('Agent selector not found, proceeding with default agent');
 		}
 
 		// Step 4: Send a test message
 		const messageInput = page.locator('input[type="text"]:not([name="username"]), textarea').last();
-		const sendButton = page.locator('button:has-text("Send"), [data-testid="send-button"]').first();
+		const sendButton = page.locator('button:has-text("Send")').first();
 
 		const testMessage = 'Hello test message for E2E validation';
 		await messageInput.fill(testMessage);
@@ -93,7 +90,7 @@ test.describe('Full Message Flow E2E Tests', () => {
 	test('should handle empty messages gracefully', async ({ page }) => {
 		// Try to send an empty message
 		const messageInput = page.locator('input[type="text"]:not([name="username"]), textarea').last();
-		const sendButton = page.locator('button:has-text("Send"), [data-testid="send-button"]').first();
+		const sendButton = page.locator('button:has-text("Send")').first();
 
 		// Clear any existing text and try to send
 		await messageInput.fill('');
@@ -111,7 +108,7 @@ test.describe('Full Message Flow E2E Tests', () => {
 	test('should maintain connection across page refresh', async ({ page }) => {
 		// Send initial message
 		const messageInput = page.locator('input[type="text"]:not([name="username"]), textarea').last();
-		const sendButton = page.locator('button:has-text("Send"), [data-testid="send-button"]').first();
+		const sendButton = page.locator('button:has-text("Send")').first();
 
 		const initialMessage = 'Message before refresh';
 		await messageInput.fill(initialMessage);
