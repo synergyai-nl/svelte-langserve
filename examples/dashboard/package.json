@@ -15,6 +15,8 @@
 		"test": "vitest --run",
 		"test:unit": "vitest --run",
 		"test:e2e": "playwright test",
+		"test:e2e:echo": "playwright test --grep=\"Echo Agent\"",
+		"test:e2e:full-stack": "./scripts/run-e2e-with-services.sh",
 		"test:all": "npm run test:unit && npm run test:e2e"
 	},
 	"devDependencies": {

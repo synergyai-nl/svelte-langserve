@@ -17,6 +17,10 @@ from .research_assistant_graph import (
     create_research_assistant_graph,
     create_research_assistant_graph_with_checkpointing,
 )
+from .test_echo_graph import (
+    create_test_echo_graph,
+    create_test_echo_graph_with_checkpointing,
+)
 
 
 __all__ = [
@@ -30,4 +34,6 @@ __all__ = [
     "create_data_analyst_graph_with_checkpointing",
     "create_research_assistant_graph",
     "create_research_assistant_graph_with_checkpointing",
+    "create_test_echo_graph",
+    "create_test_echo_graph_with_checkpointing",
 ]

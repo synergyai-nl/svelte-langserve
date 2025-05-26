@@ -32,6 +32,13 @@
         "cwd": "examples/langgraph-backend"
       }
     },
+    "test:echo": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "uv run python scripts/test-echo-agent.py",
+        "cwd": "examples/langgraph-backend"
+      }
+    },
     "lint": {
       "executor": "nx:run-commands",
       "options": {

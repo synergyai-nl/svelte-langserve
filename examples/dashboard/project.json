@@ -83,6 +83,22 @@
 			},
 			"dependsOn": ["paraglide:compile", "svelte-langgraph:build"]
 		},
+		"test:e2e:echo": {
+			"executor": "nx:run-commands",
+			"options": {
+				"command": "playwright test --grep=\"Echo Agent\"",
+				"cwd": "examples/dashboard"
+			},
+			"dependsOn": ["paraglide:compile", "svelte-langgraph:build"]
+		},
+		"test:e2e:full-stack": {
+			"executor": "nx:run-commands",
+			"options": {
+				"command": "./scripts/run-e2e-with-services.sh",
+				"cwd": "examples/dashboard"
+			},
+			"dependsOn": ["paraglide:compile", "svelte-langgraph:build"]
+		},
 		"test": {
 			"dependsOn": ["test:unit"]
 		},
