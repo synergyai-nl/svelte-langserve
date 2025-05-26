@@ -60,6 +60,23 @@
 				"command": "rm -rf dist",
 				"cwd": "packages/svelte-langgraph"
 			}
+		},
+		"format": {
+			"executor": "nx:run-commands",
+			"options": {
+				"command": "prettier --write .",
+				"cwd": "packages/svelte-langgraph"
+			}
+		},
+		"format:check": {
+			"executor": "nx:run-commands",
+			"options": {
+				"command": "prettier --check .",
+				"cwd": "packages/svelte-langgraph"
+			}
+		},
+		"quality": {
+			"dependsOn": ["lint", "check", "test"]
 		}
 	}
 }

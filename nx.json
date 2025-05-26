@@ -35,6 +35,18 @@
     "typecheck": {
       "inputs": ["default", "^production"],
       "cache": true
+    },
+    "format": {
+      "inputs": ["default"],
+      "cache": true
+    },
+    "format:check": {
+      "inputs": ["default"],
+      "cache": true
+    },
+    "quality": {
+      "dependsOn": ["lint", "check", "test"],
+      "cache": true
     }
   },
   "namedInputs": {
@@ -50,5 +62,9 @@
       "!{projectRoot}/eslint.config.js"
     ],
     "sharedGlobals": []
+  },
+  "targetDependencies": {
+    "build": ["^build"],
+    "quality": ["^build"]
   }
 }

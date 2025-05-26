@@ -86,6 +86,16 @@
 		},
 		"test:all": {
 			"dependsOn": ["test:unit", "test:e2e"]
+		},
+		"format:check": {
+			"executor": "nx:run-commands",
+			"options": {
+				"command": "prettier --check .",
+				"cwd": "examples/dashboard"
+			}
+		},
+		"quality": {
+			"dependsOn": ["lint", "check", "test"]
 		}
 	},
 	"tags": ["type:app", "scope:frontend"]

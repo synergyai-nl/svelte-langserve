@@ -1,0 +1,31 @@
+# Generated files
+dist/
+.svelte-kit/
+
+# Build artifacts  
+*.d.ts
+
+# Config files that are auto-generated
+eslint.config.js
+
+# Documentation files that shouldn't be formatted
+COMPONENT-TESTING.md
+README-themes.md
+
+# Package files
+package.json
+
+# Svelte config
+svelte.config.js
+
+# Project config
+project.json
+
+# TypeScript config
+tsconfig.json
+
+# Vite config
+vitest.config.ts
+
+# Source HTML (might have special formatting)
+src/app.html

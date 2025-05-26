@@ -52,6 +52,16 @@
         "command": "uv run pyright",
         "cwd": "examples/langgraph-backend"
       }
+    },
+    "format:check": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "uv run ruff check . && uv run ruff format --check .",
+        "cwd": "examples/langgraph-backend"
+      }
+    },
+    "quality": {
+      "dependsOn": ["lint", "typecheck", "test"]
     }
   },
   "tags": ["type:app", "scope:backend"]

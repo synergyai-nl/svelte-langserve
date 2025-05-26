@@ -16,6 +16,10 @@
     "lint": "nx run-many -t lint",
     "lint:root": "eslint .",
     "test": "nx run-many -t test",
+    "format": "nx run-many -t format",
+    "format:check": "nx run-many -t format:check",
+    "quality": "nx run-many -t quality --output-style=stream --parallel=3",
+    "quality:all": "nx run-many -t lint,check,test --output-style=stream --parallel=3",
     "changeset": "changeset",
     "version-packages": "changeset version",
     "release": "pnpm build && changeset publish",
@@ -48,15 +52,15 @@
   },
   "lint-staged": {
     "examples/dashboard/**/*.{js,ts,svelte}": [
-      "cd examples/dashboard && pnpm format",
-      "cd examples/dashboard && pnpm lint"
+      "nx run dashboard:format",
+      "nx run dashboard:lint"
     ],
     "examples/langgraph-backend/**/*.py": [
-      "cd examples/langgraph-backend && uv run ruff check --fix",
-      "cd examples/langgraph-backend && uv run ruff format",
-      "cd examples/langgraph-backend && uv run pyright"
+      "nx run langgraph-backend:format",
+      "nx run langgraph-backend:typecheck"
     ],
     "packages/**/*.{js,ts}": [
+      "nx run svelte-langgraph:format",
       "nx run svelte-langgraph:lint",
       "nx run svelte-langgraph:check"
     ]

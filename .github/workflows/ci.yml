@@ -65,8 +65,7 @@ jobs:
         run: pnpm install --no-frozen-lockfile
 
       - name: Build dashboard (with dependencies)
-        run: npx nx run dashboard:build
-        working-directory: .
+        run: pnpm build
 
   backend:
     name: Backend (Python/FastAPI)
@@ -92,10 +91,20 @@ jobs:
       - name: Install dependencies
         run: uv sync --dev
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install monorepo dependencies
+        run: pnpm install --no-frozen-lockfile
+
       - name: Lint and format with ruff
-        run: |
-          uv run ruff check --fix .
-          uv run ruff format .
+        run: npx nx run langgraph-backend:format
 
   quality:
     name: Quality Checks (Nx)
@@ -132,15 +141,10 @@ jobs:
         run: uv sync --dev
 
       - name: Build packages
-        run: npx nx run svelte-langgraph:build --output-style=stream
+        run: pnpm build
 
-      - name: Run comprehensive quality checks
-        run: |
-          # Run linting, type checking, and tests in parallel
-          npx nx run-many -t lint,check,test --output-style=stream --parallel=3
-          
-          # Backend type checking (not covered by nx)
-          cd examples/langgraph-backend && uv run pyright src/
+      - name: Run unified quality checks
+        run: pnpm quality
 
   e2e:
     name: End-to-End Tests
@@ -168,8 +172,7 @@ jobs:
         run: pnpm install --no-frozen-lockfile
 
       - name: Build dashboard  
-        run: npx nx run dashboard:build
-        working-directory: .
+        run: pnpm build
 
       - name: Install Playwright browsers
         run: pnpm exec playwright install --with-deps
