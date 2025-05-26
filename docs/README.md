@@ -1,6 +1,6 @@
-# Svelte LangServe Documentation
+# Svelte LangGraph Documentation
 
-Welcome to the comprehensive documentation for Svelte LangServe - a complete solution for building real-time AI chat applications with SvelteKit, LangServe, and beautiful Flowbite UI components.
+Welcome to the comprehensive documentation for Svelte LangGraph - a complete solution for building real-time AI chat applications with SvelteKit, LangGraph, and beautiful Flowbite UI components.
 
 ## 🎨 What Makes This Special
 
@@ -25,7 +25,7 @@ Welcome to the comprehensive documentation for Svelte LangServe - a complete sol
 
 ### 📋 [Reference](./reference/)
 - **[API Reference](./reference/api/)** - Complete API documentation
-- **[Flowbite Components](./reference/components.md)** - LangServe + Flowbite component library
+- **[Flowbite Components](./reference/components.md)** - LangGraph + Flowbite component library
 - **[Stores & State](./reference/stores.md)** - Socket.IO stores and reactive state
 - **[Socket Events](./reference/socket-events.md)** - Real-time event reference
 
@@ -62,10 +62,10 @@ Our Flowbite integration provides:
 ```svelte
 <!-- Beautiful AI chat with one component -->
 <script>
-  import { LangServeFrontend } from 'svelte-langserve';
+  import { LangGraphFrontend } from 'svelte-langgraph';
 </script>
 
-<LangServeFrontend 
+<LangGraphFrontend 
   userId="user123" 
   theme="flowbite" 
   darkMode={true} 
@@ -79,7 +79,7 @@ Experience the Flowbite theme in action:
 ```bash
 # Clone and run
 git clone <repository-url>
-cd svelte-langserve/examples/dashboard
+cd svelte-langgraph/examples/dashboard
 pnpm install && pnpm dev
 
 # Visit http://localhost:5173/flowbite
@@ -89,8 +89,8 @@ pnpm install && pnpm dev
 
 - 📖 [Troubleshooting Guide](./advanced/troubleshooting.md) - Common issues and fixes
 - 💡 [Examples Gallery](./getting-started/examples/) - Live code examples
-- 🐛 [Report Issues](https://github.com/synergyai-nl/svelte-langserve/issues)
-- 💬 [Discussions](https://github.com/synergyai-nl/svelte-langserve/discussions)
+- 🐛 [Report Issues](https://github.com/synergyai-nl/svelte-langgraph/issues)
+- 💬 [Discussions](https://github.com/synergyai-nl/svelte-langgraph/discussions)
 
 ---
 

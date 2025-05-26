@@ -1,6 +1,6 @@
 # Complete Tutorial: Build Your First AI Chat App
 
-Learn to build a production-ready AI chat application with Svelte LangServe and Flowbite UI components. This tutorial takes you from zero to a fully functional app in 30 minutes.
+Learn to build a production-ready AI chat application with Svelte LangGraph and Flowbite UI components. This tutorial takes you from zero to a fully functional app in 30 minutes.
 
 ## 🎯 What We'll Build
 
@@ -46,8 +46,8 @@ Let's start by getting the project running:
 
 ```bash
 # Clone the repository
-git clone https://github.com/synergyai-nl/svelte-langserve.git
-cd svelte-langserve
+git clone https://github.com/synergyai-nl/svelte-langgraph.git
+cd svelte-langgraph
 
 # Setup environment variables
 cp .env.example .env
@@ -72,7 +72,7 @@ Our application follows this data flow:
 ```
 ┌─────────────────┐    WebSocket    ┌─────────────────┐    HTTP    ┌─────────────────┐
 │   Browser       │ ◄─────────────► │   SvelteKit     │ ◄────────► │   FastAPI       │
-│   (Flowbite UI) │                 │   Frontend      │            │   LangServe     │
+│   (Flowbite UI) │                 │   Frontend      │            │   LangGraph     │
 └─────────────────┘                 └─────────────────┘            └─────────────────┘
                                             │                               │
                                             ▼                               ▼
@@ -84,7 +84,7 @@ Our application follows this data flow:
 
 Key components:
 - **Frontend**: SvelteKit + Flowbite UI + Socket.IO client
-- **Backend**: FastAPI + LangServe + Socket.IO server
+- **Backend**: FastAPI + LangGraph + Socket.IO server
 - **AI Layer**: Multiple specialized agents (chatbot, code assistant, etc.)
 
 ### Step 3: Start the Application
@@ -96,7 +96,7 @@ open http://localhost:3000
 
 # Option 2: Development mode
 # Terminal 1 - Backend
-cd examples/langserve-backend
+cd examples/langgraph-backend
 uv run serve
 
 # Terminal 2 - Frontend  
@@ -120,7 +120,7 @@ When you sent that message:
 
 1. **Frontend** captured your input and sent it via Socket.IO
 2. **Socket.IO server** received the message and routed it to the selected agent
-3. **LangServe backend** processed the message with the AI model (OpenAI/Anthropic)
+3. **LangGraph backend** processed the message with the AI model (OpenAI/Anthropic)
 4. **Streaming response** came back through the same WebSocket connection
 5. **Flowbite UI** rendered the response with beautiful styling
 
@@ -136,7 +136,7 @@ Create a custom theme file:
 
 ```typescript
 // examples/dashboard/src/lib/custom-theme.ts
-import { flowbiteTheme } from 'svelte-langserve';
+import { flowbiteTheme } from 'svelte-langgraph';
 
 export const myCustomTheme = {
   ...flowbiteTheme,
@@ -159,12 +159,12 @@ Apply your theme:
 ```svelte
 <!-- examples/dashboard/src/routes/+page.svelte -->
 <script>
-  import { LangServeFrontend, ThemeProvider } from 'svelte-langserve';
+  import { LangGraphFrontend, ThemeProvider } from 'svelte-langgraph';
   import { myCustomTheme } from '$lib/custom-theme.js';
 </script>
 
 <ThemeProvider theme={myCustomTheme}>
-  <LangServeFrontend userId="tutorial-user" />
+  <LangGraphFrontend userId="tutorial-user" />
 </ThemeProvider>
 ```
 
@@ -177,22 +177,22 @@ Let's create a "Tutorial Assistant" agent specialized in helping with this tutor
 Create the agent backend:
 
 ```python
-# examples/langserve-backend/src/svelte_langserve/chains/tutorial_assistant.py
+# examples/langgraph-backend/src/svelte_langgraph/chains/tutorial_assistant.py
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import Runnable
 from ..llm import get_llm
 
 def create_tutorial_assistant_chain() -> Runnable:
-    """Tutorial Assistant specialized in helping with Svelte LangServe tutorials."""
+    """Tutorial Assistant specialized in helping with Svelte LangGraph tutorials."""
     
     prompt = ChatPromptTemplate.from_messages([
-        ("system", """You are a Tutorial Assistant specialized in helping users learn Svelte LangServe.
+        ("system", """You are a Tutorial Assistant specialized in helping users learn Svelte LangGraph.
 
 Key areas you help with:
 - SvelteKit and Svelte 5 syntax
 - Flowbite UI component usage
 - Socket.IO integration patterns
-- LangServe and LangChain concepts
+- LangGraph and LangChain concepts
 - Deployment and production best practices
 
 Always provide:
@@ -212,7 +212,7 @@ Be encouraging and assume the user is learning."""),
 Register the new agent:
 
 ```python
-# examples/langserve-backend/src/svelte_langserve/app.py
+# examples/langgraph-backend/src/svelte_langgraph/app.py
 from .chains.tutorial_assistant import create_tutorial_assistant_chain
 
 # Add to your existing create_app function:
@@ -236,14 +236,14 @@ def create_app():
 Update the frontend to show your new agent:
 
 ```typescript
-// examples/dashboard/src/lib/stores/langserve.ts
+// examples/dashboard/src/lib/stores/langgraph.ts
 // Add to your endpoints array:
 const endpoints = [
   // ... existing endpoints ...
   {
     id: 'tutorial-assistant',
     name: 'Tutorial Assistant',
-    description: 'Specialized help for Svelte LangServe tutorials',
+    description: 'Specialized help for Svelte LangGraph tutorials',
     url: `${BACKEND_URL}/tutorial-assistant`,
     color: 'green'
   }
@@ -259,7 +259,7 @@ Let's add a simple user registration system.
 Update the backend user model:
 
 ```python
-# examples/langserve-backend/src/svelte_langserve/auth.py
+# examples/langgraph-backend/src/svelte_langgraph/auth.py
 # Add a registration endpoint:
 
 @app.post("/register")
@@ -404,7 +404,7 @@ LOG_LEVEL=info
 ACCESS_TOKEN_EXPIRE_MINUTES=60
 
 # Database (optional - for user persistence)
-DATABASE_URL=postgresql://user:pass@localhost:5432/svelte_langserve
+DATABASE_URL=postgresql://user:pass@localhost:5432/svelte_langgraph
 ```
 
 ### Step 10: Monitoring and Health Checks
@@ -418,7 +418,7 @@ curl http://localhost:3000/api/health
 
 # View real-time logs
 docker-compose logs -f svelte-frontend
-docker-compose logs -f langserve-backend
+docker-compose logs -f langgraph-backend
 
 # Monitor Socket.IO connections
 # Check browser dev tools -> Network -> WS tab
@@ -475,14 +475,14 @@ You've successfully built a production-ready AI chat application with:
 
 ## 💬 Get Help
 
-- 🐛 **Found a bug?** [Report it here](https://github.com/synergyai-nl/svelte-langserve/issues)
-- 💡 **Have questions?** [Start a discussion](https://github.com/synergyai-nl/svelte-langserve/discussions)
+- 🐛 **Found a bug?** [Report it here](https://github.com/synergyai-nl/svelte-langgraph/issues)
+- 💡 **Have questions?** [Start a discussion](https://github.com/synergyai-nl/svelte-langgraph/discussions)
 - 📖 **Need help?** Check our [troubleshooting guide](../advanced/troubleshooting.md)
 
 ## 🏆 Share Your Success
 
-Built something cool? We'd love to see it! Share your project in our [showcase discussions](https://github.com/synergyai-nl/svelte-langserve/discussions/categories/showcase).
+Built something cool? We'd love to see it! Share your project in our [showcase discussions](https://github.com/synergyai-nl/svelte-langgraph/discussions/categories/showcase).
 
 ---
 
-**🎯 Tutorial completed!** You're now ready to build amazing AI applications with Svelte LangServe and Flowbite.
+**🎯 Tutorial completed!** You're now ready to build amazing AI applications with Svelte LangGraph and Flowbite.

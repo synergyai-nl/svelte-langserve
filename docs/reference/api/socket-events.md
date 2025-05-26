@@ -1,6 +1,6 @@
 # Socket.IO Event Reference
 
-Complete reference for all WebSocket events used in Svelte LangServe for real-time AI chat communication.
+Complete reference for all WebSocket events used in Svelte LangGraph for real-time AI chat communication.
 
 ## 📡 Connection Events
 
@@ -73,7 +73,7 @@ socket.on('conversation_joined', (data: {
   conversationId: string;
   participants: {
     users: string[];
-    agents: LangServeEndpoint[];
+    agents: LangGraphEndpoint[];
   };
   messageHistory: ChatMessage[];
   pagination: {
@@ -356,7 +356,7 @@ socket.on('conversation_created', (conversation: {
   createdAt: number;
   participants: {
     users: string[];
-    agents: LangServeEndpoint[];
+    agents: LangGraphEndpoint[];
   };
 }) => {
   // Add to conversation list
@@ -523,7 +523,7 @@ socket.on('rate_limit_warning', (warning: {
 type ErrorType = 
   | 'AUTH_FAILED'           // Authentication error
   | 'RATE_LIMIT'           // API rate limit exceeded
-  | 'API_ERROR'            // LangServe API error
+  | 'API_ERROR'            // LangGraph API error
   | 'VALIDATION_ERROR'     // Invalid request data
   | 'TIMEOUT'              // Request timeout
   | 'CONVERSATION_NOT_FOUND' // Invalid conversation ID
@@ -573,16 +573,16 @@ socket.on('error', (error: SocketError) => {
 sequenceDiagram
     participant Client
     participant Server
-    participant LangServe
+    participant LangGraph
 
     Client->>Server: send_message
     Server-->>Client: message_received
-    Server->>LangServe: invoke chain
+    Server->>LangGraph: invoke chain
     loop Streaming Response
-        LangServe-->>Server: chunk
+        LangGraph-->>Server: chunk
         Server-->>Client: message_chunk
     end
-    LangServe-->>Server: complete
+    LangGraph-->>Server: complete
     Server-->>Client: message_complete
 ```
 
@@ -609,7 +609,7 @@ Here's how to implement a complete Socket.IO client:
 ```typescript
 import { io } from 'socket.io-client';
 
-class LangServeClient {
+class LangGraphClient {
   private socket: Socket;
   
   constructor(serverUrl: string) {

@@ -1,27 +1,27 @@
 # Component Library Reference
 
-Complete reference for all Svelte LangServe components with Flowbite integration. Each component is designed to work seamlessly with the theme system and provides excellent TypeScript support.
+Complete reference for all Svelte LangGraph components with Flowbite integration. Each component is designed to work seamlessly with the theme system and provides excellent TypeScript support.
 
 ## 🎨 Quick Start
 
 ```svelte
 <script>
-  import { LangServeFrontend, ThemeProvider, flowbiteTheme } from 'svelte-langserve';
+  import { LangGraphFrontend, ThemeProvider, flowbiteTheme } from 'svelte-langgraph';
 </script>
 
 <ThemeProvider theme={flowbiteTheme}>
-  <LangServeFrontend userId="your-user-id" />
+  <LangGraphFrontend userId="your-user-id" />
 </ThemeProvider>
 ```
 
 ## 📦 Core Components
 
-### LangServeFrontend
+### LangGraphFrontend
 
 The main component that provides a complete AI chat interface with Flowbite styling.
 
 ```svelte
-<LangServeFrontend 
+<LangGraphFrontend 
   userId="user123"
   authToken="jwt-token-here"
   serverUrl="http://localhost:3000"
@@ -49,18 +49,18 @@ The main component that provides a complete AI chat interface with Flowbite styl
 
 **Basic Usage:**
 ```svelte
-<LangServeFrontend userId="demo-user" />
+<LangGraphFrontend userId="demo-user" />
 ```
 
 **With Authentication:**
 ```svelte
 <script>
-  import { LangServeFrontend } from 'svelte-langserve';
+  import { LangGraphFrontend } from 'svelte-langgraph';
   
   let authToken = localStorage.getItem('auth_token');
 </script>
 
-<LangServeFrontend 
+<LangGraphFrontend 
   userId="authenticated-user"
   {authToken}
   serverUrl="https://your-production-api.com"
@@ -69,7 +69,7 @@ The main component that provides a complete AI chat interface with Flowbite styl
 
 **Custom Server:**
 ```svelte
-<LangServeFrontend 
+<LangGraphFrontend 
   userId="user123"
   serverUrl="https://api.yourcompany.com"
 />
@@ -83,7 +83,7 @@ Provides theme context to all child components. Supports Flowbite themes, custom
 
 ```svelte
 <ThemeProvider theme={flowbiteTheme} variant="dark" override={customOverride}>
-  <LangServeFrontend userId="user123" />
+  <LangGraphFrontend userId="user123" />
 </ThemeProvider>
 ```
 
@@ -104,7 +104,7 @@ import {
   defaultTheme,      // Clean Tailwind CSS theme
   flowbiteTheme,     // Professional Flowbite theme
   createFlowbiteTheme // Factory for Flowbite variants
-} from 'svelte-langserve';
+} from 'svelte-langgraph';
 
 // Create custom Flowbite variants
 const darkTheme = createFlowbiteTheme('dark');
@@ -150,24 +150,24 @@ interface ChatTheme {
 **Default Theme:**
 ```svelte
 <!-- Uses defaultTheme automatically -->
-<LangServeFrontend userId="user123" />
+<LangGraphFrontend userId="user123" />
 ```
 
 **Flowbite Theme:**
 ```svelte
 <script>
-  import { ThemeProvider, flowbiteTheme } from 'svelte-langserve';
+  import { ThemeProvider, flowbiteTheme } from 'svelte-langgraph';
 </script>
 
 <ThemeProvider theme={flowbiteTheme}>
-  <LangServeFrontend userId="user123" />
+  <LangGraphFrontend userId="user123" />
 </ThemeProvider>
 ```
 
 **Custom Theme:**
 ```svelte
 <script>
-  import { ThemeProvider, defaultTheme } from 'svelte-langserve';
+  import { ThemeProvider, defaultTheme } from 'svelte-langgraph';
   
   const customTheme = {
     ...defaultTheme,
@@ -177,14 +177,14 @@ interface ChatTheme {
 </script>
 
 <ThemeProvider theme={customTheme}>
-  <LangServeFrontend userId="user123" />
+  <LangGraphFrontend userId="user123" />
 </ThemeProvider>
 ```
 
 **Runtime Theme Override:**
 ```svelte
 <script>
-  import { ThemeProvider, flowbiteTheme } from 'svelte-langserve';
+  import { ThemeProvider, flowbiteTheme } from 'svelte-langgraph';
   
   let accentColor = 'blue';
   
@@ -201,7 +201,7 @@ interface ChatTheme {
 </select>
 
 <ThemeProvider theme={flowbiteTheme} override={themeOverride}>
-  <LangServeFrontend userId="user123" />
+  <LangGraphFrontend userId="user123" />
 </ThemeProvider>
 ```
 
@@ -253,7 +253,7 @@ dispatch('create');
 **Basic Chat:**
 ```svelte
 <script>
-  import { ChatInterface } from 'svelte-langserve';
+  import { ChatInterface } from 'svelte-langgraph';
   
   let conversation = { 
     id: '1', 
@@ -343,7 +343,7 @@ interface ChatMessage {
 **Basic Message:**
 ```svelte
 <script>
-  import { ChatMessage } from 'svelte-langserve';
+  import { ChatMessage } from 'svelte-langgraph';
   
   const message = {
     id: '1',
@@ -392,7 +392,7 @@ Multi-select component for choosing AI agents/endpoints.
 #### Endpoint Structure
 
 ```typescript
-interface LangServeEndpoint {
+interface LangGraphEndpoint {
   id: string;
   name: string;
   url: string;
@@ -416,7 +416,7 @@ interface LangServeEndpoint {
 **Basic Selector:**
 ```svelte
 <script>
-  import { EndpointSelector } from 'svelte-langserve';
+  import { EndpointSelector } from 'svelte-langgraph';
   
   const endpoints = [
     { id: 'chatbot', name: 'General Chatbot', url: '...', type: 'chatbot' },
@@ -496,7 +496,7 @@ interface Conversation {
 **Basic List:**
 ```svelte
 <script>
-  import { ConversationList } from 'svelte-langserve';
+  import { ConversationList } from 'svelte-langgraph';
   
   let conversations = [
     { id: '1', title: 'General Chat', messages: [], createdAt: Date.now() },
@@ -582,7 +582,7 @@ interface ChatConfig {
 **Basic Config:**
 ```svelte
 <script>
-  import { ConfigPanel } from 'svelte-langserve';
+  import { ConfigPanel } from 'svelte-langgraph';
   
   let config = {
     temperature: 0.7,
@@ -606,17 +606,17 @@ All components automatically integrate with the theme system:
 ```svelte
 <script>
   import { 
-    LangServeFrontend, 
+    LangGraphFrontend, 
     ThemeProvider, 
     flowbiteTheme,
     ChatInterface,
     ChatMessage 
-  } from 'svelte-langserve';
+  } from 'svelte-langgraph';
 </script>
 
 <!-- All components inherit the Flowbite theme -->
 <ThemeProvider theme={flowbiteTheme}>
-  <LangServeFrontend userId="user123" />
+  <LangGraphFrontend userId="user123" />
   
   <!-- Or use individual components -->
   <ChatInterface sendMessage={handleSend} {conversation} />
@@ -633,9 +633,9 @@ import type {
   ChatTheme, 
   Conversation, 
   ChatMessage, 
-  LangServeEndpoint,
+  LangGraphEndpoint,
   ChatConfig 
-} from 'svelte-langserve';
+} from 'svelte-langgraph';
 
 // Full type safety for all props and events
 const handleMessage = (event: CustomEvent<{ content: string }>) => {
@@ -677,11 +677,11 @@ Common component issues and solutions:
 
 ```svelte
 <!-- ❌ Missing ThemeProvider -->
-<LangServeFrontend userId="user123" />
+<LangGraphFrontend userId="user123" />
 
 <!-- ✅ Wrap with ThemeProvider -->
 <ThemeProvider>
-  <LangServeFrontend userId="user123" />
+  <LangGraphFrontend userId="user123" />
 </ThemeProvider>
 ```
 
@@ -693,14 +693,14 @@ Common component issues and solutions:
   <ThemeProvider theme={flowbiteTheme}>
     <span>Themed content</span>
   </ThemeProvider>
-  <LangServeFrontend userId="user123" /> <!-- No theme -->
+  <LangGraphFrontend userId="user123" /> <!-- No theme -->
 </div>
 
 <!-- ✅ Theme wraps all components -->
 <ThemeProvider theme={flowbiteTheme}>
   <div>
     <span>Themed content</span>
-    <LangServeFrontend userId="user123" />
+    <LangGraphFrontend userId="user123" />
   </div>
 </ThemeProvider>
 ```
@@ -709,10 +709,10 @@ Common component issues and solutions:
 
 ```typescript
 // ❌ Missing type imports
-import { LangServeFrontend } from 'svelte-langserve';
+import { LangGraphFrontend } from 'svelte-langgraph';
 
 // ✅ Import types explicitly
-import { LangServeFrontend, type ChatTheme } from 'svelte-langserve';
+import { LangGraphFrontend, type ChatTheme } from 'svelte-langgraph';
 ```
 
 For more troubleshooting, see the [Troubleshooting Guide](../advanced/troubleshooting.md).

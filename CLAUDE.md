@@ -7,8 +7,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 This is a monorepo containing a complete AI chat application framework with **worldclass documentation**:
 
 - **examples/dashboard**: SvelteKit frontend with Flowbite UI integration and Socket.IO  
-- **examples/langserve-backend**: Python FastAPI backend with LangServe and 5 AI agents
-- **packages/svelte-langserve**: Consolidated npm package with components, stores, and themes
+- **examples/langgraph-backend**: Python FastAPI backend with LangGraph and 5 AI agents
+- **packages/svelte-langgraph**: Consolidated npm package with components, stores, and themes
 - **docs/**: Comprehensive documentation covering everything from quickstart to production deployment
 
 ## Key Project Features
@@ -35,7 +35,7 @@ This is a monorepo containing a complete AI chat application framework with **wo
 pnpm install
 
 # Start backend (in one terminal)
-cd examples/langserve-backend && uv run serve
+cd examples/langgraph-backend && uv run serve
 
 # Start frontend (in another terminal)  
 cd examples/dashboard && pnpm dev
@@ -132,7 +132,7 @@ docker-compose logs -f
 
 # View specific service logs
 docker-compose logs -f svelte-frontend
-docker-compose logs -f langserve-backend
+docker-compose logs -f langgraph-backend
 
 # Rebuild and restart services
 docker-compose up -d --build
@@ -174,6 +174,11 @@ cp .env.example .env
 OPENAI_API_KEY=sk-your-openai-key-here           # Required for AI agents
 ANTHROPIC_API_KEY=sk-ant-your-anthropic-key     # Required for Claude agents
 TAVILY_API_KEY=your-tavily-key-here              # Optional, for research agent
+LANGSMITH_API_KEY=lsv2_pt_your-langsmith-key    # Required for LangGraph
+
+# Database configuration (LangGraph requirements)
+LANGGRAPH_DB_URL=postgresql://langgraph:langgraph@localhost:5432/langgraph
+REDIS_URL=redis://localhost:6379
 
 # Authentication (change in production!)
 SECRET_KEY=your-super-secure-jwt-secret-key-at-least-32-chars
@@ -185,8 +190,8 @@ PORT=8000
 LOG_LEVEL=info
 
 # Frontend configuration  
-PUBLIC_API_URL=http://localhost:8000
-PUBLIC_SOCKET_URL=http://localhost:3000
+PUBLIC_LANGGRAPH_SERVER_URL=http://localhost:8000
+PUBLIC_SOCKET_IO_URL=http://localhost:3000
 ```
 
 ## Architecture Overview
@@ -200,7 +205,7 @@ This project is a **production-ready monorepo** containing a complete AI chat ap
 
 ### Updated Monorepo Structure
 ```
-svelte-langserve/
+svelte-langgraph/
 ├── docs/                           # 📚 Worldclass documentation
 │   ├── getting-started/           #    Quick start + tutorial
 │   ├── guides/                    #    Themes, auth, deployment  
@@ -208,13 +213,13 @@ svelte-langserve/
 │   └── advanced/                  #    Architecture + troubleshooting
 ├── examples/                      # 🚀 Example applications
 │   ├── dashboard/                 #    SvelteKit frontend with Flowbite
-│   └── langserve-backend/         #    FastAPI backend with 5 AI agents
+│   └── langgraph-backend/         #    FastAPI backend with 5 AI agents
 ├── packages/                      # 📦 Reusable packages
-│   └── svelte-langserve/          #    Consolidated library
+│   └── svelte-langgraph/          #    Consolidated library
 │       ├── components/            #      Flowbite UI components
 │       ├── stores/                #      Socket.IO & state management
 │       ├── themes/                #      Flowbite theme system
-│       ├── client/                #      LangServe client adapters
+│       ├── client/                #      LangGraph client adapters
 │       └── types.ts               #      LangChain-compatible types
 ├── nginx/                         # 🌐 Production nginx config
 ├── docker-compose.yml             # 🐳 Development deployment
@@ -227,7 +232,7 @@ svelte-langserve/
 ```
 ┌─────────────────┐    WebSocket    ┌─────────────────┐    HTTP/Streaming    ┌─────────────────┐
 │   Browser       │ ◄─────────────► │   SvelteKit     │ ◄──────────────────► │   FastAPI       │
-│   (Flowbite UI) │                 │   Frontend      │                      │   LangServe     │
+│   (Flowbite UI) │                 │   Frontend      │                      │   LangGraph     │
 └─────────────────┘                 └─────────────────┘                      └─────────────────┘
                                             │                                         │
                                             ▼                                         ▼
@@ -253,8 +258,8 @@ svelte-langserve/
    - **Architecture Consideration**: Large file (~700 lines) - consider refactoring into services
    - JWT authentication middleware for WebSocket connections
 
-3. **LangServe Backend - `examples/langserve-backend/`**
-   - Implements 5 specialized AI agents via LangChain and LangServe:
+3. **LangGraph Backend - `examples/langgraph-backend/`**
+   - Implements 5 specialized AI agents via LangChain and LangGraph:
      - General Chatbot
      - Code Assistant  
      - Data Analyst
@@ -262,10 +267,10 @@ svelte-langserve/
      - Research Assistant (with web search)
    - Supports streaming responses for real-time interaction
    - FastAPI with JWT authentication and role-based access control
-   - Module path: `src.svelte_langserve.*`
+   - Module path: `src.svelte_langgraph.*`
 
-4. **Consolidated Package - `packages/svelte-langserve/`**
-   - **Complete Svelte integration** for LangServe with Socket.IO
+4. **Consolidated Package - `packages/svelte-langgraph/`**
+   - **Complete Svelte integration** for LangGraph with Socket.IO
    - **Flowbite theme system** with runtime customization
    - **UI components** with accessibility and responsive design  
    - **Reactive stores** for real-time state management
@@ -286,10 +291,10 @@ The theme system is a major architectural component:
 
 ```typescript
 // Theme usage examples
-import { ThemeProvider, flowbiteTheme, defaultTheme } from 'svelte-langserve';
+import { ThemeProvider, flowbiteTheme, defaultTheme } from 'svelte-langgraph';
 
 // Automatic Flowbite integration
-<LangServeFrontend userId="user123" theme="flowbite" />
+<LangGraphFrontend userId="user123" theme="flowbite" />
 
 // Custom theme variants
 <ThemeProvider theme={flowbiteTheme} variant="dark">
@@ -298,7 +303,7 @@ import { ThemeProvider, flowbiteTheme, defaultTheme } from 'svelte-langserve';
 
 // Runtime customization
 <ThemeProvider theme={customTheme} override={brandOverrides}>
-  <LangServeFrontend userId="user123" />
+  <LangGraphFrontend userId="user123" />
 </ThemeProvider>
 ```
 
@@ -314,18 +319,18 @@ import { ThemeProvider, flowbiteTheme, defaultTheme } from 'svelte-langserve';
 The Socket.IO server integration is comprehensive:
 - **Client connections** with JWT authentication middleware
 - **Conversation management** with real-time updates
-- **Message routing** between clients and LangServe endpoints
+- **Message routing** between clients and LangGraph endpoints
 - **Streaming response handling** with chunk-by-chunk delivery
 - **Agent coordination** for multi-agent conversations
 - **Error handling** with proper client notification
 - **Memory management** for streaming messages and conversations
 
-### LangServe Frontend Components
+### LangGraph Frontend Components
 
 Component architecture with Flowbite integration:
 
 **Core Components:**
-- `LangServeFrontend.svelte`: Main entry point with theme provider
+- `LangGraphFrontend.svelte`: Main entry point with theme provider
 - `ChatInterface.svelte`: Message display with streaming support
 - `ChatMessage.svelte`: Individual messages with role-based styling
 - `EndpointSelector.svelte`: Multi-select for AI agents
@@ -345,7 +350,7 @@ Advanced reactive patterns using Svelte 5 runes:
 
 ```typescript
 // Main store architecture
-interface LangServeState {
+interface LangGraphState {
   // Connection state
   socket: Socket | null;
   connected: boolean;
@@ -377,7 +382,7 @@ FastAPI backend with comprehensive features:
 
 **AI Agent Architecture:**
 ```python
-# Agent implementations in src/svelte_langserve/chains/
+# Agent implementations in src/svelte_langgraph/chains/
 - chatbot.py: General conversation agent
 - code_assistant.py: Programming help with tools  
 - data_analyst.py: Data analysis with search
@@ -386,7 +391,7 @@ FastAPI backend with comprehensive features:
 ```
 
 **Key Features:**
-- **Streaming responses** via LangServe
+- **Streaming responses** via LangGraph
 - **Tool integration** for specialized agents
 - **JWT authentication** with role-based access
 - **Rate limiting** for API protection
@@ -398,20 +403,20 @@ FastAPI backend with comprehensive features:
 ### Common Development Tasks
 
 **Adding a new AI agent:**
-1. Create agent class in `examples/langserve-backend/src/svelte_langserve/chains/`
-2. Register in `app.py` with LangServe
+1. Create agent class in `examples/langgraph-backend/src/svelte_langgraph/chains/`
+2. Register in `app.py` with LangGraph
 3. Add to frontend endpoint list
 4. Test with Socket.IO integration
 5. Update documentation
 
 **Customizing Flowbite theme:**
-1. Create theme variant in `packages/svelte-langserve/src/lib/themes/`
+1. Create theme variant in `packages/svelte-langgraph/src/lib/themes/`
 2. Test with all components
 3. Update theme documentation
 4. Add examples to demo routes
 
 **Adding new UI components:**
-1. Create component in `packages/svelte-langserve/src/lib/components/`
+1. Create component in `packages/svelte-langgraph/src/lib/components/`
 2. Add Flowbite integration
 3. Include in component index
 4. Add to component documentation
@@ -426,7 +431,7 @@ FastAPI backend with comprehensive features:
 - **Theme tests**: All theme variants and overrides
 
 **Backend Testing:**
-- **Unit tests**: Agent functionality and LangServe integration
+- **Unit tests**: Agent functionality and LangGraph integration
 - **API tests**: FastAPI endpoints and authentication
 - **Integration tests**: Real AI provider communication
 - **Performance tests**: Streaming and concurrent users
@@ -490,7 +495,7 @@ pnpm format                     # Fix formatting issues
 ### Backend Issues  
 - **No AI responses**: Check API keys in .env file
 - **Authentication failed**: Verify JWT secret configuration
-- **Import errors**: Use module path `src.svelte_langserve.*`
+- **Import errors**: Use module path `src.svelte_langgraph.*`
 - **Performance issues**: Monitor streaming message cleanup
 
 ### Docker Issues
