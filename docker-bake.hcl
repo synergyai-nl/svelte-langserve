@@ -3,7 +3,7 @@ variable "REGISTRY" {
 }
 
 variable "REPO" {
-  default = "synergyai-nl/svelte-langserve"
+  default = "synergyai-nl/svelte-langgraph"
 }
 
 variable "TAG" {
@@ -11,28 +11,28 @@ variable "TAG" {
 }
 
 group "default" {
-  targets = ["langserve-backend", "svelte-frontend"]
+  targets = ["langgraph-backend", "svelte-frontend"]
 }
 
-target "langserve-backend" {
-  context = "./examples/langserve-backend"
-  dockerfile = "Dockerfile"
+target "langgraph-backend" {
+  context = "."
+  dockerfile = "./examples/langgraph-backend/Dockerfile"
   tags = [
-    "${REGISTRY}/${REPO}/langserve-backend:${TAG}",
-    "${REGISTRY}/${REPO}/langserve-backend:latest"
+    "${REGISTRY}/${REPO}/langgraph-backend:${TAG}",
+    "${REGISTRY}/${REPO}/langgraph-backend:latest"
   ]
   cache-from = [
-    "type=gha,scope=langserve-backend"
+    "type=gha,scope=langgraph-backend"
   ]
   cache-to = [
-    "type=gha,scope=langserve-backend,mode=max"
+    "type=gha,scope=langgraph-backend,mode=max"
   ]
-  platforms = ["linux/amd64", "linux/arm64"]
+  platforms = ["linux/amd64"]
 }
 
 target "svelte-frontend" {
-  context = "./examples/dashboard"
-  dockerfile = "Dockerfile"
+  context = "."
+  dockerfile = "./examples/dashboard/Dockerfile"
   tags = [
     "${REGISTRY}/${REPO}/svelte-frontend:${TAG}",
     "${REGISTRY}/${REPO}/svelte-frontend:latest"
@@ -43,9 +43,9 @@ target "svelte-frontend" {
   cache-to = [
     "type=gha,scope=svelte-frontend,mode=max"
   ]
-  platforms = ["linux/amd64", "linux/arm64"]
+  platforms = ["linux/amd64"]
 }
 
 group "all" {
-  targets = ["langserve-backend", "svelte-frontend"]
+  targets = ["langgraph-backend", "svelte-frontend"]
 }

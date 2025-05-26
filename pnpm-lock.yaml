@@ -62,9 +62,9 @@ importers:
       socket.io-client:
         specifier: ^4.8.1
         version: 4.8.1
-      svelte-langserve:
+      svelte-langgraph:
         specifier: workspace:*
-        version: link:../../packages/svelte-langserve
+        version: link:../../packages/svelte-langgraph
     devDependencies:
       '@eslint/compat':
         specifier: ^1.2.5
@@ -151,11 +151,14 @@ importers:
         specifier: ^3.0.0
         version: 3.1.4(@types/node@20.17.50)(jiti@2.4.2)(jsdom@26.1.0)(lightningcss@1.30.1)(yaml@2.8.0)
 
-  packages/svelte-langserve:
+  packages/svelte-langgraph:
     dependencies:
       '@langchain/core':
         specifier: ^0.3.57
         version: 0.3.57
+      '@langchain/langgraph':
+        specifier: ^0.2.39
+        version: 0.2.73(@langchain/core@0.3.57)(zod-to-json-schema@3.24.5(zod@3.25.23))
       esm-env:
         specifier: ^1.2.2
         version: 1.2.2
@@ -1118,6 +1121,33 @@ packages:
   '@langchain/core@0.3.57':
     resolution: {integrity: sha512-jz28qCTKJmi47b6jqhQ6vYRTG5jRpqhtPQjriRTB5wR8mgvzo6xKs0fG/kExS3ZvM79ytD1npBvgf8i19xOo9Q==}
     engines: {node: '>=18'}
+
+  '@langchain/langgraph-checkpoint@0.0.17':
+    resolution: {integrity: sha512-6b3CuVVYx+7x0uWLG+7YXz9j2iBa+tn2AXvkLxzEvaAsLE6Sij++8PPbS2BZzC+S/FPJdWsz6I5bsrqL0BYrCA==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      '@langchain/core': '>=0.2.31 <0.4.0'
+
+  '@langchain/langgraph-sdk@0.0.78':
+    resolution: {integrity: sha512-skkUDmEhClWzlsr8jRaS1VpXVBISm5OFd0MUtS1jKRL5pn08K+IJRvHnlzgum9x7Dste9KXGcIGVoR7cNKJQrw==}
+    peerDependencies:
+      '@langchain/core': '>=0.2.31 <0.4.0'
+      react: ^18 || ^19
+    peerDependenciesMeta:
+      '@langchain/core':
+        optional: true
+      react:
+        optional: true
+
+  '@langchain/langgraph@0.2.73':
+    resolution: {integrity: sha512-vw+IXV2Q7x/QaykNj3VE/Ak3aPlst3spkpM6zYtqwGkQlhLZU4Lb8PHHPjqNNYHSdOTDj9x4jIRUPZArGHx9Aw==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      '@langchain/core': '>=0.2.36 <0.3.0 || >=0.3.40 < 0.4.0'
+      zod-to-json-schema: ^3.x
+    peerDependenciesMeta:
+      zod-to-json-schema:
+        optional: true
 
   '@lix-js/sdk@0.4.7':
     resolution: {integrity: sha512-pRbW+joG12L0ULfMiWYosIW0plmW4AsUdiPCp+Z8rAsElJ+wJ6in58zhD3UwUcd4BNcpldEGjg6PdA7e0RgsDQ==}
@@ -3790,6 +3820,10 @@ packages:
     resolution: {integrity: sha512-8XkAphELsDnEGrDxUOHB3RGvXz6TeuYSGEZBOjtTtPm2lwhGBjLgOzLHB63IUWfBpNucQjND6d3AOudO+H3RWQ==}
     hasBin: true
 
+  uuid@9.0.1:
+    resolution: {integrity: sha512-b+1eJOlsR9K8HJpow9Ok3fiWOWSIcIzXodvv0rQjVoOVNpWMpxf1wZNpt4y9h10odCNrqnYp1OBzRktckBe3sA==}
+    hasBin: true
+
   validate-npm-package-name@5.0.1:
     resolution: {integrity: sha512-OljLrQ9SQdOUqTaQxqL5dEfZWrXExyyWsozYlAWFawPVNuD83igl7uJD2RTkNMbniIYgt8l81eCJGIdQF7avLQ==}
     engines: {node: ^14.17.0 || ^16.13.0 || >=18.0.0}
@@ -5134,6 +5168,32 @@ snapshots:
       zod-to-json-schema: 3.24.5(zod@3.25.23)
     transitivePeerDependencies:
       - openai
+
+  '@langchain/langgraph-checkpoint@0.0.17(@langchain/core@0.3.57)':
+    dependencies:
+      '@langchain/core': 0.3.57
+      uuid: 10.0.0
+
+  '@langchain/langgraph-sdk@0.0.78(@langchain/core@0.3.57)':
+    dependencies:
+      '@types/json-schema': 7.0.15
+      p-queue: 6.6.2
+      p-retry: 4.6.2
+      uuid: 9.0.1
+    optionalDependencies:
+      '@langchain/core': 0.3.57
+
+  '@langchain/langgraph@0.2.73(@langchain/core@0.3.57)(zod-to-json-schema@3.24.5(zod@3.25.23))':
+    dependencies:
+      '@langchain/core': 0.3.57
+      '@langchain/langgraph-checkpoint': 0.0.17(@langchain/core@0.3.57)
+      '@langchain/langgraph-sdk': 0.0.78(@langchain/core@0.3.57)
+      uuid: 10.0.0
+      zod: 3.25.23
+    optionalDependencies:
+      zod-to-json-schema: 3.24.5(zod@3.25.23)
+    transitivePeerDependencies:
+      - react
 
   '@lix-js/sdk@0.4.7(babel-plugin-macros@3.1.0)':
     dependencies:
@@ -7836,6 +7896,8 @@ snapshots:
   util-deprecate@1.0.2: {}
 
   uuid@10.0.0: {}
+
+  uuid@9.0.1: {}
 
   validate-npm-package-name@5.0.1: {}
 

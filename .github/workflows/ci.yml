@@ -33,7 +33,7 @@ jobs:
               - 'pnpm-lock.yaml'
               - 'pnpm-workspace.yaml'
             backend:
-              - 'examples/langserve-backend/**'
+              - 'examples/langgraph-backend/**'
             root:
               - 'package.json'
               - 'nx.json'
@@ -64,23 +64,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
 
-      - name: Check types
-        run: npx nx run dashboard:check
-        working-directory: .
-
-      - name: Lint
-        run: npx nx run dashboard:lint
-        working-directory: .
-
-      - name: Format check
-        run: pnpm exec prettier --check .
-
-      - name: Unit tests
-        run: pnpm test:unit
-
-      - name: Build
-        run: npx nx run dashboard:build
-        working-directory: .
+      - name: Build dashboard (nx handles dependencies)
+        run: pnpm nx run dashboard:build
 
   backend:
     name: Backend (Python/FastAPI)
@@ -89,7 +74,7 @@ jobs:
     if: needs.changes.outputs.backend == 'true' || needs.changes.outputs.root == 'true'
     defaults:
       run:
-        working-directory: examples/langserve-backend
+        working-directory: examples/langgraph-backend
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -98,7 +83,7 @@ jobs:
         uses: astral-sh/setup-uv@v6
         with:
           enable-cache: true
-          cache-dependency-glob: "examples/langserve-backend/uv.lock"
+          cache-dependency-glob: "examples/langgraph-backend/uv.lock"
 
       - name: Set up Python
         run: uv python install
@@ -106,17 +91,20 @@ jobs:
       - name: Install dependencies
         run: uv sync --dev
 
-      - name: Lint with ruff
-        run: uv run ruff check .
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
 
-      - name: Format check with ruff
-        run: uv run ruff format --check .
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
 
-      - name: Type check with pyright
-        run: uv run pyright src/
+      - name: Install monorepo dependencies
+        run: pnpm install --no-frozen-lockfile
 
-      - name: Run tests
-        run: uv run pytest
+      - name: Lint and format with ruff
+        run: pnpm nx run langgraph-backend:format
 
   quality:
     name: Quality Checks (Nx)
@@ -140,7 +128,7 @@ jobs:
         uses: astral-sh/setup-uv@v6
         with:
           enable-cache: true
-          cache-dependency-glob: "examples/langserve-backend/uv.lock"
+          cache-dependency-glob: "examples/langgraph-backend/uv.lock"
 
       - name: Set up Python
         run: uv python install
@@ -149,20 +137,11 @@ jobs:
         run: pnpm install --no-frozen-lockfile
 
       - name: Install backend dependencies
-        working-directory: examples/langserve-backend
+        working-directory: examples/langgraph-backend
         run: uv sync --dev
 
-      - name: Build packages
-        run: npx nx run svelte-langserve:build --output-style=stream
-
-      - name: Run quality checks (excluding e2e tests)
-        run: npx nx run-many -t lint,check --output-style=stream --parallel=3
-
-      - name: Run unit tests
-        run: |
-          npx nx run dashboard:test:unit --output-style=stream || true
-          npx nx run svelte-langserve:test --output-style=stream || true
-          npx nx run langserve-backend:test --output-style=stream || true
+      - name: Run unified quality checks (nx handles all dependencies)
+        run: pnpm quality
 
   e2e:
     name: End-to-End Tests
@@ -189,9 +168,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
 
-      - name: Build dashboard  
-        run: npx nx run dashboard:build
-        working-directory: .
+      - name: Build dashboard (nx handles dependencies)
+        run: pnpm nx run dashboard:build
 
       - name: Install Playwright browsers
         run: pnpm exec playwright install --with-deps
@@ -200,19 +178,19 @@ jobs:
         uses: astral-sh/setup-uv@v6
         with:
           enable-cache: true
-          cache-dependency-glob: "examples/langserve-backend/uv.lock"
+          cache-dependency-glob: "examples/langgraph-backend/uv.lock"
 
       - name: Set up Python
         run: uv python install
 
       - name: Install backend dependencies
-        working-directory: examples/langserve-backend
+        working-directory: examples/langgraph-backend
         run: uv sync
 
       - name: Start backend server
-        working-directory: examples/langserve-backend
+        working-directory: examples/langgraph-backend
         run: |
-          uv run uvicorn src.svelte_langserve.main:create_app --factory --host 0.0.0.0 --port 8000 &
+          uv run uvicorn src.svelte_langgraph.main:create_app --factory --host 0.0.0.0 --port 8000 &
           echo $! > backend.pid
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY || 'test-key' }}

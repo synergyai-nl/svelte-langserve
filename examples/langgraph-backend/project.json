@@ -1,0 +1,68 @@
+{
+  "name": "langgraph-backend",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "examples/langgraph-backend/src",
+  "targets": {
+    "serve": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "uv run serve",
+        "cwd": "examples/langgraph-backend"
+      }
+    },
+    "dev": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "uv run uvicorn src.svelte_langgraph.main:create_app --factory --reload --port 8000",
+        "cwd": "examples/langgraph-backend"
+      }
+    },
+    "start": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "uv run main.py",
+        "cwd": "examples/langgraph-backend"
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "uv run pytest",
+        "cwd": "examples/langgraph-backend"
+      }
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "uv run ruff check .",
+        "cwd": "examples/langgraph-backend"
+      }
+    },
+    "format": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "uv run ruff format .",
+        "cwd": "examples/langgraph-backend"
+      }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "uv run pyright",
+        "cwd": "examples/langgraph-backend"
+      }
+    },
+    "format:check": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "uv run ruff check . && uv run ruff format --check .",
+        "cwd": "examples/langgraph-backend"
+      }
+    },
+    "quality": {
+      "dependsOn": ["lint", "typecheck", "test"]
+    }
+  },
+  "tags": ["type:app", "scope:backend"]
+}

@@ -1,26 +1,40 @@
 services:
-  # PostgreSQL Database
+  # PostgreSQL Database for LangGraph
   postgres:
     image: postgres:15-alpine
     environment:
-      - POSTGRES_DB=chat_history
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=langgraph
+      - POSTGRES_USER=langgraph
+      - POSTGRES_PASSWORD=langgraph
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U langgraph"]
       interval: 10s
       timeout: 5s
       retries: 5
 
-  # LangServe Backend
-  langserve-backend:
+  # Redis for LangGraph task queue
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # LangGraph Backend
+  langgraph-backend:
     build:
-      context: ./examples/langserve-backend
+      context: ./examples/langgraph-backend
       dockerfile: Dockerfile
     ports:
       - "8000:8000"
@@ -28,12 +42,16 @@ services:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
       - TAVILY_API_KEY=${TAVILY_API_KEY}
-      - POSTGRES_CONNECTION_STRING=postgresql://postgres:password@postgres:5432/chat_history
+      - LANGSMITH_API_KEY=${LANGSMITH_API_KEY}
+      - LANGGRAPH_DB_URL=postgresql://langgraph:langgraph@postgres:5432/langgraph
+      - REDIS_URL=redis://redis:6379
       - ENVIRONMENT=production
     volumes:
-      - ./examples/langserve-backend:/app
+      - ./examples/langgraph-backend:/app
     depends_on:
       postgres:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     restart: unless-stopped
     healthcheck:
@@ -51,15 +69,15 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=production
-      - PUBLIC_LANGSERVE_CHATBOT_URL=http://langserve-backend:8000/chatbot
-      - PUBLIC_LANGSERVE_CHATBOT_PERSISTENT_URL=http://langserve-backend:8000/chatbot-persistent
-      - PUBLIC_LANGSERVE_CODE_URL=http://langserve-backend:8000/code-assistant
-      - PUBLIC_LANGSERVE_DATA_URL=http://langserve-backend:8000/data-analyst
-      - PUBLIC_LANGSERVE_CREATIVE_URL=http://langserve-backend:8000/creative-writer
-      - PUBLIC_LANGSERVE_RESEARCH_URL=http://langserve-backend:8000/research-assistant
+      - PUBLIC_LANGGRAPH_CHATBOT_URL=http://langgraph-backend:8000/chatbot
+      - PUBLIC_LANGGRAPH_CHATBOT_PERSISTENT_URL=http://langgraph-backend:8000/chatbot-persistent
+      - PUBLIC_LANGGRAPH_CODE_URL=http://langgraph-backend:8000/code-assistant
+      - PUBLIC_LANGGRAPH_DATA_URL=http://langgraph-backend:8000/data-analyst
+      - PUBLIC_LANGGRAPH_CREATIVE_URL=http://langgraph-backend:8000/creative-writer
+      - PUBLIC_LANGGRAPH_RESEARCH_URL=http://langgraph-backend:8000/research-assistant
       - PUBLIC_SOCKET_IO_URL=http://localhost:3000
     depends_on:
-      - langserve-backend
+      - langgraph-backend
     volumes:
       - ./examples/dashboard:/app
       - /app/node_modules
@@ -76,8 +94,9 @@ services:
       - ./nginx/ssl:/etc/nginx/ssl
     depends_on:
       - svelte-frontend
-      - langserve-backend
+      - langgraph-backend
     restart: unless-stopped
 
 volumes:
   postgres_data:
+  redis_data:

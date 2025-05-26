@@ -10,7 +10,7 @@
 				"command": "vite dev",
 				"cwd": "examples/dashboard"
 			},
-			"dependsOn": ["svelte-langserve:build"]
+			"dependsOn": ["svelte-langgraph:build"]
 		},
 		"build": {
 			"executor": "nx:run-commands",
@@ -19,7 +19,7 @@
 				"cwd": "examples/dashboard"
 			},
 			"outputs": ["{projectRoot}/build"],
-			"dependsOn": ["paraglide:compile", "svelte-langserve:build"]
+			"dependsOn": ["paraglide:compile", "svelte-langgraph:build"]
 		},
 		"preview": {
 			"executor": "nx:run-commands",
@@ -42,7 +42,15 @@
 				"command": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 				"cwd": "examples/dashboard"
 			},
-			"dependsOn": ["paraglide:compile", "svelte-langserve:build"]
+			"dependsOn": ["paraglide:compile", "svelte-langgraph:build"]
+		},
+		"typecheck": {
+			"executor": "nx:run-commands",
+			"options": {
+				"command": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+				"cwd": "examples/dashboard"
+			},
+			"dependsOn": ["paraglide:compile", "svelte-langgraph:build"]
 		},
 		"lint": {
 			"executor": "nx:run-commands",
@@ -74,7 +82,20 @@
 			}
 		},
 		"test": {
+			"dependsOn": ["test:unit"]
+		},
+		"test:all": {
 			"dependsOn": ["test:unit", "test:e2e"]
+		},
+		"format:check": {
+			"executor": "nx:run-commands",
+			"options": {
+				"command": "prettier --check .",
+				"cwd": "examples/dashboard"
+			}
+		},
+		"quality": {
+			"dependsOn": ["lint", "check", "test"]
 		}
 	},
 	"tags": ["type:app", "scope:frontend"]

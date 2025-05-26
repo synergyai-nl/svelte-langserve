@@ -58,103 +58,46 @@ docker-compose up -d
 # Login: demo / secret
 ```
 
-### Frontend Development (SvelteKit + Flowbite)
+### Development Commands (Nx-powered Monorepo)
 
 ```bash
-# Install dependencies
-cd examples/dashboard
-pnpm install
+# Quality checks (MUST run before commits)
+pnpm quality                    # Comprehensive: lint + typecheck + test across all projects
 
-# Start frontend in development mode
-cd examples/dashboard
-pnpm dev
+# Development
+pnpm dev                        # Start all services in development mode
+pnpm build                      # Build all projects  
 
-# Important demo routes:
-# / - Main dashboard with Flowbite components
-# /flowbite - Flowbite theme showcase  
-# /demo/paraglide - Internationalization demo
+# Formatting
+pnpm format                     # Format all code (prettier + ruff)
+pnpm format:check              # Check formatting without making changes
 
-# Build frontend for production
-cd examples/dashboard
-pnpm build
+# Individual targets (if needed)
+pnpm lint                       # Lint all projects (eslint + ruff)
+pnpm test                       # Run all tests (vitest + pytest)
+pnpm typecheck                  # Type checking (svelte-check + pyright)
 
-# Preview production build
-cd examples/dashboard
-pnpm preview
-
-# Run unit tests
-cd examples/dashboard
-pnpm test:unit
-
-# Run end-to-end tests
-cd examples/dashboard
-pnpm test:e2e
-
-# Run all tests
-cd examples/dashboard
-pnpm test
-
-# Check types
-cd examples/dashboard
-pnpm check
-
-# Lint and format code
-cd examples/dashboard
-pnpm lint
-pnpm format
-
-# Generate internationalization files (required for build)
-cd examples/dashboard
-pnpm exec paraglide-js compile --project ./project.inlang --outdir ./src/lib/paraglide
+# Project-specific commands
+nx run dashboard:dev            # Frontend only
+nx run langgraph-backend:serve  # Backend only
+nx run svelte-langgraph:build   # Package only
 ```
 
-### Backend Development (Python/FastAPI/LangServe)
+### Pre-commit Workflow
 
 ```bash
-# Install backend dependencies and run (using uv - recommended)
-cd examples/langserve-backend
-uv run serve
+# REQUIRED before pushing (comprehensive quality check)
+pnpm quality
 
-# Or run directly with proper module path
-cd examples/langserve-backend
-uv run main.py
-
-# Development mode with auto-reload
-cd examples/langserve-backend
-uv run uvicorn src.svelte_langserve.main:create_app --factory --reload --port 8000
-
-# Development tools
-cd examples/langserve-backend
-uv run ruff check .        # Lint code
-uv run ruff format .       # Format code
-uv run pytest             # Run tests
-uv run pyright            # Type checking
-
-# Health check
-curl http://localhost:8000/health
-```
-
-### Package Development (Consolidated Library)
-
-```bash
-# Build consolidated package
-cd packages/svelte-langserve
-pnpm build
-
-# Test consolidated package (theme tests working)
-cd packages/svelte-langserve
-pnpm test
-
-# Lint consolidated package
-cd packages/svelte-langserve
-pnpm lint
-
-# Run all quality checks across monorepo
-nx run-many -t test,lint,check --output-style=stream
-
-# Publish package (when ready)
-cd packages/svelte-langserve
-npm publish
+# This runs automatically on commit (fast pre-commit hooks via husky + lint-staged):
+# ✅ Formatting (prettier + ruff format) 
+# ✅ Linting (eslint + ruff check)
+# 
+# This runs manually before push (comprehensive quality check):
+# ✅ All of the above PLUS
+# ✅ Type checking (svelte-check + pyright)  
+# ✅ Unit tests (vitest + pytest)
+# ✅ Build verification with dependency management
 ```
 
 ### Documentation Development
@@ -205,17 +148,20 @@ curl http://localhost:3000/health        # Frontend
 curl http://localhost:8000/health        # Backend
 ```
 
-### Nx Development Commands
+### Advanced Nx Commands
 
 ```bash
-# Run tests across all projects with detailed output (recommended for Claude)
-nx run-many --target=test --output-style=stream
+# Run specific targets across projects
+nx run-many -t lint,check,test --output-style=stream --parallel=3
 
-# Run linting and type checking
-nx run-many --target=lint,check --output-style=stream
+# Target specific projects
+nx run dashboard:quality        # Frontend quality checks only
+nx run langgraph-backend:quality  # Backend quality checks only
+nx run svelte-langgraph:quality   # Package quality checks only
 
-# Run all quality checks (comprehensive)
-nx run-many --target=test,lint,check --output-style=stream --parallel=3
+# Cache management
+nx reset                        # Clear nx cache
+nx show projects               # List all projects
 ```
 
 ### Environment Setup
@@ -485,23 +431,26 @@ FastAPI backend with comprehensive features:
 - **Integration tests**: Real AI provider communication
 - **Performance tests**: Streaming and concurrent users
 
-### Quality Assurance Commands
+### Quality Assurance (Two-Tier System)
 
 ```bash
-# Complete quality check (run before committing)
-nx run-many -t test,lint,check --output-style=stream
+# AUTOMATED on commit (fast): husky + lint-staged
+# ✅ Formatting (prettier + ruff format)
+# ✅ Linting (eslint + ruff check)
+# ⚡ Runs in ~5-10 seconds
 
-# Frontend quality
-cd examples/dashboard
-pnpm test && pnpm check && pnpm lint
+# MANUAL before push (comprehensive): 
+pnpm quality
 
-# Backend quality  
-cd examples/langserve-backend
-uv run pytest && uv run pyright && uv run ruff check .
+# ✅ All of the above PLUS
+# ✅ Type checking (svelte-check + pyright)  
+# ✅ Unit tests (vitest + pytest)
+# ✅ Build verification with dependency management
+# ⚡ Runs efficiently with nx caching and parallel execution
 
-# Package quality
-cd packages/svelte-langserve
-pnpm test && pnpm lint && pnpm build
+# Manual formatting commands (if needed):
+pnpm format:check               # Verify code formatting
+pnpm format                     # Fix formatting issues
 ```
 
 ## Important Files & Locations

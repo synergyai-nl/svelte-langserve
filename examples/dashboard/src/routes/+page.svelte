@@ -1,43 +1,46 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
+	import { env } from '$env/dynamic/public';
 	import { onMount } from 'svelte';
 	import {
 		connect,
 		disconnect,
 		createConversation,
 		sendMessage,
-		availableEndpoints,
+		availableAssistants,
 		conversations,
 		activeConversation,
 		connected,
 		authenticated,
 		connectionError,
 		streamingMessages,
+		assistantHealth,
 		getDisplayMessages,
 		setActiveConversationId
-	} from '$lib/langserve/stores/langserve';
+	} from '$lib/langgraph/stores/langserve';
 	import { Card, Badge, Spinner, Button } from 'flowbite-svelte';
 	import { PaperPlaneSolid, UserSolid, ExclamationCircleSolid } from 'flowbite-svelte-icons';
 
 	// Generate a random user ID for demo purposes
 	let userId = '';
-	let selectedEndpoints: string[] = [];
+	let selectedAssistants: string[] = [];
 	let messageInput = '';
 	let config = { temperature: 0.7, streaming: true };
 
 	if (browser) {
 		userId =
-			localStorage.getItem('langserve_user_id') ||
+			localStorage.getItem('langgraph_user_id') ||
 			`user_${Math.random().toString(36).substring(2, 10)}`;
-		localStorage.setItem('langserve_user_id', userId);
+		localStorage.setItem('langgraph_user_id', userId);
 	}
 
 	// Auto-connect when component mounts
 	onMount(() => {
 		if (browser && userId) {
 			// Connect to the SvelteKit server (with Socket.IO), not the Python backend
-			// The SvelteKit dev server runs on port 5173 and has Socket.IO integrated
-			connect(window.location.origin, userId);
+			// Use PUBLIC_SOCKET_IO_URL if available, otherwise fallback to window.location.origin
+			const socketUrl = env.PUBLIC_SOCKET_IO_URL || window.location.origin;
+			connect(socketUrl, userId);
 		}
 
 		return () => {
@@ -47,12 +50,12 @@
 
 	function handleCreateConversation() {
 		console.log('Create conversation clicked!', {
-			selectedEndpoints,
+			selectedAssistants,
 			authenticated: $authenticated,
 			config
 		});
-		if (selectedEndpoints.length > 0) {
-			createConversation(selectedEndpoints, undefined, config);
+		if (selectedAssistants.length > 0) {
+			createConversation(selectedAssistants, undefined, config);
 		}
 	}
 
@@ -70,11 +73,11 @@
 		}
 	}
 
-	function toggleEndpoint(endpointId: string) {
-		if (selectedEndpoints.includes(endpointId)) {
-			selectedEndpoints = selectedEndpoints.filter((id) => id !== endpointId);
+	function toggleAssistant(assistantId: string) {
+		if (selectedAssistants.includes(assistantId)) {
+			selectedAssistants = selectedAssistants.filter((id) => id !== assistantId);
 		} else {
-			selectedEndpoints = [...selectedEndpoints, endpointId];
+			selectedAssistants = [...selectedAssistants, assistantId];
 		}
 	}
 
@@ -87,7 +90,7 @@
 	<header class="bg-gradient-to-r from-blue-600 to-purple-600 p-4 text-white shadow-lg">
 		<div class="container mx-auto">
 			<h1 class="text-3xl font-bold">Claude Rocks the Dashboard</h1>
-			<p class="text-sm opacity-90">LangServe Frontend Implementation in SvelteKit</p>
+			<p class="text-sm opacity-90">LangGraph Frontend Implementation in SvelteKit</p>
 			<div class="mt-2 flex items-center gap-4 text-sm">
 				<Badge color={$connected ? 'green' : 'red'} class="flex items-center gap-1">
 					<div class="h-2 w-2 rounded-full bg-current"></div>
@@ -106,7 +109,7 @@
 			<div class="lg:col-span-1">
 				<Card class="h-full overflow-y-auto">
 					<h2 class="mb-4 text-xl font-semibold text-gray-900 dark:text-white">
-						LangServe Frontend
+						LangGraph Frontend
 					</h2>
 
 					{#if $connectionError}
@@ -119,32 +122,75 @@
 						</div>
 					{/if}
 
-					<!-- Available Endpoints -->
+					<!-- Available Assistants -->
 					<div class="mb-6">
 						<h3 class="mb-3 text-lg font-medium text-gray-900 dark:text-white">
-							Available Endpoints
+							Available Assistants
 						</h3>
-						{#if $availableEndpoints.length > 0}
+						{#if $availableAssistants.length > 0}
 							<div class="space-y-2">
-								{#each $availableEndpoints as endpoint (endpoint.id)}
+								{#each $availableAssistants as assistant (assistant.id)}
 									<label
 										class="flex cursor-pointer items-center rounded-lg border p-3 hover:bg-gray-50 dark:hover:bg-gray-800"
-										class:bg-blue-50={selectedEndpoints.includes(endpoint.id)}
-										class:border-blue-500={selectedEndpoints.includes(endpoint.id)}
+										class:bg-blue-50={selectedAssistants.includes(assistant.id)}
+										class:border-blue-500={selectedAssistants.includes(assistant.id)}
 									>
 										<input
 											type="checkbox"
 											class="mr-3"
-											checked={selectedEndpoints.includes(endpoint.id)}
-											onchange={() => toggleEndpoint(endpoint.id)}
+											checked={selectedAssistants.includes(assistant.id)}
+											onchange={() => toggleAssistant(assistant.id)}
 										/>
 										<div class="flex-1">
-											<div class="font-medium text-gray-900 dark:text-white">{endpoint.name}</div>
+											<div class="font-medium text-gray-900 dark:text-white">{assistant.name}</div>
 											<div class="text-sm text-gray-500 dark:text-gray-400">
-												Type: {endpoint.type || 'chatbot'}
+												Type: {assistant.type || 'chatbot'}
+											</div>
+											{#if assistant.description}
+												<div class="mt-1 text-xs text-gray-400 dark:text-gray-500">
+													{assistant.description}
+												</div>
+											{/if}
+											{#if assistant.assistantId}
+												<div class="mt-1 text-xs text-blue-600 dark:text-blue-400">
+													ID: {assistant.assistantId}
+												</div>
+											{/if}
+											<div class="mt-2 flex gap-1">
+												{#if assistant.type === 'code-assistant'}
+													<span class="rounded-full bg-purple-100 px-2 py-1 text-xs text-purple-800"
+														>Code</span
+													>
+												{:else if assistant.type === 'data-analyst'}
+													<span class="rounded-full bg-green-100 px-2 py-1 text-xs text-green-800"
+														>Data</span
+													>
+												{:else if assistant.type === 'creative-writer'}
+													<span class="rounded-full bg-pink-100 px-2 py-1 text-xs text-pink-800"
+														>Creative</span
+													>
+												{:else if assistant.type === 'research-assistant'}
+													<span class="rounded-full bg-indigo-100 px-2 py-1 text-xs text-indigo-800"
+														>Research</span
+													>
+												{:else}
+													<span class="rounded-full bg-gray-100 px-2 py-1 text-xs text-gray-800"
+														>Chat</span
+													>
+												{/if}
 											</div>
 										</div>
-										<div class="h-3 w-3 rounded-full bg-green-500"></div>
+										<div
+											class="h-3 w-3 rounded-full"
+											class:bg-green-500={$assistantHealth.get(assistant.id) !== false}
+											class:bg-red-500={$assistantHealth.get(assistant.id) === false}
+											class:bg-gray-400={$assistantHealth.get(assistant.id) === undefined}
+											title={$assistantHealth.get(assistant.id) === false
+												? 'Unhealthy'
+												: $assistantHealth.get(assistant.id) === true
+													? 'Healthy'
+													: 'Unknown'}
+										></div>
 									</label>
 								{/each}
 							</div>
@@ -154,7 +200,7 @@
 									<Spinner class="mr-2" size="4" />
 									Connecting...
 								{:else}
-									No endpoints available
+									No assistants available
 								{/if}
 							</div>
 						{/if}
@@ -191,10 +237,10 @@
 					<!-- Create Conversation -->
 					<button
 						onclick={handleCreateConversation}
-						disabled={selectedEndpoints.length === 0 || !$authenticated}
+						disabled={selectedAssistants.length === 0 || !$authenticated}
 						class="mb-4 w-full rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
 					>
-						Create Conversation ({selectedEndpoints.length} endpoints)
+						Create Conversation ({selectedAssistants.length} assistants)
 					</button>
 
 					<!-- Conversations List -->
@@ -238,7 +284,7 @@
 						<div class="border-b bg-gray-50 p-4 dark:bg-gray-800">
 							<h3 class="text-lg font-semibold text-gray-900 dark:text-white">
 								{$activeConversation.title ||
-									`Conversation with ${$activeConversation.participants.agents.length} endpoint(s)`}
+									`Conversation with ${$activeConversation.participants.assistants.length} assistant(s)`}
 							</h3>
 							<div class="text-sm text-gray-500 dark:text-gray-400">
 								{displayMessages.length} messages
@@ -293,12 +339,13 @@
 															? message.content
 															: JSON.stringify(message.content)}
 														{#if message.additional_kwargs?.streaming}
-															<span class="ml-1 inline-block h-4 w-2 animate-pulse bg-current"></span>
+															<span class="ml-1 inline-block h-4 w-2 animate-pulse bg-current"
+															></span>
 														{/if}
 													</div>
 												</div>
 												<div class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-													{message.additional_kwargs?.endpoint_name || message.sender_id} •
+													{message.additional_kwargs?.assistant_name || message.sender_id} •
 													{new Date(message.timestamp).toLocaleTimeString()}
 												</div>
 											</div>
@@ -334,14 +381,14 @@
 						<div class="flex flex-1 items-center justify-center">
 							<div class="text-center">
 								<div class="mb-2 text-lg font-medium text-gray-900 dark:text-white">
-									Welcome to LangServe Frontend
+									Welcome to LangGraph Frontend
 								</div>
 								<div class="mb-4 text-gray-500 dark:text-gray-400">
-									Select endpoints and create a conversation to get started.
+									Select assistants and create a conversation to get started.
 								</div>
 								<Button
 									onclick={handleCreateConversation}
-									disabled={selectedEndpoints.length === 0 || !$authenticated}
+									disabled={selectedAssistants.length === 0 || !$authenticated}
 									color="blue"
 								>
 									Create New Conversation

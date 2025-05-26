@@ -1,21 +1,25 @@
 {
-  "name": "svelte-langserve",
+  "name": "svelte-langgraph",
   "version": "0.1.0",
-  "description": "Svelte integration packages for LangServe backends",
+  "description": "Svelte integration packages for LangGraph backends",
   "type": "module",
   "private": true,
   "workspaces": [
-    "packages/@svelte-langserve/*",
+    "packages/*",
     "examples/*"
   ],
   "scripts": {
     "build": "nx run-many -t build",
     "dev": "nx run-many -t dev",
-    "clean": "pnpm -r --filter='@svelte-langserve/*' clean",
-    "typecheck": "nx run-many -t check",
+    "clean": "pnpm -r --filter='svelte-langgraph' clean",
+    "typecheck": "nx run-many -t typecheck",
     "lint": "nx run-many -t lint",
     "lint:root": "eslint .",
     "test": "nx run-many -t test",
+    "format": "nx run-many -t format",
+    "format:check": "nx run-many -t format:check",
+    "quality": "nx run-many -t quality --output-style=stream --parallel=3",
+    "quality:all": "nx run-many -t lint,check,test --output-style=stream --parallel=3",
     "changeset": "changeset",
     "version-packages": "changeset version",
     "release": "pnpm build && changeset publish",
@@ -48,22 +52,21 @@
   },
   "lint-staged": {
     "examples/dashboard/**/*.{js,ts,svelte}": [
-      "cd examples/dashboard && pnpm format",
-      "cd examples/dashboard && pnpm lint"
+      "nx run dashboard:format",
+      "nx run dashboard:lint"
     ],
-    "examples/langserve-backend/**/*.py": [
-      "cd examples/langserve-backend && uv run ruff check --fix",
-      "cd examples/langserve-backend && uv run ruff format",
-      "cd examples/langserve-backend && uv run pyright"
+    "examples/langgraph-backend/**/*.py": [
+      "nx run langgraph-backend:format",
+      "nx run langgraph-backend:lint"
     ],
     "packages/**/*.{js,ts}": [
-      "nx run svelte-langserve:lint",
-      "nx run svelte-langserve:check"
+      "nx run svelte-langgraph:format",
+      "nx run svelte-langgraph:lint"
     ]
   },
   "keywords": [
     "svelte",
-    "langserve",
+    "langgraph",
     "langchain",
     "ai",
     "chat",
@@ -71,14 +74,14 @@
     "frontend",
     "ui"
   ],
-  "author": "svelte-langserve contributors",
+  "author": "svelte-langgraph contributors",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-org/svelte-langserve.git"
+    "url": "https://github.com/your-org/svelte-langgraph.git"
   },
   "bugs": {
-    "url": "https://github.com/your-org/svelte-langserve/issues"
+    "url": "https://github.com/your-org/svelte-langgraph/issues"
   },
-  "homepage": "https://github.com/your-org/svelte-langserve#readme"
+  "homepage": "https://github.com/your-org/svelte-langgraph#readme"
 }
