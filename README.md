@@ -173,16 +173,16 @@ Perfect for building:
 
 ### **Monorepo Organization**
 ```
-svelte-langserve/
+svelte-langgraph/
 ├── packages/
-│   └── svelte-langserve/           # 📦 Complete library package
+│   └── svelte-langgraph/           # 📦 Complete library package
 │       ├── components/             #    Flowbite UI components
 │       ├── stores/                 #    Socket.IO & state management  
 │       ├── themes/                 #    Flowbite theme system
 │       └── types.ts                #    LangChain-compatible types
 ├── examples/
 │   ├── dashboard/                  # 🎨 SvelteKit frontend example
-│   └── langserve-backend/          # 🚀 FastAPI backend example
+│   └── langgraph-backend/          # 🚀 FastAPI backend example
 ├── docs/                           # 📚 Comprehensive documentation
 ├── nginx/                          # 🌐 Production nginx config
 └── docker-compose.yml              # 🐳 Full-stack deployment
@@ -190,8 +190,8 @@ svelte-langserve/
 
 ### **Key Features by Package**
 
-**📦 `svelte-langserve` Package:**
-- Complete Svelte integration for LangServe
+**📦 `svelte-langgraph` Package:**
+- Complete Svelte integration for LangGraph
 - Socket.IO client with automatic reconnection
 - Flowbite theme system with dark mode
 - TypeScript definitions for LangChain compatibility
@@ -216,7 +216,7 @@ svelte-langserve/
 ### **Professional Design System**
 ```svelte
 <!-- Automatic Flowbite theming -->
-<LangServeFrontend userId="user123" theme="flowbite" />
+<LangGraphFrontend userId="user123" theme="flowbite" />
 
 <!-- Custom theme variants -->
 <ThemeProvider theme={flowbiteTheme} variant="dark">
@@ -225,7 +225,7 @@ svelte-langserve/
 
 <!-- Runtime theme customization -->
 <ThemeProvider theme={customTheme} override={brandColors}>
-  <LangServeFrontend userId="user123" />
+  <LangGraphFrontend userId="user123" />
 </ThemeProvider>
 ```
 
@@ -367,8 +367,8 @@ MIT © [Svelte LangServe Contributors](LICENSE)
 ## 🆘 **Support**
 
 - 📖 **Documentation**: [docs/](./docs/) - Complete guides and API reference
-- 🐛 **Issues**: [GitHub Issues](https://github.com/synergyai-nl/svelte-langserve/issues) - Bug reports and feature requests
-- 💬 **Discussions**: [GitHub Discussions](https://github.com/synergyai-nl/svelte-langserve/discussions) - Questions and community
+- 🐛 **Issues**: [GitHub Issues](https://github.com/synergyai-nl/svelte-langgraph/issues) - Bug reports and feature requests
+- 💬 **Discussions**: [GitHub Discussions](https://github.com/synergyai-nl/svelte-langgraph/discussions) - Questions and community
 - 🔧 **Troubleshooting**: [Troubleshooting Guide](./docs/advanced/troubleshooting.md) - Debug common issues
 
 ## 🎉 **What's Next?**
@@ -379,8 +379,8 @@ Ready to build amazing AI applications? **[Start with our 5-minute Quick Start G
 
 <div align="center">
 
-**Built with ❤️ using SvelteKit, Flowbite, and LangServe**
+**Built with ❤️ using SvelteKit, Flowbite, and LangGraph**
 
-[Documentation](./docs/) • [Quick Start](./docs/getting-started/quick-start.md) • [Live Demo](http://localhost:3000) • [GitHub](https://github.com/synergyai-nl/svelte-langserve)
+[Documentation](./docs/) • [Quick Start](./docs/getting-started/quick-start.md) • [Live Demo](http://localhost:3000) • [GitHub](https://github.com/synergyai-nl/svelte-langgraph)
 
 </div>
