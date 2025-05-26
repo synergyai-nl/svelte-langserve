@@ -1,5 +1,22 @@
 """Tests for REST API endpoints - comprehensive coverage of manual testing."""
 
+# Constants for assistant endpoint paths to reduce duplication
+ASSISTANT_DOCS_PATHS = [
+    "/chatbot/docs",
+    "/code-assistant/docs",
+    "/data-analyst/docs",
+    "/creative-writer/docs",
+    "/research-assistant/docs",
+]
+
+ASSISTANT_PLAYGROUND_PATHS = [
+    "/chatbot/playground",
+    "/code-assistant/playground",
+    "/data-analyst/playground",
+    "/creative-writer/playground",
+    "/research-assistant/playground",
+]
+
 
 class TestHealthEndpoint:
     """Test health check endpoint functionality."""
@@ -125,15 +142,7 @@ class TestAssistantEndpoints:
 
     def test_assistant_endpoints_require_auth(self, client):
         """Test that assistant endpoints require authentication."""
-        assistant_paths = [
-            "/chatbot/docs",
-            "/code-assistant/docs",
-            "/data-analyst/docs",
-            "/creative-writer/docs",
-            "/research-assistant/docs",
-        ]
-
-        for path in assistant_paths:
+        for path in ASSISTANT_DOCS_PATHS:
             response = client.get(path)
             # Should be unauthorized (401) or forbidden (403), not 200
             assert response.status_code in [
@@ -146,15 +155,7 @@ class TestAssistantEndpoints:
         """Test assistant endpoints with valid authentication."""
         headers = {"Authorization": f"Bearer {demo_token}"}
 
-        assistant_paths = [
-            "/chatbot/docs",
-            "/code-assistant/docs",
-            "/data-analyst/docs",
-            "/creative-writer/docs",
-            "/research-assistant/docs",
-        ]
-
-        for path in assistant_paths:
+        for path in ASSISTANT_DOCS_PATHS:
             response = client.get(path, headers=headers)
             # Should not be authentication error if auth is valid
             assert response.status_code not in [401, 403]
@@ -163,15 +164,7 @@ class TestAssistantEndpoints:
         """Test assistant playground endpoints with authentication."""
         headers = {"Authorization": f"Bearer {demo_token}"}
 
-        playground_paths = [
-            "/chatbot/playground",
-            "/code-assistant/playground",
-            "/data-analyst/playground",
-            "/creative-writer/playground",
-            "/research-assistant/playground",
-        ]
-
-        for path in playground_paths:
+        for path in ASSISTANT_PLAYGROUND_PATHS:
             response = client.get(path, headers=headers)
             # Should not be authentication error if auth is valid
             assert response.status_code not in [401, 403]
@@ -209,6 +202,8 @@ class TestAuthenticationFlow:
 
         token_data = login_response.json()
         assert "access_token" in token_data
+        assert "token_type" in token_data
+        assert token_data["token_type"] == "bearer"
 
         # Step 2: Use token to access protected endpoint
         headers = {"Authorization": f"Bearer {token_data['access_token']}"}

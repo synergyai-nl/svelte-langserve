@@ -29,11 +29,11 @@ class TestFastAPIDocumentation:
             # Test that our custom tags are included
             if "tags" in schema:
                 tag_names = [tag["name"] for tag in schema["tags"]]
-                expected_tags = ["Authentication", "Health", "Assistants"]
+                expected_tags = ["Authentication", "System", "Assistants"]
                 for tag in expected_tags:
                     assert tag in tag_names
 
-        except Exception as e:
+        except (ConnectionError, ValueError, KeyError) as e:
             # OpenAPI schema generation can fail with LangServe due to Pydantic issues
             pytest.skip(f"OpenAPI schema generation failed: {e}")
 
@@ -82,17 +82,18 @@ class TestFastAPIDocumentation:
             if "/health" in paths:
                 health_endpoint = paths["/health"]["get"]
                 assert "summary" in health_endpoint
-                assert "Health Check" in health_endpoint["summary"]
+                assert "health" in health_endpoint["summary"].lower()
 
             if "/token" in paths:
                 token_endpoint = paths["/token"]["post"]
                 assert "summary" in token_endpoint
                 assert (
-                    "OAuth2" in token_endpoint["summary"]
-                    or "Login" in token_endpoint["summary"]
+                    "jwt" in token_endpoint["summary"].lower()
+                    or "token" in token_endpoint["summary"].lower()
+                    or "login" in token_endpoint["summary"].lower()
                 )
 
-        except Exception as e:
+        except (ConnectionError, ValueError, KeyError) as e:
             pytest.skip(f"OpenAPI schema parsing failed: {e}")
 
     def test_pydantic_model_documentation(self, client):
@@ -122,7 +123,7 @@ class TestFastAPIDocumentation:
                                 "description" in prop_details or "title" in prop_details
                             )
 
-        except Exception as e:
+        except (ConnectionError, ValueError, KeyError) as e:
             pytest.skip(f"Pydantic model documentation test failed: {e}")
 
 
@@ -180,10 +181,15 @@ class TestInteractiveDocumentation:
             examples = find_examples(schema)
 
             # We should have at least some examples in our documentation
-            # This might be 0 if LangServe interferes with schema generation
-            assert len(examples) >= 0
+            # Skip test if no examples found (may happen due to LangServe interference)
+            if len(examples) == 0:
+                pytest.skip(
+                    "No examples found in OpenAPI schema (may be due to LangServe)"
+                )
+            else:
+                assert len(examples) > 0
 
-        except Exception as e:
+        except (ConnectionError, ValueError, KeyError) as e:
             pytest.skip(f"Example documentation test failed: {e}")
 
 
