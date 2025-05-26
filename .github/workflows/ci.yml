@@ -64,6 +64,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
 
+      - name: Build svelte-langgraph package first
+        run: nx run svelte-langgraph:build
+
       - name: Build dashboard (with dependencies)
         run: pnpm build
 
