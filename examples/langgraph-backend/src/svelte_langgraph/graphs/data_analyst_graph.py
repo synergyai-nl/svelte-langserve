@@ -146,7 +146,11 @@ Available tools:
     result = chain.invoke({"messages": state["messages"]})
 
     # Check if the LLM wants to use tools
-    if isinstance(result, AIMessage) and hasattr(result, "tool_calls") and result.tool_calls:
+    if (
+        isinstance(result, AIMessage)
+        and hasattr(result, "tool_calls")
+        and result.tool_calls
+    ):
         # Execute tool calls
         tool_messages = []
         for tool_call in result.tool_calls:

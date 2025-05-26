@@ -1,11 +1,13 @@
 """Test configuration and fixtures."""
 
 import os
+
 from unittest.mock import MagicMock, patch
 
 import pytest
 
 from fastapi.testclient import TestClient
+
 
 # Set testing environment before importing app
 os.environ["TESTING"] = "true"
