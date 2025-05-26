@@ -39,6 +39,13 @@
         "cwd": "examples/langgraph-backend"
       }
     },
+    "test:mock-openai": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "uv run python scripts/test-mock-openai.py",
+        "cwd": "examples/langgraph-backend"
+      }
+    },
     "lint": {
       "executor": "nx:run-commands",
       "options": {

@@ -113,9 +113,10 @@ echo -e "\n${BLUE}📦 Starting LangGraph Backend with test-echo agent...${NC}"
 
 cd ../langgraph-backend
 
-# Set minimal environment for test-echo agent (no real API keys needed)
-export OPENAI_API_KEY="test-key-for-echo-agent"
-export ANTHROPIC_API_KEY="test-key-for-echo-agent"
+# Set test mode environment (enables mock LLMs)
+export TEST_MODE="true"
+export OPENAI_API_KEY="test-key-for-mocking"
+export ANTHROPIC_API_KEY="test-key-for-mocking"  
 export SECRET_KEY="test-secret-key-for-e2e-testing-only"
 
 # Check if uv is available and start backend
