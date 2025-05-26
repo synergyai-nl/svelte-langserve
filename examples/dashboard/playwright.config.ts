@@ -18,7 +18,7 @@ export default defineConfig({
 	workers: process.env.CI ? 1 : undefined,
 	reporter: [['html'], ['list'], ...(process.env.CI ? [['github']] : [])],
 	use: {
-		baseURL: process.env.BASE_URL || 'http://localhost:4173',
+		baseURL: process.env.BASE_URL || 'http://localhost:5173',
 		trace: 'on-first-retry',
 		screenshot: 'only-on-failure',
 		video: 'retain-on-failure'
@@ -34,8 +34,8 @@ export default defineConfig({
 	// Automatically start services (or reuse existing ones in CI)
 	webServer: [
 		{
-			command: 'npm run preview',
-			port: 4173,
+			command: 'npm run dev',
+			port: 5173,
 			timeout: 120 * 1000,
 			reuseExistingServer: !!process.env.CI
 		},

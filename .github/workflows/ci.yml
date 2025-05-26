@@ -315,7 +315,7 @@ jobs:
       - name: Start backend server
         working-directory: examples/langgraph-backend
         run: |
-          uv run uvicorn src.svelte_langgraph.main:create_app --factory --host 0.0.0.0 --port 8000 &
+          uv run uvicorn src.svelte_langgraph.app:create_app --factory --host 0.0.0.0 --port 8000 &
           echo $! > backend.pid
         env:
           TEST_MODE: true
@@ -323,9 +323,18 @@ jobs:
           ANTHROPIC_API_KEY: test-key-for-mocking
           SECRET_KEY: test-secret-key-for-ci
 
-      - name: Wait for backend
+      - name: Start frontend server
+        working-directory: examples/dashboard
+        run: |
+          npm run dev &
+          echo $! > frontend.pid
+        env:
+          PUBLIC_LANGGRAPH_SERVER_URL: http://localhost:8000
+
+      - name: Wait for servers
         run: |
           timeout 30 bash -c 'until curl -f http://localhost:8000/health; do sleep 1; done' || echo "Backend health check failed, continuing with tests"
+          timeout 30 bash -c 'until curl -f http://localhost:5173; do sleep 1; done' || echo "Frontend health check failed, continuing with tests"
 
       - name: Run Playwright tests
         run: pnpm test:e2e
@@ -338,7 +347,9 @@ jobs:
           path: examples/dashboard/playwright-report/
           retention-days: 30
 
-      - name: Cleanup backend
+      - name: Cleanup servers
         if: always()
+        working-directory: examples/dashboard
         run: |
-          if [ -f backend.pid ]; then kill $(cat backend.pid) || true; fi
+          if [ -f ../langgraph-backend/backend.pid ]; then kill $(cat ../langgraph-backend/backend.pid) || true; fi
+          if [ -f frontend.pid ]; then kill $(cat frontend.pid) || true; fi
