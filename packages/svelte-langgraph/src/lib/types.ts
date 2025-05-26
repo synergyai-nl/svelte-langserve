@@ -1,22 +1,27 @@
 // Re-export LangChain types as primary types for 1:1 backend mapping
-export type { 
-  BaseMessage, 
-  HumanMessage, 
-  AIMessage, 
-  SystemMessage 
-} from '@langchain/core/messages';
-export type { RunnableConfig } from '@langchain/core/runnables';
+export type {
+  BaseMessage,
+  HumanMessage,
+  AIMessage,
+  SystemMessage,
+} from "@langchain/core/messages";
+export type { RunnableConfig } from "@langchain/core/runnables";
 
-// Extend LangChain types for Socket.IO specific needs  
-import type { BaseMessage } from '@langchain/core/messages';
-import type { RunnableConfig } from '@langchain/core/runnables';
+// Extend LangChain types for Socket.IO specific needs
+import type { BaseMessage } from "@langchain/core/messages";
+import type { RunnableConfig } from "@langchain/core/runnables";
 
 export interface LangGraphAssistant {
   id: string;
   name: string;
   assistantId: string;
   description?: string;
-  type: 'chatbot' | 'code-assistant' | 'data-analyst' | 'creative-writer' | 'research-assistant';
+  type:
+    | "chatbot"
+    | "code-assistant"
+    | "data-analyst"
+    | "creative-writer"
+    | "research-assistant";
   config?: RunnableConfig;
 }
 
@@ -26,7 +31,12 @@ export interface LangServeEndpoint {
   name: string;
   url: string;
   description?: string;
-  type: 'chatbot' | 'code-assistant' | 'data-analyst' | 'creative-writer' | 'research-assistant';
+  type:
+    | "chatbot"
+    | "code-assistant"
+    | "data-analyst"
+    | "creative-writer"
+    | "research-assistant";
   config?: RunnableConfig;
 }
 
@@ -40,17 +50,17 @@ export interface Conversation {
     users: string[];
     assistants: LangGraphAssistant[];
   };
-  status: 'active' | 'completed' | 'error';
+  status: "active" | "completed" | "error";
   metadata?: Record<string, unknown>;
 }
 
 // Socket.IO enhanced message type that wraps LangChain BaseMessage
 export interface ChatMessage {
   id: string;
-  type: 'human' | 'ai' | 'system';
+  type: "human" | "ai" | "system";
   content: string | Record<string, unknown>;
   sender_id: string;
-  sender_type: 'user' | 'agent';
+  sender_type: "user" | "agent";
   timestamp: string;
   conversation_id: string;
   additional_kwargs?: Record<string, unknown>;
@@ -59,7 +69,7 @@ export interface ChatMessage {
 // Message type for UI components
 export interface Message {
   id: string;
-  role: 'user' | 'assistant' | 'system';
+  role: "user" | "assistant" | "system";
   content: string;
   timestamp: Date;
   metadata?: {
@@ -71,9 +81,9 @@ export interface Message {
 // For new implementations, we'll gradually migrate to use BaseMessage directly
 export interface LangChainMessage {
   id: string;
-  message: BaseMessage;  // Direct LangChain type
+  message: BaseMessage; // Direct LangChain type
   sender_id: string;
-  sender_type: 'user' | 'agent';
+  sender_type: "user" | "agent";
   timestamp: string;
   conversation_id: string;
   config?: RunnableConfig;
@@ -82,53 +92,59 @@ export interface LangChainMessage {
 // Socket.IO event types
 export interface SocketEvents {
   // Client to server
-  'authenticate': (data: { user_id: string; token?: string }) => void;
-  'create_conversation': (data: { 
-    assistant_ids: string[]; 
-    initial_message?: string; 
+  authenticate: (data: { user_id: string; token?: string }) => void;
+  create_conversation: (data: {
+    assistant_ids: string[];
+    initial_message?: string;
     config?: RunnableConfig;
   }) => void;
-  'send_message': (data: { 
-    conversation_id: string; 
-    content: string; 
+  send_message: (data: {
+    conversation_id: string;
+    content: string;
     config?: RunnableConfig;
   }) => void;
-  'test_assistant': (data: { assistant_id: string }) => void;
-  'get_assistant_schemas': (data: { assistant_id: string }) => void;
-  'join_conversation': (data: { conversation_id: string }) => void;
-  'list_conversations': () => void;
-  'get_conversation_history': (data: { conversation_id: string }) => void;
-  
-  // Server to client  
-  'authenticated': (data: { user_id: string; available_assistants: LangGraphAssistant[] }) => void;
-  'message_received': (message: ChatMessage) => void;
-  'message_chunk': (chunk: MessageChunk) => void;
-  'conversation_created': (conversation: Conversation) => void;
-  'conversation_joined': (conversation: Conversation) => void;
-  'conversations_list': (conversations: Conversation[]) => void;
-  'conversation_history': (data: { conversation_id: string; messages: ChatMessage[] }) => void;
-  'assistant_response_start': (data: { 
-    message_id: string; 
-    assistant_id: string; 
+  test_assistant: (data: { assistant_id: string }) => void;
+  get_assistant_schemas: (data: { assistant_id: string }) => void;
+  join_conversation: (data: { conversation_id: string }) => void;
+  list_conversations: () => void;
+  get_conversation_history: (data: { conversation_id: string }) => void;
+
+  // Server to client
+  authenticated: (data: {
+    user_id: string;
+    available_assistants: LangGraphAssistant[];
+  }) => void;
+  message_received: (message: ChatMessage) => void;
+  message_chunk: (chunk: MessageChunk) => void;
+  conversation_created: (conversation: Conversation) => void;
+  conversation_joined: (conversation: Conversation) => void;
+  conversations_list: (conversations: Conversation[]) => void;
+  conversation_history: (data: {
+    conversation_id: string;
+    messages: ChatMessage[];
+  }) => void;
+  assistant_response_start: (data: {
+    message_id: string;
+    assistant_id: string;
     assistant_name: string;
     conversation_id: string;
   }) => void;
-  'assistant_response_complete': (message: ChatMessage) => void;
-  'assistant_response_error': (data: { 
-    message_id: string; 
-    assistant_id: string; 
+  assistant_response_complete: (message: ChatMessage) => void;
+  assistant_response_error: (data: {
+    message_id: string;
+    assistant_id: string;
     error: string;
   }) => void;
-  'assistant_schemas': (data: { assistant_id: string; schemas: unknown }) => void;
-  'assistant_test_result': (data: { 
-    assistant_id: string; 
-    healthy: boolean; 
+  assistant_schemas: (data: { assistant_id: string; schemas: unknown }) => void;
+  assistant_test_result: (data: {
+    assistant_id: string;
+    healthy: boolean;
     error?: string;
   }) => void;
-  'error': (error: { message: string }) => void;
-  'assistant_error': (error: { 
-    assistant_id: string; 
-    assistant_name: string; 
+  error: (error: { message: string }) => void;
+  assistant_error: (error: {
+    assistant_id: string;
+    assistant_name: string;
     error: string;
     conversation_id: string;
   }) => void;

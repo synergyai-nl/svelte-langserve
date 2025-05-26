@@ -1,11 +1,16 @@
-import { getContext, setContext } from 'svelte';
-import type { ChatTheme, ThemeContext, ThemeConfig, ThemeOverride } from './types.js';
-import { defaultTheme, defaultThemeConfig } from './default.js';
+import { getContext, setContext } from "svelte";
+import type {
+  ChatTheme,
+  ThemeContext,
+  ThemeConfig,
+  ThemeOverride,
+} from "./types.js";
+import { defaultTheme, defaultThemeConfig } from "./default.js";
 
 /**
  * Theme context key for Svelte context
  */
-const THEME_CONTEXT_KEY = 'svelte-langgraph-theme';
+const THEME_CONTEXT_KEY = "svelte-langgraph-theme";
 
 /**
  * Get the current theme from Svelte context
@@ -13,12 +18,12 @@ const THEME_CONTEXT_KEY = 'svelte-langgraph-theme';
  */
 export function useTheme(): ChatTheme {
   const context = getContext<ThemeContext>(THEME_CONTEXT_KEY);
-  
+
   if (!context) {
     // Return default theme if no context found
     return defaultTheme;
   }
-  
+
   // Apply overrides if provided
   if (context.override) {
     return {
@@ -26,7 +31,7 @@ export function useTheme(): ChatTheme {
       ...context.override,
     };
   }
-  
+
   return context.theme;
 }
 
@@ -35,14 +40,14 @@ export function useTheme(): ChatTheme {
  */
 export function useThemeContext(): ThemeContext {
   const context = getContext<ThemeContext>(THEME_CONTEXT_KEY);
-  
+
   if (!context) {
     return {
       theme: defaultTheme,
       config: defaultThemeConfig,
     };
   }
-  
+
   return context;
 }
 
@@ -52,8 +57,8 @@ export function useThemeContext(): ThemeContext {
 export function createThemeContext(
   theme: ChatTheme,
   config: ThemeConfig,
-  variant?: 'primary' | 'dark' | 'compact' | 'mobile',
-  override?: ThemeOverride
+  variant?: "primary" | "dark" | "compact" | "mobile",
+  override?: ThemeOverride,
 ): ThemeContext {
   const context: ThemeContext = {
     theme,
@@ -61,7 +66,7 @@ export function createThemeContext(
     variant,
     override,
   };
-  
+
   setContext(THEME_CONTEXT_KEY, context);
   return context;
 }
@@ -69,7 +74,9 @@ export function createThemeContext(
 /**
  * Merge multiple theme overrides
  */
-export function mergeThemeOverrides(...overrides: (ThemeOverride | undefined)[]): ThemeOverride {
+export function mergeThemeOverrides(
+  ...overrides: (ThemeOverride | undefined)[]
+): ThemeOverride {
   return overrides.reduce<ThemeOverride>((merged, override) => {
     if (override) {
       return { ...merged, ...override };
@@ -85,12 +92,12 @@ export function themeClass(
   theme: ChatTheme,
   key: keyof ChatTheme,
   condition: boolean = true,
-  fallback: string = ''
+  fallback: string = "",
 ): string {
   if (!condition) {
     return fallback;
   }
-  
+
   return theme[key] || fallback;
 }
 
@@ -99,14 +106,14 @@ export function themeClass(
  */
 export function combineClasses(
   themeClass: string,
-  additionalClasses: string = '',
-  condition: boolean = true
+  additionalClasses: string = "",
+  condition: boolean = true,
 ): string {
   if (!condition) {
-    return '';
+    return "";
   }
-  
-  return [themeClass, additionalClasses].filter(Boolean).join(' ');
+
+  return [themeClass, additionalClasses].filter(Boolean).join(" ");
 }
 
 /**
@@ -114,17 +121,17 @@ export function combineClasses(
  */
 export function getResponsiveClasses(
   theme: ChatTheme,
-  breakpoint: 'mobile' | 'tablet' | 'desktop'
+  breakpoint: "mobile" | "tablet" | "desktop",
 ): string {
   switch (breakpoint) {
-    case 'mobile':
+    case "mobile":
       return theme.mobile;
-    case 'tablet':
+    case "tablet":
       return theme.tablet;
-    case 'desktop':
+    case "desktop":
       return theme.desktop;
     default:
-      return '';
+      return "";
   }
 }
 
@@ -132,22 +139,24 @@ export function getResponsiveClasses(
  * Validate theme object has required properties
  */
 export function validateTheme(theme: Partial<ChatTheme>): theme is ChatTheme {
-  if (!theme || typeof theme !== 'object') {
+  if (!theme || typeof theme !== "object") {
     return false;
   }
-  
+
   const requiredKeys: (keyof ChatTheme)[] = [
-    'container',
-    'chatArea',
-    'messageContainer',
-    'messageUser',
-    'messageAssistant',
-    'inputContainer',
-    'inputField',
-    'sendButton',
+    "container",
+    "chatArea",
+    "messageContainer",
+    "messageUser",
+    "messageAssistant",
+    "inputContainer",
+    "inputField",
+    "sendButton",
   ];
-  
-  return requiredKeys.every(key => key in theme && typeof theme[key] === 'string');
+
+  return requiredKeys.every(
+    (key) => key in theme && typeof theme[key] === "string",
+  );
 }
 
 /**

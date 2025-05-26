@@ -6,7 +6,7 @@ export type {
   ThemePackage,
   ThemeOverride,
   ThemeContext,
-} from './types.js';
+} from "./types.js";
 
 // Default theme
 export {
@@ -14,7 +14,7 @@ export {
   defaultThemeConfig,
   defaultThemePackage,
   createDefaultTheme,
-} from './default.js';
+} from "./default.js";
 
 // Flowbite theme
 export {
@@ -25,7 +25,7 @@ export {
   flowbiteThemeConfig,
   flowbiteThemePackage,
   createFlowbiteTheme,
-} from './flowbite.js';
+} from "./flowbite.js";
 
 // Theme utilities
-export { useTheme, createThemeContext } from './utils.js';
+export { useTheme, createThemeContext } from "./utils.js";

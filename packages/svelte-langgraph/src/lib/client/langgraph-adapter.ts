@@ -1,6 +1,6 @@
-import { RemoteGraph } from '@langchain/langgraph/remote';
-import type { BaseMessage } from '@langchain/core/messages';
-import { AIMessage } from '@langchain/core/messages';
+import { RemoteGraph } from "@langchain/langgraph/remote";
+import type { BaseMessage } from "@langchain/core/messages";
+import { AIMessage } from "@langchain/core/messages";
 
 export interface LangGraphConfig {
   apiUrl?: string;
@@ -29,27 +29,28 @@ export class LangGraphAdapter {
   }
 
   async streamMessage(
-    messages: BaseMessage[], 
-    options?: StreamingOptions
+    messages: BaseMessage[],
+    options?: StreamingOptions,
   ): Promise<void> {
     try {
       const stream = await this.remoteGraph.stream(
         { messages },
-        { 
+        {
           configurable: { assistant_id: this.assistantId },
-          streamMode: 'messages'
-        }
+          streamMode: "messages",
+        },
       );
 
-      let fullContent = '';
+      let fullContent = "";
       for await (const chunk of stream) {
         if (chunk.messages && chunk.messages.length > 0) {
           const message = chunk.messages[chunk.messages.length - 1];
           if (message.content) {
-            const chunkContent = typeof message.content === 'string' 
-              ? message.content 
-              : JSON.stringify(message.content);
-            
+            const chunkContent =
+              typeof message.content === "string"
+                ? message.content
+                : JSON.stringify(message.content);
+
             fullContent += chunkContent;
             options?.onChunk?.(chunkContent);
           }
@@ -61,7 +62,7 @@ export class LangGraphAdapter {
         const finalMessage = new AIMessage({
           content: fullContent,
           additional_kwargs: {},
-          response_metadata: {}
+          response_metadata: {},
         });
         options.onComplete(finalMessage);
       }
@@ -73,14 +74,14 @@ export class LangGraphAdapter {
   async invokeMessage(messages: BaseMessage[]): Promise<BaseMessage> {
     const result = await this.remoteGraph.invoke(
       { messages },
-      { configurable: { assistant_id: this.assistantId } }
+      { configurable: { assistant_id: this.assistantId } },
     );
-    
+
     if (result.messages && result.messages.length > 0) {
       return result.messages[result.messages.length - 1];
     }
-    
-    throw new Error('No message returned from LangGraph');
+
+    throw new Error("No message returned from LangGraph");
   }
 
   updateAssistantId(assistantId: string): void {

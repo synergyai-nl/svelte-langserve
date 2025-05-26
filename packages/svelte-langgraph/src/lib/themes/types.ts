@@ -7,12 +7,12 @@ export interface ChatTheme {
   container: string;
   sidebar: string;
   chatArea: string;
-  
+
   // Header elements
   header: string;
   title: string;
   subtitle: string;
-  
+
   // Message display
   messageContainer: string;
   messageWrapper: string;
@@ -23,12 +23,12 @@ export interface ChatTheme {
   messageSystem: string;
   messageTimestamp: string;
   messageContent: string;
-  
+
   // Message states
   messageStreaming: string;
   messageError: string;
   messageLoading: string;
-  
+
   // Input area
   inputContainer: string;
   inputWrapper: string;
@@ -37,7 +37,7 @@ export interface ChatTheme {
   sendButton: string;
   sendButtonDisabled: string;
   sendButtonIcon: string;
-  
+
   // Endpoint selector
   endpointSelector: string;
   endpointSelectorLabel: string;
@@ -46,7 +46,7 @@ export interface ChatTheme {
   endpointHealth: string;
   endpointHealthy: string;
   endpointUnhealthy: string;
-  
+
   // Configuration panel
   configPanel: string;
   configSection: string;
@@ -55,7 +55,7 @@ export interface ChatTheme {
   configSlider: string;
   configToggle: string;
   configButton: string;
-  
+
   // Conversation list
   conversationList: string;
   conversationItem: string;
@@ -64,13 +64,13 @@ export interface ChatTheme {
   conversationPreview: string;
   conversationTimestamp: string;
   conversationActions: string;
-  
+
   // Navigation and actions
   createConversationButton: string;
   joinConversationButton: string;
   testEndpointButton: string;
   getSchemasButton: string;
-  
+
   // States and feedback
   loading: string;
   loadingSpinner: string;
@@ -79,14 +79,14 @@ export interface ChatTheme {
   errorMessage: string;
   success: string;
   warning: string;
-  
+
   // Empty states
   emptyState: string;
   emptyStateIcon: string;
   emptyStateTitle: string;
   emptyStateDescription: string;
   emptyStateAction: string;
-  
+
   // Responsive classes
   mobile: string;
   tablet: string;
@@ -112,7 +112,7 @@ export interface ThemeConfig {
   description?: string;
   author?: string;
   version?: string;
-  framework?: 'tailwind' | 'bootstrap' | 'flowbite' | 'material' | 'custom';
+  framework?: "tailwind" | "bootstrap" | "flowbite" | "material" | "custom";
   darkMode?: boolean;
   responsive?: boolean;
 }
@@ -136,6 +136,6 @@ export type ThemeOverride = Partial<ChatTheme>;
 export interface ThemeContext {
   theme: ChatTheme;
   config: ThemeConfig;
-  variant?: 'primary' | 'dark' | 'compact' | 'mobile';
+  variant?: "primary" | "dark" | "compact" | "mobile";
   override?: ThemeOverride;
 }
