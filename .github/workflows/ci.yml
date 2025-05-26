@@ -124,7 +124,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
       - name: Lint frontend
-        run: nx run dashboard:lint && nx run svelte-langgraph:lint
+        run: pnpm nx run dashboard:lint && pnpm nx run svelte-langgraph:lint
 
   lint-backend:
     name: Lint (Backend)
@@ -154,7 +154,7 @@ jobs:
         working-directory: examples/langgraph-backend
         run: uv sync --dev
       - name: Lint backend
-        run: nx run langgraph-backend:lint
+        run: pnpm nx run langgraph-backend:lint
 
   typecheck-frontend:
     name: Typecheck (Frontend)
@@ -174,7 +174,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
       - name: Typecheck frontend
-        run: nx run dashboard:typecheck && nx run svelte-langgraph:typecheck
+        run: pnpm nx run dashboard:typecheck && pnpm nx run svelte-langgraph:typecheck
 
   typecheck-backend:
     name: Typecheck (Backend)
@@ -204,7 +204,7 @@ jobs:
         working-directory: examples/langgraph-backend
         run: uv sync --dev
       - name: Typecheck backend
-        run: nx run langgraph-backend:typecheck
+        run: pnpm nx run langgraph-backend:typecheck
 
   test-frontend:
     name: Test (Frontend)
@@ -224,7 +224,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
       - name: Test frontend
-        run: nx run dashboard:test && nx run svelte-langgraph:test
+        run: pnpm nx run dashboard:test && pnpm nx run svelte-langgraph:test
 
   test-backend:
     name: Test (Backend)
@@ -254,7 +254,7 @@ jobs:
         working-directory: examples/langgraph-backend
         run: uv sync --dev
       - name: Test backend
-        run: nx run langgraph-backend:test
+        run: pnpm nx run langgraph-backend:test
 
   # Main consolidated quality check that GitHub branch protection will require
   quality:
