@@ -1,10 +1,10 @@
 # Architecture Deep Dive
 
-Complete technical overview of Svelte LangServe architecture, design patterns, and implementation details for developers who want to understand or extend the system.
+Complete technical overview of Svelte LangGraph architecture, design patterns, and implementation details for developers who want to understand or extend the system.
 
 ## 🏗️ System Overview
 
-Svelte LangServe implements a modern, real-time AI chat architecture with the following core components:
+Svelte LangGraph implements a modern, real-time AI chat architecture with the following core components:
 
 ```mermaid
 graph TB
@@ -26,7 +26,7 @@ graph TB
     end
     
     subgraph "AI Layer"
-        LangServe[LangServe Endpoints]
+        LangGraph[LangGraph Endpoints]
         OpenAI[OpenAI GPT]
         Anthropic[Anthropic Claude]
         Tools[Agent Tools]
@@ -44,10 +44,10 @@ graph TB
     WS --> SocketServer
     SocketServer --> SvelteKit
     HTTP --> FastAPI
-    FastAPI --> LangServe
-    LangServe --> OpenAI
-    LangServe --> Anthropic
-    LangServe --> Tools
+    FastAPI --> LangGraph
+    LangGraph --> OpenAI
+    LangGraph --> Anthropic
+    LangGraph --> Tools
     SocketServer --> Memory
     FastAPI --> DB
     FastAPI --> Cache
@@ -64,7 +64,7 @@ sequenceDiagram
     participant Store
     participant Socket
     participant Server
-    participant LangServe
+    participant LangGraph
     participant AI
 
     User->>UI: Type message
@@ -72,19 +72,19 @@ sequenceDiagram
     Store->>Socket: emit('send_message')
     Socket->>Server: WebSocket message
     Server->>Server: Validate & route
-    Server->>LangServe: HTTP streaming request
-    LangServe->>AI: Model invocation
+    Server->>LangGraph: HTTP streaming request
+    LangGraph->>AI: Model invocation
     
     loop Streaming Response
-        AI-->>LangServe: Token chunk
-        LangServe-->>Server: Streaming chunk
+        AI-->>LangGraph: Token chunk
+        LangGraph-->>Server: Streaming chunk
         Server-->>Socket: emit('message_chunk')
         Socket-->>Store: Update streaming state
         Store-->>UI: Reactive update
     end
     
-    AI-->>LangServe: Complete response
-    LangServe-->>Server: Final message
+    AI-->>LangGraph: Complete response
+    LangGraph-->>Server: Final message
     Server-->>Socket: emit('message_complete')
     Socket-->>Store: Finalize message
     Store-->>UI: Final update
@@ -95,9 +95,9 @@ sequenceDiagram
 ### Package Organization
 
 ```
-svelte-langserve/
+svelte-langgraph/
 ├── packages/                    # Reusable packages
-│   └── svelte-langserve/       # Consolidated library
+│   └── svelte-langgraph/       # Consolidated library
 │       ├── src/lib/
 │       │   ├── components/     # Svelte UI components
 │       │   ├── stores/         # State management
@@ -109,12 +109,12 @@ svelte-langserve/
 │   ├── dashboard/             # SvelteKit frontend example
 │   │   ├── src/
 │   │   │   ├── lib/
-│   │   │   │   └── langserve/  # Local implementation (to be deprecated)
+│   │   │   │   └── langgraph/  # Local implementation (to be deprecated)
 │   │   │   ├── routes/         # SvelteKit routes
 │   │   │   └── hooks.server.ts # Socket.IO server integration
 │   │   └── package.json
-│   └── langserve-backend/     # FastAPI backend example
-│       ├── src/svelte_langserve/
+│   └── langgraph-backend/     # FastAPI backend example
+│       ├── src/svelte_langgraph/
 │       │   ├── chains/         # AI agent implementations
 │       │   ├── auth.py         # Authentication
 │       │   └── main.py         # FastAPI app
@@ -127,8 +127,8 @@ svelte-langserve/
 ```mermaid
 graph TD
     Dashboard[examples/dashboard]
-    Backend[examples/langserve-backend]
-    Lib[packages/svelte-langserve]
+    Backend[examples/langgraph-backend]
+    Lib[packages/svelte-langgraph]
     
     Dashboard --> Lib
     Dashboard --> Backend
@@ -153,7 +153,7 @@ graph TD
 ### Component Hierarchy
 
 ```
-LangServeFrontend (Root)
+LangGraphFrontend (Root)
 ├── ThemeProvider (Context)
 │   ├── ConversationList (Sidebar)
 │   │   ├── ConversationItem
@@ -171,7 +171,7 @@ LangServeFrontend (Root)
 
 ```typescript
 // Reactive state architecture using Svelte 5 runes
-interface LangServeState {
+interface LangGraphState {
   // Connection state
   socket: Socket | null;
   connected: boolean;
@@ -190,8 +190,8 @@ interface LangServeState {
 }
 
 // Store implementation with automatic cleanup
-const createLangServeStore = () => {
-  const { subscribe, update } = writable<LangServeState>(initialState);
+const createLangGraphStore = () => {
+  const { subscribe, update } = writable<LangGraphState>(initialState);
   
   // Automatic memory management
   const cleanupInterval = setInterval(() => {
@@ -269,12 +269,12 @@ function createSafeTheme(
 # Layered architecture pattern
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from langserve import add_routes
+from langgraph.server import add_routes
 
 def create_app() -> FastAPI:
     app = FastAPI(
-        title="Svelte LangServe Backend",
-        description="AI chat backend with LangServe integration",
+        title="Svelte LangGraph Backend",
+        description="AI chat backend with LangGraph integration",
         version="1.0.0"
     )
     
@@ -284,8 +284,8 @@ def create_app() -> FastAPI:
     # Authentication
     setup_auth(app)
     
-    # LangServe routes
-    setup_langserve_routes(app)
+    # LangGraph routes
+    setup_langgraph_routes(app)
     
     # API routes
     setup_api_routes(app)
@@ -295,9 +295,9 @@ def create_app() -> FastAPI:
     
     return app
 
-# LangServe integration pattern
-def setup_langserve_routes(app: FastAPI):
-    """Setup LangServe endpoints for AI agents."""
+# LangGraph integration pattern
+def setup_langgraph_routes(app: FastAPI):
+    """Setup LangGraph endpoints for AI agents."""
     
     # Each agent is a separate chain
     agents = {
@@ -459,12 +459,12 @@ interface SocketData {
 class SocketManager {
   private io: Server;
   private conversationManager: ConversationManager;
-  private langserveClients: LangServeClientManager;
+  private langgraphClients: LangGraphClientManager;
   
   constructor(
     httpServer: any,
     conversationManager: ConversationManager,
-    langserveClients: LangServeClientManager
+    langgraphClients: LangGraphClientManager
   ) {
     this.io = new Server(httpServer, {
       cors: {
@@ -475,7 +475,7 @@ class SocketManager {
     });
     
     this.conversationManager = conversationManager;
-    this.langserveClients = langserveClients;
+    this.langgraphClients = langgraphClients;
     
     this.setupMiddleware();
     this.setupEventHandlers();
@@ -568,7 +568,7 @@ class SocketManager {
   ) {
     for (const endpointId of endpoints) {
       try {
-        const client = this.langserveClients.getClient(endpointId);
+        const client = this.langgraphClients.getClient(endpointId);
         const memory = this.conversationManager.getMemory(conversationId);
         
         // Prepare input with conversation history
@@ -640,13 +640,13 @@ class SocketManager {
 
 ```typescript
 // Reactive Socket.IO client with automatic reconnection
-class LangServeSocketClient {
+class LangGraphSocketClient {
   private socket: Socket | null = null;
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
   private reconnectDelay = 1000;
   
-  constructor(private store: LangServeStore) {}
+  constructor(private store: LangGraphStore) {}
   
   connect(url: string, token: string): Promise<void> {
     return new Promise((resolve, reject) => {
@@ -854,8 +854,8 @@ class MessageProcessor:
         except Exception as e:
             logger.error(f"Failed to flush messages: {e}")
 
-# LangServe client pooling
-class LangServeClientPool:
+# LangGraph client pooling
+class LangGraphClientPool:
     def __init__(self, endpoint_url: str, pool_size: int = 5):
         self.endpoint_url = endpoint_url
         self.pool_size = pool_size
@@ -884,7 +884,7 @@ class LangServeClientPool:
 ```typescript
 // Component testing with theme context
 import { render, screen } from '@testing-library/svelte';
-import { ThemeProvider, defaultTheme } from 'svelte-langserve';
+import { ThemeProvider, defaultTheme } from 'svelte-langgraph';
 import ChatMessage from '$lib/components/ChatMessage.svelte';
 
 describe('ChatMessage Component', () => {
@@ -976,4 +976,4 @@ describe('Socket.IO Integration', () => {
 });
 ```
 
-This architecture documentation provides a comprehensive understanding of how Svelte LangServe is designed and implemented, enabling developers to effectively use, extend, and contribute to the system.
+This architecture documentation provides a comprehensive understanding of how Svelte LangGraph is designed and implemented, enabling developers to effectively use, extend, and contribute to the system.
