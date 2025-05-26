@@ -1,6 +1,6 @@
 # Troubleshooting Guide
 
-Comprehensive guide to diagnosing and fixing common issues in Svelte LangServe applications, with step-by-step solutions and debugging techniques.
+Comprehensive guide to diagnosing and fixing common issues in Svelte LangGraph applications, with step-by-step solutions and debugging techniques.
 
 ## 🔍 Quick Diagnostic Checklist
 
@@ -41,11 +41,11 @@ curl http://localhost:3000/socket.io/
 **Backend not running:**
 ```bash
 # Start the backend
-cd examples/langserve-backend
+cd examples/langgraph-backend
 uv run serve
 
 # Or with auto-reload for development
-uv run uvicorn src.svelte_langserve.main:create_app --factory --reload --port 8000
+uv run uvicorn src.svelte_langgraph.main:create_app --factory --reload --port 8000
 ```
 
 **Frontend not running:**
@@ -58,7 +58,7 @@ pnpm dev
 **CORS issues:**
 ```python
 # Check CORS configuration in backend
-# examples/langserve-backend/src/svelte_langserve/app.py
+# examples/langgraph-backend/src/svelte_langgraph/app.py
 
 ALLOWED_ORIGINS = [
     "http://localhost:3000",
@@ -150,15 +150,15 @@ openssl rand -hex 32
 echo $OPENAI_API_KEY
 echo $ANTHROPIC_API_KEY
 
-# Test LangServe endpoints directly
+# Test LangGraph endpoints directly
 curl -X POST http://localhost:8000/chatbot/invoke \
   -H "Content-Type: application/json" \
   -d '{"input": "Hello, test message"}'
 
 # Check backend logs for errors
-docker-compose logs -f langserve-backend
+docker-compose logs -f langgraph-backend
 # or
-cd examples/langserve-backend && uv run serve --log-level debug
+cd examples/langgraph-backend && uv run serve --log-level debug
 ```
 
 **Solutions:**
@@ -240,10 +240,10 @@ const config = {
 };
 ```
 
-**LangServe streaming configuration:**
+**LangGraph streaming configuration:**
 ```python
-# Ensure LangServe endpoints support streaming
-from langserve import add_routes
+# Ensure LangGraph endpoints support streaming
+from langgraph import add_routes
 
 add_routes(
     app,
@@ -291,31 +291,31 @@ pnpm build  # Build check
 **Missing ThemeProvider:**
 ```svelte
 <!-- ❌ Components without theme context -->
-<LangServeFrontend userId="user123" />
+<LangGraphFrontend userId="user123" />
 
 <!-- ✅ Wrap with ThemeProvider -->
 <ThemeProvider theme={flowbiteTheme}>
-  <LangServeFrontend userId="user123" />
+  <LangGraphFrontend userId="user123" />
 </ThemeProvider>
 ```
 
 **Import errors:**
 ```typescript
 // ❌ Incorrect imports
-import { LangServeFrontend } from '$lib/components';
+import { LangGraphFrontend } from '$lib/components';
 
 // ✅ Correct imports
-import { LangServeFrontend } from 'svelte-langserve';
+import { LangGraphFrontend } from 'svelte-langgraph';
 ```
 
 **Package not installed:**
 ```bash
 # Install the package
 cd examples/dashboard
-pnpm add svelte-langserve
+pnpm add svelte-langgraph
 
 # Or link local package for development
-pnpm link ../../packages/svelte-langserve
+pnpm link ../../packages/svelte-langgraph
 ```
 
 #### **Flowbite Styles Not Applied**
@@ -358,7 +358,7 @@ module.exports = {
 **Theme not set:**
 ```svelte
 <script>
-  import { ThemeProvider, flowbiteTheme } from 'svelte-langserve';
+  import { ThemeProvider, flowbiteTheme } from 'svelte-langgraph';
 </script>
 
 <!-- Use Flowbite theme specifically -->
@@ -442,7 +442,7 @@ top -p $(pgrep -f "uvicorn")
 htop
 
 # Check backend logs
-docker-compose logs -f langserve-backend
+docker-compose logs -f langgraph-backend
 
 # Monitor database connections
 psql -c "SELECT count(*) FROM pg_stat_activity;"
@@ -492,8 +492,8 @@ async def process_multiple_agents(message: str, endpoints: list):
 ```typescript
 // Add debugging helpers to global scope
 if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
-  window.debugLangServe = {
-    store: langServeStore,
+  window.debugLangGraph = {
+    store: langGraphStore,
     auth: authStore,
     connection: connectionStore,
     
@@ -509,7 +509,7 @@ if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
     },
     
     simulateError: () => {
-      langServeStore.setError('Simulated error for testing');
+      langGraphStore.setError('Simulated error for testing');
     }
   };
 }
@@ -617,7 +617,7 @@ async def detailed_health_check():
     
     # AI endpoints health
     checks["ai_endpoints"] = {}
-    for endpoint_id, client in langserve_clients.items():
+    for endpoint_id, client in langgraph_clients.items():
         try:
             start_time = time.time()
             await client.ainvoke({"input": "health check"})
@@ -811,8 +811,8 @@ async def global_exception_handler(request: Request, exc: Exception):
    ```
 
 3. **Community Resources**
-   - [GitHub Discussions](https://github.com/synergyai-nl/svelte-langserve/discussions)
-   - [Issue Tracker](https://github.com/synergyai-nl/svelte-langserve/issues)
+   - [GitHub Discussions](https://github.com/synergyai-nl/svelte-langgraph/discussions)
+   - [Issue Tracker](https://github.com/synergyai-nl/svelte-langgraph/issues)
 
 ### Reporting Issues
 
@@ -830,11 +830,11 @@ echo "Frontend dependencies:"
 cd examples/dashboard && pnpm list --depth=0
 
 echo "Backend dependencies:"
-cd examples/langserve-backend && uv pip list
+cd examples/langgraph-backend && uv pip list
 
 # Recent logs
 echo "Recent backend logs:"
-docker-compose logs --tail=50 langserve-backend
+docker-compose logs --tail=50 langgraph-backend
 
 echo "Recent frontend logs:"
 # Browser console logs
@@ -846,7 +846,7 @@ echo "Recent frontend logs:"
 #!/bin/bash
 # scripts/collect-diagnostics.sh
 
-echo "=== Svelte LangServe Diagnostics ==="
+echo "=== Svelte LangGraph Diagnostics ==="
 echo "Timestamp: $(date)"
 echo "User: $(whoami)"
 echo
@@ -872,7 +872,7 @@ echo
 echo "=== Recent Logs ==="
 if command -v docker-compose >/dev/null; then
     echo "Backend logs (last 20 lines):"
-    docker-compose logs --tail=20 langserve-backend 2>/dev/null || echo "No Docker logs available"
+    docker-compose logs --tail=20 langgraph-backend 2>/dev/null || echo "No Docker logs available"
 else
     echo "Docker Compose not available"
 fi
@@ -882,4 +882,4 @@ echo "=== Diagnostics Complete ==="
 echo "Please include this output when reporting issues."
 ```
 
-This troubleshooting guide covers the most common issues you'll encounter with Svelte LangServe and provides systematic approaches to diagnosing and fixing them. Keep this guide handy for quick reference during development and deployment.
+This troubleshooting guide covers the most common issues you'll encounter with Svelte LangGraph and provides systematic approaches to diagnosing and fixing them. Keep this guide handy for quick reference during development and deployment.

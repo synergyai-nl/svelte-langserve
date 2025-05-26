@@ -53,7 +53,7 @@ jobs:
           echo "TAG=$TAG" >> $GITHUB_OUTPUT
 
       - name: Build
-        uses: docker/bake-action@v4
+        uses: docker/bake-action@v6
         with:
           files: |
             ./docker-bake.hcl
