@@ -41,14 +41,12 @@ jobs:
       if: matrix.language == 'javascript'
       uses: actions/setup-node@v4
       with:
-        node-version: 20
+        node-version: 22
         cache: 'pnpm'
 
     - name: Install dependencies (for JavaScript analysis)
       if: matrix.language == 'javascript'
-      run: |
-        pnpm install --no-frozen-lockfile
-        cd examples/dashboard && pnpm install --no-frozen-lockfile
+      run: pnpm install --frozen-lockfile
 
     - name: Setup Python (for Python analysis)
       if: matrix.language == 'python'

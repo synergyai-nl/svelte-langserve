@@ -62,7 +62,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Build dashboard (nx handles dependencies)
         run: pnpm nx run dashboard:build
@@ -101,7 +101,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Install monorepo dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Lint and format with ruff
         run: pnpm nx run langgraph-backend:format
@@ -122,7 +122,7 @@ jobs:
           node-version: 22
           cache: 'pnpm'
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
       - name: Lint frontend
         run: pnpm nx run dashboard:lint
 
@@ -149,7 +149,7 @@ jobs:
           node-version: 22
           cache: 'pnpm'
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
       - name: Install backend dependencies
         working-directory: examples/langgraph-backend
         run: uv sync --dev
@@ -172,7 +172,7 @@ jobs:
           node-version: 22
           cache: 'pnpm'
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
       - name: Typecheck frontend
         run: pnpm nx run dashboard:typecheck
 
@@ -199,7 +199,7 @@ jobs:
           node-version: 22
           cache: 'pnpm'
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
       - name: Install backend dependencies
         working-directory: examples/langgraph-backend
         run: uv sync --dev
@@ -222,7 +222,7 @@ jobs:
           node-version: 22
           cache: 'pnpm'
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
       - name: Test frontend
         run: pnpm nx run dashboard:test
 
@@ -249,7 +249,7 @@ jobs:
           node-version: 22
           cache: 'pnpm'
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
       - name: Install backend dependencies
         working-directory: examples/langgraph-backend
         run: uv sync --dev
@@ -272,7 +272,7 @@ jobs:
           node-version: 22
           cache: 'pnpm'
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
       - name: Lint package
         run: pnpm nx run svelte-langgraph:lint
 
@@ -292,7 +292,7 @@ jobs:
           node-version: 22
           cache: 'pnpm'
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
       - name: Typecheck package
         run: pnpm nx run svelte-langgraph:typecheck
 
@@ -312,7 +312,7 @@ jobs:
           node-version: 22
           cache: 'pnpm'
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
       - name: Test package
         run: pnpm nx run svelte-langgraph:test
 
@@ -372,7 +372,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Build dashboard (nx handles dependencies)
         run: pnpm nx run dashboard:build
