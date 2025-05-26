@@ -64,11 +64,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
 
-      - name: Build svelte-langgraph package first
-        run: nx run svelte-langgraph:build
-
-      - name: Build dashboard (with dependencies)
-        run: pnpm build
+      - name: Build dashboard (nx handles dependencies)
+        run: nx run dashboard:build
 
   backend:
     name: Backend (Python/FastAPI)
@@ -143,10 +140,7 @@ jobs:
         working-directory: examples/langgraph-backend
         run: uv sync --dev
 
-      - name: Build packages
-        run: pnpm build
-
-      - name: Run unified quality checks
+      - name: Run unified quality checks (nx handles all dependencies)
         run: pnpm quality
 
   e2e:
@@ -174,8 +168,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
 
-      - name: Build dashboard  
-        run: pnpm build
+      - name: Build dashboard (nx handles dependencies)
+        run: nx run dashboard:build
 
       - name: Install Playwright browsers
         run: pnpm exec playwright install --with-deps
