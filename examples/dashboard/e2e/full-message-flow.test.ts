@@ -11,7 +11,7 @@ import { expect, test } from '@playwright/test';
 
 // Test configuration
 const BACKEND_URL = 'http://localhost:8000';
-const FRONTEND_URL = 'http://localhost:4173';
+const FRONTEND_URL = 'http://localhost:5173';
 const TEST_CREDENTIALS = {
 	username: 'demo',
 	password: 'secret'
@@ -56,7 +56,7 @@ test.describe('Full Message Flow E2E Tests', () => {
 
 		// Alternative: Look for test-echo option in a dropdown or list
 		const testEchoOption = page.locator(
-			'option:has-text("test-echo"), [data-agent="test-echo"], text=Test Echo'
+			'option:has-text("test-echo"), [data-agent="test-echo"], text="Test Echo"'
 		);
 		if (await testEchoOption.isVisible({ timeout: 2000 })) {
 			await testEchoOption.click();
