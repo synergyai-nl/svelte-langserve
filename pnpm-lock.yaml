@@ -110,7 +110,7 @@ importers:
         version: 3.1.2(rollup@4.41.0)
       flowbite-svelte:
         specifier: ^1.4.3
-        version: 1.4.3(rollup@4.41.0)(svelte@5.33.2)(tailwindcss@4.1.7)
+        version: 1.4.3(rollup@4.41.0)(svelte@5.33.2)(tailwindcss@4.1.8)
       flowbite-svelte-icons:
         specifier: ^2.2.0
         version: 2.2.0(svelte@5.33.2)
@@ -136,8 +136,8 @@ importers:
         specifier: ^4.2.1
         version: 4.2.1(picomatch@4.0.2)(svelte@5.33.2)(typescript@5.8.3)
       tailwindcss:
-        specifier: ^4.0.0
-        version: 4.1.7
+        specifier: ^4.1.8
+        version: 4.1.8
       typescript:
         specifier: ^5.0.0
         version: 5.8.3
@@ -3605,6 +3605,9 @@ packages:
   tailwindcss@4.1.7:
     resolution: {integrity: sha512-kr1o/ErIdNhTz8uzAYL7TpaUuzKIE6QPQ4qmSdxnoX/lo+5wmUHQA6h3L5yIqEImSRnAAURDirLu/BgiXGPAhg==}
 
+  tailwindcss@4.1.8:
+    resolution: {integrity: sha512-kjeW8gjdxasbmFKpVGrGd5T4i40mV5J2Rasw48QARfYeQ8YS9x02ON9SFWax3Qf616rt4Cp3nVNIj6Hd1mP3og==}
+
   tapable@2.2.2:
     resolution: {integrity: sha512-Re10+NauLTMCudc7T5WLFLAwDhQ0JWdrMK+9B2M8zR5hRExKmsRDCBA7/aV/pNJFltmBFO5BAMlQFi/vq3nKOg==}
     engines: {node: '>=6'}
@@ -6472,7 +6475,7 @@ snapshots:
       svelte: 5.33.2
       tailwind-merge: 3.3.0
 
-  flowbite-svelte@1.4.3(rollup@4.41.0)(svelte@5.33.2)(tailwindcss@4.1.7):
+  flowbite-svelte@1.4.3(rollup@4.41.0)(svelte@5.33.2)(tailwindcss@4.1.8):
     dependencies:
       '@floating-ui/dom': 1.7.0
       '@floating-ui/utils': 0.2.9
@@ -6480,8 +6483,8 @@ snapshots:
       flowbite: 3.1.2(rollup@4.41.0)
       svelte: 5.33.2
       tailwind-merge: 3.3.0
-      tailwind-variants: 1.0.0(tailwindcss@4.1.7)
-      tailwindcss: 4.1.7
+      tailwind-variants: 1.0.0(tailwindcss@4.1.8)
+      tailwindcss: 4.1.8
       virtua: 0.41.2(svelte@5.33.2)
     transitivePeerDependencies:
       - react
@@ -7604,12 +7607,14 @@ snapshots:
 
   tailwind-merge@3.3.0: {}
 
-  tailwind-variants@1.0.0(tailwindcss@4.1.7):
+  tailwind-variants@1.0.0(tailwindcss@4.1.8):
     dependencies:
       tailwind-merge: 3.0.2
-      tailwindcss: 4.1.7
+      tailwindcss: 4.1.8
 
   tailwindcss@4.1.7: {}
+
+  tailwindcss@4.1.8: {}
 
   tapable@2.2.2: {}
 
